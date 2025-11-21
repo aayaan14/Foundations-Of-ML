@@ -120,13 +120,36 @@ nav a:hover {
     font-size: 1.3em;
 }
 
+.context {
+    background: #e8f4f8;
+    padding: 20px;
+    margin: 20px 0;
+    border-radius: 5px;
+    border-left: 4px solid #3498db;
+}
+
+.context h4 {
+    color: #2c3e50;
+    margin-bottom: 12px;
+    font-size: 1.15em;
+}
+
+.context ul {
+    margin-top: 10px;
+}
+
 .problem-statement {
-    background: white;
-    padding: 15px;
-    margin: 15px 0;
-    border-radius: 3px;
-    font-style: italic;
-    color: #555;
+    background: #fff9e6;
+    padding: 20px;
+    margin: 20px 0;
+    border-radius: 5px;
+    border-left: 4px solid #f39c12;
+}
+
+.problem-statement h4 {
+    color: #2c3e50;
+    margin-bottom: 12px;
+    font-size: 1.15em;
 }
 
 .solution {
