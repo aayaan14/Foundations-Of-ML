@@ -35,11 +35,64 @@
         </div>
 
         <div class="chapter">
+            <!-- 1 -->
             <div class="problem">
                 <h3>Problem 1.1</h3>
 
                 <div class="context">
                     <h4>Context</h4>
+                    <p>
+                        Suppose we are asked to model the relationship between apartment size (in sq.ft)
+                        and price for a Brigade apartment project in Bangalore.
+                    </p>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Flat ID</th>
+                                <th>Size x (sq.ft)</th>
+                                <th>Total Price (₹ Lakhs)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>F1</td>
+                                <td>650</td>
+                                <td>68</td>
+                            </tr>
+                            <tr>
+                                <td>F2</td>
+                                <td>800</td>
+                                <td>82</td>
+                            </tr>
+                            <tr>
+                                <td>F3</td>
+                                <td>1100</td>
+                                <td>105</td>
+                            </tr>
+                            <tr>
+                                <td>F4</td>
+                                <td>1400</td>
+                                <td>128</td>
+                            </tr>
+                            <tr>
+                                <td>F5</td>
+                                <td>1800</td>
+                                <td>167</td>
+                            </tr>
+                            <tr>
+                                <td>F6</td>
+                                <td>2200</td>
+                                <td>215</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <p>
+                        A simple straight-line model may not be sufficient to describe this data
+                        accurately. In real-world, the relationship between size
+                        and price is often nonlinear due to location effects, floor level, amenities,
+                        and demand variations across different size ranges etc etc.
+                        The below equation is a general expression of what we're trying to achieve:
+                    </p>
                     <img src="../assets/LR.png" alt="Linear Regression Illustration" class="context-image"
                         style="max-width: 100%; height: auto; display: block; margin: 0 auto;" loading="lazy">
                 </div>
@@ -111,12 +164,15 @@
                 </div>
             </div>
 
-            <!-- Template for next problem -->
+            <!-- 2 -->
             <div class="problem">
                 <h3>Problem 1.2</h3>
 
                 <div class="context">
                     <h4>Context</h4>
+
+                    <p>Continuing from our Brigade apartment example, here's how the actual data looks like
+                    </p>
 
                     <img src="../assets/target_var.png" alt="Linear Regression Illustration" class="context-image"
                         style="max-width: 100%; height: auto; display: block; margin: 0 auto;" loading="lazy">
@@ -127,7 +183,8 @@
                     t = y(x, \mathbf{w}) + \epsilon
                     \]
 
-                    <p>where \(\epsilon\) represents the Gaussian noise.</p>
+                    <p>where \(\epsilon\) represents the Gaussian noise (adding it so we can generalise the equation).
+                    </p>
 
                     <p>In order to learn the spread or uncertainity (as \(y(x, \mathbf{w})\) will just predict a value
                         but we're more interested in the distribution), we'll calculate the probability of the target
@@ -139,7 +196,7 @@
 
                     <p>where \(\beta\) is the precision (inverse of the variance) of the Gaussian noise.</p>
 
-                    <p>Now assuming all the data points are independent,</p>
+                    <p>Now assuming all the data points are independent, likelihood is:</p>
 
                     \[
                     p(\mathbf{t}|\mathbf{X}, \mathbf{w}, \beta) = \prod_{n=1}^{N} \mathcal{N}(t_n|y(x_n, \mathbf{w}),
@@ -161,28 +218,47 @@
                     E_D(\mathbf{w}) = \frac{1}{2}\sum_{n=1}^{N} \left\{ t_n - \mathbf{w}^T \phi(\mathbf{x}_n) \right\}^2
                     \]
 
-                    <p>Maximizing the log-likelihood is equivalent to minimizing the sum-of-squares error function. We
-                        take the gradient with respect to \(\mathbf{w}\):</p>
+                    <p>Maximizing the log-likelihood is equivalent to minimizing the sum-of-squares error function.</p>
 
                     \[
-                    \nabla_{\mathbf{w}} \ln p = -\beta \nabla_{\mathbf{w}} \left( \frac{1}{2} \sum_{n=1}^{N} \{t_n -
-                    \mathbf{w}^T \phi(\mathbf{x}_n)\}^2 \right) = 0
-                    \]
-                    
-                    \[
-                    \sum_{n=1}^{N} \{t_n - \mathbf{w}^T \phi(\mathbf{x}_n)\} \phi(\mathbf{x}_n)^T = 0
-                    \]
-                    
-                    \[\Rightarrow \sum_{n=1}^{N} t_n \phi(\mathbf{x}_n)^T = \sum_{n=1}^{N} \phi(\mathbf{x}_n) \phi(\mathbf{x}_n)^T
-                    \mathbf{w}
-                    \]
-                    
-                    \[\Rightarrow \Phi^T \mathbf{t} = \Phi^T \Phi \mathbf{w}
+                    E(\mathbf{w})
+                    = \frac{1}{2}\|\mathbf{t}-\Phi\mathbf{w}\|^2
+                    = \frac{1}{2}(\mathbf{t}-\Phi\mathbf{w})^T(\mathbf{t}-\Phi\mathbf{w})
                     \]
 
-                    \[\Rightarrow \mathbf{w} = (\Phi^T \Phi)^{-1} \Phi^T \mathbf{t}
+                    \[
+                    \ln p(\mathbf{t}|\mathbf{w},\beta)
+                    = \text{const} - \beta E(\mathbf{w})
                     \]
-                    
+
+                    \[
+                    \nabla_{\mathbf{w}} \ln p
+                    = -\beta \nabla_{\mathbf{w}} E(\mathbf{w}) = 0
+                    \]
+
+                    \[
+                    \nabla_{\mathbf{w}} E(\mathbf{w})
+                    = \nabla_{\mathbf{w}} \left[
+                    \frac{1}{2}(\mathbf{t}-\Phi\mathbf{w})^T(\mathbf{t}-\Phi\mathbf{w})
+                    \right]
+                    \]
+
+                    \[
+                    \nabla_{\mathbf{w}} E(\mathbf{w})
+                    = -\Phi^T(\mathbf{t}-\Phi\mathbf{w})
+                    \]
+
+                    \[
+                    \Rightarrow -\Phi^T\mathbf{t} + \Phi^T\Phi\mathbf{w} = 0
+                    \]
+
+                    \[
+                    \Rightarrow \Phi^T\Phi\mathbf{w} = \Phi^T\mathbf{t}
+                    \]
+
+                    \[
+                    \Rightarrow \mathbf{w} = (\Phi^T\Phi)^{-1}\Phi^T\mathbf{t}
+                    \]
                 </div>
 
                 <div class="problem-statement">
@@ -239,7 +315,7 @@
                         <p>Since the dot product is zero, the residual is orthogonal to the column space.</p>
 
                         <img src="../assets/error_vec.png" alt="Linear Regression Illustration" class="context-image"
-                        style="max-width: 100%; height: auto; display: block; margin: 0 auto;" loading="lazy">
+                            style="max-width: 100%; height: auto; display: block; margin: 0 auto;" loading="lazy">
                     </div>
 
                     <div class="note">
@@ -250,13 +326,142 @@
                 </div>
             </div>
 
-        </div>
+            <!-- 3 -->
+            <div class="problem">
+                <h3>Problem 1.3</h3>
 
-        <footer>
-            <p><a href="../index.html">Home</a> | <a href="chapter2.html">Next Chapter →</a></p>
-            <p style="margin-top: 10px;">Created with ❤️ for the ML community</p>
-        </footer>
-    </div>
+                <div class="context">
+                    <h4>Context</h4>
+                    <p>In the previous problem (1.2), we assumed that every data point (apartment price) was equally
+                        reliable. However, in real-world scenarios, this is rarely the case.</p>
+
+                    <p>For example, in our Brigade apartment dataset:</p>
+                    <p> -> A price from a verified government sale deed is highly reliable (High weight).</p>
+                    <p> -> A price from an anonymous online posting might be noisy or inaccurate (Low weight).</p>
+
+
+
+                    <p>To handle this, we assign a "weight" \(r_n\) to each data point. If a point is reliable, \(r_n\)
+                        is large; if it's noisy, \(r_n\) is small. This technique is known as <strong>Weighted Least
+                            Squares</strong>.</p>
+                </div>
+
+                <div class="problem-statement">
+                    <h4>Question</h4>
+                    <p>Consider a data set in which each data point \(t_n\) is associated with a weighting
+                        factor \(r_n > 0\), so that the sum-of-squares error function becomes
+                    </p>
+                    \[
+                    E_D(\mathbf{w})
+                    = \frac{1}{2}\sum_{n=1}^{N}
+                    r_n \left\{ t_n - \mathbf{w}^T \phi(\mathbf{x}_n) \right\}^2
+                    \]
+
+                    <p>Find an expression for the solution \(\mathbf{w}^*\) that minimizes this error function.
+                        Give two alternative interpretations of the weighted sum-of-squares error function
+                        in terms of: (i) data-dependent noise variance and (ii) replicated data points.</p>
+                </div>
+
+                <div class="solution">
+                    <h4>Solution:</h4>
+
+                    <div class="step">
+                        <strong>Part 1: Finding the Solution \(\mathbf{w}^*\)</strong>
+                        <p>First, it is helpful to express the error function in matrix notation. We introduce a
+                            diagonal
+                            matrix \(\mathbf{R}\) of size \(N \times N\) containing the weights:</p>
+                        \[
+                        \mathbf{R} = \text{diag}(r_1, r_2, \dots, r_N)
+                        \]
+                        <p>The weighted sum-of-squares error can now be written as:</p>
+                        \[
+                        E_D(\mathbf{w}) = \frac{1}{2} (\mathbf{t} - \Phi\mathbf{w})^T \mathbf{R} (\mathbf{t} -
+                        \Phi\mathbf{w})
+                        \]
+                        <p>To find the minimizer \(\mathbf{w}^*\), we set the gradient with respect to \(\mathbf{w}\) to
+                            zero:</p>
+                        \[
+                        \nabla_{\mathbf{w}} E_D(\mathbf{w}) = -\Phi^T \mathbf{R} (\mathbf{t} - \Phi\mathbf{w}) = 0
+                        \]
+                        <p>Rearranging the terms to solve for \(\mathbf{w}\):</p>
+                        \[
+                        \Phi^T \mathbf{R} \Phi \mathbf{w} = \Phi^T \mathbf{R} \mathbf{t}
+                        \]
+                        \[
+                        \mathbf{w}^* = (\Phi^T \mathbf{R} \Phi)^{-1} \Phi^T \mathbf{R} \mathbf{t}
+                        \]
+                        <p>This is the solution for Weighted Least Squares. Note that if \(\mathbf{R} = \mathbf{I}\)
+                            (identity matrix), this reduces to the standard least squares solution found in Problem 1.2.
+                        </p>
+                    </div>
+
+                    <div class="step">
+                        <strong>Part 2: Interpretation (i) - Data-Dependent Noise Variance</strong>
+                        <p>Recall that the standard sum-of-squares error comes from maximizing the likelihood of a
+                            Gaussian distribution with constant variance \(\sigma^2\).</p>
+                        <p>If we assume that each data point \(t_n\) has its own specific variance \(\sigma_n^2\), the
+                            likelihood function becomes:</p>
+                        \[
+                        p(\mathbf{t}|\mathbf{w}) = \prod_{n=1}^{N} \mathcal{N}(t_n | \mathbf{w}^T \phi(\mathbf{x}_n),
+                        \sigma_n^2)
+                        \]
+                        <p>Taking the negative log-likelihood, we isolate the error term:</p>
+                        \[
+                        \frac{1}{2} \sum_{n=1}^{N} \frac{1}{\sigma_n^2} (t_n - \mathbf{w}^T \phi(\mathbf{x}_n))^2
+                        \]
+                        <p>By comparing this to our weighted error function, we can see that:</p>
+                        \[
+                        r_n = \frac{1}{\sigma_n^2} \quad \text{(or } r_n \propto \beta_n \text{)}
+                        \]
+                        <p><strong>Interpretation:</strong> The weight \(r_n\) represents the precision of the
+                            measurement. Points with high uncertainty (high variance) are given low weights, and points
+                            with high precision are given high weights.</p>
+                    </div>
+
+                    <div class="step">
+                        <strong>Part 3: Interpretation (ii) - Replicated Data Points</strong>
+                        <p>Consider the case where all weights \(r_n\) are integers. The term:</p>
+                        \[
+                        r_n \left\{ t_n - \mathbf{w}^T \phi(\mathbf{x}_n) \right\}^2
+                        \]
+                        <p>is mathematically equivalent to:</p>
+                        \[
+                        \underbrace{\left\{ t_n - \mathbf{w}^T \phi(\mathbf{x}_n) \right\}^2 + \dots + \left\{ t_n -
+                        \mathbf{w}^T \phi(\mathbf{x}_n) \right\}^2}_{r_n \text{ times}}
+                        \]
+                        <p><strong>Interpretation:</strong> We can view weighted least squares as a standard least
+                            squares problem on a dataset where the \(n\)-th observation has been replicated \(r_n\)
+                            times. This gives that specific data point more "voting power" in determining the model
+                            parameters.</p>
+                    </div>
+
+                    <div class="note">
+                        <strong>💡 Key Insight:</strong> Weighted Least Squares (WLS) is the bridge between standard
+                        regression and probabilistic regression where data quality varies. It allows the model to
+                        "listen" more closely to high-quality data while ignoring noisy outliers.
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4 -->
+            <div class="problem">
+                <h3>Problem 1.4</h3>
+
+                <div class="context">
+                </div>
+
+                <div class="problem-statement">
+                </div>
+
+                <div class="solution">
+                </div>
+            </div>
+
+            <footer>
+                <p><a href="../index.html">Home</a> | <a href="chapter2.html">Next Chapter →</a></p>
+                <p style="margin-top: 10px;">Created with ❤️ for the ML community</p>
+            </footer>
+        </div>
 </body>
 
 </html>
