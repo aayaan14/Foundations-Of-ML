@@ -30,17 +30,14 @@
                 \[
                 y(x) = w_0 + \sum_{i=1}^N w_i\,\phi\!\left({x}\right)\quad (1.1)
                 \]
-                where 'N' is the total number of features and w_i is the weight associated to the i_th feature.
+                where 'N' is the total number of features and \(w_i\) is the weight associated to the \(i\)-th feature.
             </p>
         </div>
 
         <div class="chapter">
             <!-- 1 -->
             <div class="problem">
-                <h3>Problem 1.1</h3>
-
                 <div class="context">
-                    <h4>Context</h4>
                     <p>
                         Suppose we are asked to model the relationship between apartment size (in sq.ft)
                         and price for a Brigade apartment project in Bangalore.
@@ -151,6 +148,14 @@
                         \frac{w_j}{2}\,\tanh\!\left(\frac{x-\mu_j}{2s}\right)
                         \end{aligned}
                         \]
+                        <p>Comparing this with equation (1.102), we identify the new parameters as:</p>
+                        \[
+                        u_0 \;=\; w_0 \;+\; \frac{1}{2}\sum_{j=1}^M w_j
+                        \]
+
+                        \[
+                        u_j \;=\; \frac{w_j}{2} \qquad (j = 1,\ldots,M)
+                        \]
                         <p>which aligns to eqn (1.102) (not sure if there's a printing mistake but you get the idea)</p>
                     </div>
 
@@ -166,17 +171,13 @@
 
             <!-- 2 -->
             <div class="problem">
-                <h3>Problem 1.2</h3>
-
                 <div class="context">
-                    <h4>Context</h4>
-
-                    <p>Continuing from our Brigade apartment example, here's how the actual data looks like
+                    <p>Continuing from our Brigade apartment example, here's how the actual data might look like
                     </p>
-
-                    <img src="../assets/target_var.png" alt="Linear Regression Illustration" class="context-image"
+                    <br>
+                    <img src="../assets/combined.png" alt="Linear Regression Illustration" class="context-image"
                         style="max-width: 100%; height: auto; display: block; margin: 0 auto;" loading="lazy">
-
+                    <br>
                     <p>The above graph represents a real life scenario where there's always a noise associated with the
                         target variable. This can be generalised by the below equation:</p>
                     \[
@@ -185,22 +186,25 @@
 
                     <p>where \(\epsilon\) represents the Gaussian noise (adding it so we can generalise the equation).
                     </p>
-
+                    <br>
+                    <img src="../assets/target_var.png" alt="Linear Regression Illustration" class="context-image"
+                        style="max-width: 100%; height: auto; display: block; margin: 0 auto;" loading="lazy">
+                    <br>
                     <p>In order to learn the spread or uncertainity (as \(y(x, \mathbf{w})\) will just predict a value
                         but we're more interested in the distribution), we'll calculate the probability of the target
                         variable given the input and parameters.</p>
 
                     \[
-                    p(t_n|x_n, \mathbf{w}, \beta) = \mathcal{N}(t_n|y(x_n, \mathbf{w}), \beta^{-1})
+                    p(t_n|x_n, \mathbf{w}, \sigma^2) = \mathcal{N}(t_n|y(x_n, \mathbf{w}), \sigma^2)
                     \]
 
-                    <p>where \(\beta\) is the precision (inverse of the variance) of the Gaussian noise.</p>
+                    <p>where \(\sigma^2\) is the variance of the Gaussian noise.</p>
 
                     <p>Now assuming all the data points are independent, likelihood is:</p>
 
                     \[
-                    p(\mathbf{t}|\mathbf{X}, \mathbf{w}, \beta) = \prod_{n=1}^{N} \mathcal{N}(t_n|y(x_n, \mathbf{w}),
-                    \beta^{-1})
+                    p(\mathbf{t}|\mathbf{X}, \mathbf{w}, \sigma^2) = \prod_{n=1}^{N} \mathcal{N}(t_n|y(x_n, \mathbf{w}),
+                    \sigma^2)
                     \]
 
                     <p>where \(\mathbf{t}\) is the column vector representing the target values for all data points.</p>
@@ -208,9 +212,12 @@
                     <p>Taking the logarithm of the likelihood function, we get the log-likelihood:</p>
 
                     \[
-                    \ln p(\mathbf{t}|\mathbf{X}, \mathbf{w}, \beta) = \frac{N}{2}\ln \beta - \frac{N}{2}\ln(2\pi) -
-                    \beta E_D(\mathbf{w}) \quad
+                    \ln p(\mathbf{t}|\mathbf{X}, \mathbf{w}, \sigma^2)
+                    = -\frac{N}{2}\ln \sigma^{2}
+                    - \frac{N}{2}\ln(2\pi)
+                    - \frac{E_D(\mathbf{w})}{\sigma^{2}}
                     \]
+
 
                     <p>where \(E_D(\mathbf{w})\) is the sum-of-squares error function defined as:</p>
 
@@ -227,13 +234,13 @@
                     \]
 
                     \[
-                    \ln p(\mathbf{t}|\mathbf{w},\beta)
-                    = \text{const} - \beta E(\mathbf{w})
+                    \ln p(\mathbf{t}|\mathbf{w},\sigma^{2})
+                    = \text{const} - \frac{E(\mathbf{w})}{\sigma^{2}}
                     \]
 
                     \[
                     \nabla_{\mathbf{w}} \ln p
-                    = -\beta \nabla_{\mathbf{w}} E(\mathbf{w}) = 0
+                    = - \nabla_{\mathbf{w}} \frac{E(\mathbf{w})}{\sigma^{2}} = 0
                     \]
 
                     \[
@@ -328,22 +335,30 @@
 
             <!-- 3 -->
             <div class="problem">
-                <h3>Problem 1.3</h3>
-
                 <div class="context">
-                    <h4>Context</h4>
                     <p>In the previous problem (1.2), we assumed that every data point (apartment price) was equally
                         reliable. However, in real-world scenarios, this is rarely the case.</p>
 
                     <p>For example, in our Brigade apartment dataset:</p>
-                    <p> -> A price from a verified government sale deed is highly reliable (High weight).</p>
-                    <p> -> A price from an anonymous online posting might be noisy or inaccurate (Low weight).</p>
-
-
-
+                    <p> i. A price from a verified government sale deed is highly reliable (High weight).</p>
+                    <p> ii. A price from an anonymous online posting might be noisy or inaccurate (Low weight).</p>
                     <p>To handle this, we assign a "weight" \(r_n\) to each data point. If a point is reliable, \(r_n\)
                         is large; if it's noisy, \(r_n\) is small. This technique is known as <strong>Weighted Least
                             Squares</strong>.</p>
+
+                    <p>We collect these weights into a diagonal matrix \(R\) of size \(N \times N\). The off-diagonal
+                        elements are zero because we assume the noise in one price is independent of the others:</p>
+
+                    <p>
+                        \[
+                        R = \begin{bmatrix}
+                        r_1 & 0 & \cdots & 0 \\
+                        0 & r_2 & \cdots & 0 \\
+                        \vdots & \vdots & \ddots & \vdots \\
+                        0 & 0 & \cdots & r_N
+                        \end{bmatrix}
+                        \]
+                    </p>
                 </div>
 
                 <div class="problem-statement">
@@ -411,7 +426,7 @@
                         \]
                         <p>By comparing this to our weighted error function, we can see that:</p>
                         \[
-                        r_n = \frac{1}{\sigma_n^2} \quad \text{(or } r_n \propto \beta_n \text{)}
+                        r_n = \frac{1}{\sigma_n^2} \quad
                         \]
                         <p><strong>Interpretation:</strong> The weight \(r_n\) represents the precision of the
                             measurement. Points with high uncertainty (high variance) are given low weights, and points
@@ -443,11 +458,150 @@
                 </div>
             </div>
 
-            <!-- 4 -->
             <div class="problem">
-                <h3>Problem 1.4</h3>
-
                 <div class="context">
+                    <p>In the previous problems, we assumed our input data \(\mathbf{x}\) was perfect. But in the real
+                        world, data is often corrupted by noise.</p>
+
+                    <p><strong>The Intuition: Weights as Amplifiers</strong></p>
+                    <p>Imagine a linear model \(y = w_1 x_1 + \dots\). If a specific weight \(w_1\) is very large (e.g.,
+                        1000), a tiny amount of random noise in the input \(x_1\) gets multiplied by 1000, causing the
+                        prediction to swing wildly. This makes the model unstable and prone to overfitting.</p>
+
+                    <p><strong>The Strategy: Training with Noise</strong></p>
+                    <p>To prevent this, we can intentionally add random noise to the inputs during training. This forces
+                        the model to learn that "large weights are dangerous" because they amplify the noise. As we will
+                        prove below, this strategy is mathematically identical to simply adding a penalty on the size of
+                        the weights (L2 Regularization).</p>
+                </div>
+
+                <div class="problem-statement">
+                    <h4>Question</h4>
+                    <p>
+                        Consider a linear model of the form
+                        \[
+                        y(x, w) = w_0 + \sum_{i=1}^{D} w_i x_i \tag{1.105}
+                        \]
+                        together with a sum-of-squares error function
+                        \[
+                        E_D(w) = \frac{1}{2}\sum_{n=1}^{N} \{\, y(x_n, w) - t_n \,\}^2 . \tag{1.106}
+                        \]
+                    </p>
+
+                    <p>
+                        Now suppose that Gaussian noise \( \epsilon_i \) with zero mean and variance
+                        \( \sigma^2 \) is added independently to each input variable \( x_i \).
+                        Using the properties
+                        \[
+                        \mathbb{E}[\epsilon_i] = 0, \qquad
+                        \mathbb{E}[\epsilon_i \epsilon_j] = \delta_{ij}\,\sigma^2,
+                        \]
+                        show that minimizing the expected value of \( E_D \) over the noise
+                        distribution is equivalent to minimizing the usual sum-of-squares error
+                        for noise-free inputs, but with an additional weight-decay regularizer
+                        in which the bias parameter \( w_0 \) is excluded from the penalty.
+                    </p>
+                </div>
+
+                <div class="solution">
+                    <h4>Solution:</h4>
+
+                    <div class="step">
+                        <strong>Step 1: Separate Signal from Noise</strong>
+                        <p>First, let's express the model's prediction when it receives a noisy input \(\tilde{x}_{ni} =
+                            x_{ni} + \epsilon_{ni}\). Substituting this into the linear equation:</p>
+                        \[
+                        y(\tilde{x}_n, w) = w_0 + \sum_{i=1}^{D} w_i (x_{ni} + \epsilon_{ni})
+                        \]
+                        <p>We can group the terms to separate the "clean" prediction from the noise:</p>
+                        \[
+                        y(\tilde{x}_n, w) = \underbrace{\left( w_0 + \sum_{i=1}^{D} w_i x_{ni} \right)}_{y(x_n, w)} +
+                        \underbrace{\sum_{i=1}^{D} w_i \epsilon_{ni}}_{\text{Noise term}}
+                        \]
+                        <p>For brevity, let's denote the noise term as \(\mathcal{N}_n = \sum_{i=1}^{D} w_i
+                            \epsilon_{ni}\). So, \(y_{noisy} = y_{clean} + \mathcal{N}_n\).</p>
+                    </div>
+
+                    <div class="step">
+                        <strong>Step 2: Expand the Error Function</strong>
+                        <p>We want to minimize the <em>expected</em> error over the noise distribution. Let's substitute
+                            \(y_{noisy}\) into the sum-of-squares error:</p>
+                        \[
+                        \tilde{E} = \mathbb{E} \left[ \frac{1}{2} \sum_{n=1}^{N} \{ y_{noisy} - t_n \}^2 \right]
+                        \]
+                        \[
+                        \tilde{E} = \mathbb{E} \left[ \frac{1}{2} \sum_{n=1}^{N} \{ (y(x_n, w) - t_n) + \mathcal{N}_n
+                        \}^2 \right]
+                        \]
+                        <p>Expanding the square term \((A+B)^2 = A^2 + 2AB + B^2\):</p>
+                        \[
+                        \{ \dots \}^2 = \underbrace{(y(x_n, w) - t_n)^2}_{A^2} + \underbrace{2(y(x_n, w) -
+                        t_n)\mathcal{N}_n}_{2AB} + \underbrace{\mathcal{N}_n^2}_{B^2}
+                        \]
+                    </div>
+
+                    <div class="step">
+                        <strong>Step 3: Apply the Expectation \(\mathbb{E}[\cdot]\)</strong>
+                        <p>We apply the expectation to each term individually:</p>
+                        <ol>
+                            <li><strong>Term \(A^2\):</strong> Does not contain noise \(\epsilon\). So,
+                                \(\mathbb{E}[A^2] = (y(x_n, w) - t_n)^2\).</li>
+                            <li><strong>Term \(2AB\):</strong> Contains the noise term \(\mathcal{N}_n\) which is linear
+                                in \(\epsilon\). Since \(\mathbb{E}[\epsilon] = 0\), the expectation of this whole
+                                cross-term is <strong>0</strong>.</li>
+                            <li><strong>Term \(B^2\):</strong> This is the expectation of the squared noise,
+                                \(\mathbb{E}[\mathcal{N}_n^2]\).</li>
+                        </ol>
+                        <p>Thus, the total expected error simplifies to:</p>
+                        \[
+                        \tilde{E} = \underbrace{\frac{1}{2} \sum_{n=1}^{N} (y(x_n, w) - t_n)^2}_{E_D(w)} + \frac{1}{2}
+                        \sum_{n=1}^{N} \mathbb{E}[\mathcal{N}_n^2]
+                        \]
+                    </div>
+
+                    <div class="step">
+                        <strong>Step 4: Analyze the Noise Variance Term</strong>
+                        <p>We need to solve \(\mathbb{E}[\mathcal{N}_n^2]\). Let's expand the squared sum using indices
+                            \(i\) and \(j\):</p>
+                        \[
+                        \mathbb{E}\left[ \left( \sum_{i=1}^{D} w_i \epsilon_{ni} \right) \left( \sum_{j=1}^{D} w_j
+                        \epsilon_{nj} \right) \right] = \sum_{i=1}^{D} \sum_{j=1}^{D} w_i w_j \mathbb{E}[\epsilon_{ni}
+                        \epsilon_{nj}]
+                        \]
+                        <p>Using the property \(\mathbb{E}[\epsilon_i \epsilon_j] = \delta_{ij} \sigma^2\), all terms
+                            where \(i \neq j\) vanish. We are left only with terms where \(i=j\):</p>
+                        \[
+                        \sum_{i=1}^{D} w_i^2 \sigma^2 = \sigma^2 \sum_{i=1}^{D} w_i^2
+                        \]
+                    </div>
+
+                    <div class="step">
+                        <strong>Step 5: Final Result</strong>
+                        <p>Substituting this back into our error equation (summing over \(N\) data points):</p>
+                        \[
+                        \tilde{E} = E_D(w) + \frac{1}{2} \sum_{n=1}^{N} \left( \sigma^2 \sum_{i=1}^{D} w_i^2 \right)
+                        \]
+                        \[
+                        \tilde{E} = E_D(w) + \underbrace{\frac{1}{2} N \sigma^2}_{\lambda} \sum_{i=1}^{D} w_i^2
+                        \]
+                        <p>This is exactly the form of sum-of-squares error with an L2 Regularization term (Weight
+                            Decay). Note that the summation over weights starts from \(i=1\), meaning the bias \(w_0\)
+                            is <strong>excluded</strong>.</p>
+                    </div>
+
+                    <div class="note">
+                        <strong>💡 Key Insight:</strong> This proof establishes a fundamental link in machine learning:
+                        <strong>Training with noise is equivalent to regularization.</strong> Instead of manually
+                        calculating a penalty \(\lambda\), we can simply "jitter" our inputs, and the model will
+                        naturally learn to suppress large weights to remain stable.
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5 -->
+            <div class="problem">
+                <div class="context">
+
                 </div>
 
                 <div class="problem-statement">
