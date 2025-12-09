@@ -28,10 +28,23 @@
                 saying function on 'x').
                 This equation will come up a lot:
                 \[
-                y(x) = w_0 + \sum_{i=1}^N w_i\,\phi\!\left({x}\right)\quad (1.1)
+                y(x) = w_0 + \sum_{i=1}^D w_i\,\phi\!\left({x}\right)\quad (1.1)
                 \]
                 where 'N' is the total number of features and \(w_i\) is the weight associated to the \(i\)-th feature.
             </p>
+            <p>These are the key notations we'll be using in the chapter:</p>
+            <ul style="margin-left: 25px;">
+                <li>\(x\): Input Sample</li>
+                <li>\(t\): Target variable</li>
+                <li>\(N\): Number of initial features</li>
+                <li>\(M\): Number of data points</li>
+                <li>\(D\): Number of input features (after feature engineering)</li>
+                <li>\(\mathbf{w}\): Vector of model parameters (weights)</li>
+                <li>\(y(x, \mathbf{w})\): Model prediction for input \(x\) given parameters \(\mathbf{w}\)</li>
+                <li>\(\phi(x)\): Basis function applied to input \(x\) (for example, polynomial, Gaussian, etc.)</li>
+                <li>\(\Phi\): Design matrix containing basis function evaluations for all data points</li>
+            </ul>
+
         </div>
 
         <div class="chapter">
@@ -90,7 +103,7 @@
                         and demand variations across different size ranges etc etc.
                         The below equation is a general expression of what we're trying to achieve:
                     </p>
-                    <img src="../assets/LR.png" alt="Linear Regression Illustration" class="context-image"
+                    <img src="../assets/1_LR.png" alt="Linear Regression Illustration" class="context-image"
                         style="max-width: 100%; height: auto; display: block; margin: 0 auto;" loading="lazy">
                 </div>
 
@@ -175,19 +188,23 @@
                     <p>Continuing from our Brigade apartment example, here's how the actual data might look like
                     </p>
                     <br>
-                    <img src="../assets/combined.png" alt="Linear Regression Illustration" class="context-image"
+                    <img src="../assets/1_combined.png" alt="Linear Regression Illustration" class="context-image"
                         style="max-width: 100%; height: auto; display: block; margin: 0 auto;" loading="lazy">
                     <br>
                     <p>The above graph represents a real life scenario where there's always a noise associated with the
                         target variable. This can be generalised by the below equation:</p>
                     \[
-                    t = y(x, \mathbf{w}) + \epsilon
+                    \mathbf{t}\ = \Phi \mathbf{w} + \boldsymbol{\epsilon}
                     \]
 
-                    <p>where \(\epsilon\) represents the Gaussian noise (adding it so we can generalise the equation).
+                    <p>
+                        where \(\mathbf{t}\) is the column vector representing the target values for all data points; \(\Phi \mathbf{w}\) is the deterministic linear prediction; and \(\boldsymbol{\epsilon}\)
+                        represents the Gaussian noise (added so that we can generalise the model).
+                    </p>
+
                     </p>
                     <br>
-                    <img src="../assets/target_var.png" alt="Linear Regression Illustration" class="context-image"
+                    <img src="../assets/1_target_var.png" alt="Linear Regression Illustration" class="context-image"
                         style="max-width: 100%; height: auto; display: block; margin: 0 auto;" loading="lazy">
                     <br>
                     <p>In order to learn the spread or uncertainity (as \(y(x, \mathbf{w})\) will just predict a value
@@ -195,26 +212,25 @@
                         variable given the input and parameters.</p>
 
                     \[
-                    p(t_n|x_n, \mathbf{w}, \sigma^2) = \mathcal{N}(t_n|y(x_n, \mathbf{w}), \sigma^2)
+                    p(t_n|x_n, \mathbf{w}, \sigma^2) = \mathcal{N}(y(x_n, \mathbf{w}), \sigma^2)
                     \]
 
                     <p>where \(\sigma^2\) is the variance of the Gaussian noise.</p>
 
-                    <p>Now assuming all the data points are independent, likelihood is:</p>
+                    <p>Now assuming all the data points are independent, likelihood (we'll discuss more on this in the
+                        later sections) is:</p>
 
                     \[
-                    p(\mathbf{t}|\mathbf{X}, \mathbf{w}, \sigma^2) = \prod_{n=1}^{N} \mathcal{N}(t_n|y(x_n, \mathbf{w}),
+                    p(\mathbf{t}|\mathbf{X}, \mathbf{w}, \sigma^2) = \prod_{n=1}^{M} \mathcal{N}(y(x_n, \mathbf{w}),
                     \sigma^2)
                     \]
-
-                    <p>where \(\mathbf{t}\) is the column vector representing the target values for all data points.</p>
 
                     <p>Taking the logarithm of the likelihood function, we get the log-likelihood:</p>
 
                     \[
                     \ln p(\mathbf{t}|\mathbf{X}, \mathbf{w}, \sigma^2)
-                    = -\frac{N}{2}\ln \sigma^{2}
-                    - \frac{N}{2}\ln(2\pi)
+                    = -\frac{M}{2}\ln \sigma^{2}
+                    - \frac{M}{2}\ln(2\pi)
                     - \frac{E_D(\mathbf{w})}{\sigma^{2}}
                     \]
 
@@ -222,7 +238,7 @@
                     <p>where \(E_D(\mathbf{w})\) is the sum-of-squares error function defined as:</p>
 
                     \[
-                    E_D(\mathbf{w}) = \frac{1}{2}\sum_{n=1}^{N} \left\{ t_n - \mathbf{w}^T \phi(\mathbf{x}_n) \right\}^2
+                    E_D(\mathbf{w}) = \frac{1}{2}\sum_{n=1}^{M} \left\{ t_n - \mathbf{w}^T \phi(\mathbf{x}_n) \right\}^2
                     \]
 
                     <p>Maximizing the log-likelihood is equivalent to minimizing the sum-of-squares error function.</p>
@@ -321,7 +337,7 @@
                         \]
                         <p>Since the dot product is zero, the residual is orthogonal to the column space.</p>
 
-                        <img src="../assets/error_vec.png" alt="Linear Regression Illustration" class="context-image"
+                        <img src="../assets/1_error_vec.png" alt="Linear Regression Illustration" class="context-image"
                             style="max-width: 100%; height: auto; display: block; margin: 0 auto;" loading="lazy">
                     </div>
 
@@ -346,7 +362,7 @@
                         is large; if it's noisy, \(r_n\) is small. This technique is known as <strong>Weighted Least
                             Squares</strong>.</p>
 
-                    <p>We collect these weights into a diagonal matrix \(R\) of size \(N \times N\). The off-diagonal
+                    <p>We collect these weights into a diagonal matrix \(R\) of size \(M \times M\). The off-diagonal
                         elements are zero because we assume the noise in one price is independent of the others:</p>
 
                     <p>
@@ -355,7 +371,7 @@
                         r_1 & 0 & \cdots & 0 \\
                         0 & r_2 & \cdots & 0 \\
                         \vdots & \vdots & \ddots & \vdots \\
-                        0 & 0 & \cdots & r_N
+                        0 & 0 & \cdots & r_M
                         \end{bmatrix}
                         \]
                     </p>
@@ -368,7 +384,7 @@
                     </p>
                     \[
                     E_D(\mathbf{w})
-                    = \frac{1}{2}\sum_{n=1}^{N}
+                    = \frac{1}{2}\sum_{n=1}^{M}
                     r_n \left\{ t_n - \mathbf{w}^T \phi(\mathbf{x}_n) \right\}^2
                     \]
 
@@ -417,12 +433,12 @@
                         <p>If we assume that each data point \(t_n\) has its own specific variance \(\sigma_n^2\), the
                             likelihood function becomes:</p>
                         \[
-                        p(\mathbf{t}|\mathbf{w}) = \prod_{n=1}^{N} \mathcal{N}(t_n | \mathbf{w}^T \phi(\mathbf{x}_n),
+                        p(\mathbf{t}|\mathbf{w}) = \prod_{n=1}^{M} \mathcal{N}(t_n | \mathbf{w}^T \phi(\mathbf{x}_n),
                         \sigma_n^2)
                         \]
                         <p>Taking the negative log-likelihood, we isolate the error term:</p>
                         \[
-                        \frac{1}{2} \sum_{n=1}^{N} \frac{1}{\sigma_n^2} (t_n - \mathbf{w}^T \phi(\mathbf{x}_n))^2
+                        \frac{1}{2} \sum_{n=1}^{M} \frac{1}{\sigma_n^2} (t_n - \mathbf{w}^T \phi(\mathbf{x}_n))^2
                         \]
                         <p>By comparing this to our weighted error function, we can see that:</p>
                         \[
