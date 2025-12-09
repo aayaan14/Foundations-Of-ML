@@ -458,21 +458,66 @@
                 </div>
             </div>
 
+            <!-- 4 -->
             <div class="problem">
                 <div class="context">
-                    <p>In the previous problems, we assumed our input data \(\mathbf{x}\) was perfect. But in the real
-                        world, data is often corrupted by noise.</p>
+                    <p>So far, we examined several realistic sources of uncertainty in regression:</p>
 
-                    <p><strong>The Intuition: Weights as Amplifiers</strong></p>
-                    <p>Imagine a linear model \(y = w_1 x_1 + \dots\). If a specific weight \(w_1\) is very large (e.g.,
-                        1000), a tiny amount of random noise in the input \(x_1\) gets multiplied by 1000, causing the
-                        prediction to swing wildly. This makes the model unstable and prone to overfitting.</p>
+                    <p>i. Noise in the target variable (for example, apartment prices fluctuating).</p>
+                    <p>ii. Unequal reliability of data points, leading to Weighted Least Squares.</p>
 
-                    <p><strong>The Strategy: Training with Noise</strong></p>
-                    <p>To prevent this, we can intentionally add random noise to the inputs during training. This forces
-                        the model to learn that "large weights are dangerous" because they amplify the noise. As we will
-                        prove below, this strategy is mathematically identical to simply adding a penalty on the size of
-                        the weights (L2 Regularization).</p>
+                    <p>Consider the following examples where apartment-related measurements may contain errors:</p>
+
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Feature</th>
+                                <th>Example</th>
+                                <th>How Noise Appears</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Size (sq.ft)</td>
+                                <td>1150</td>
+                                <td>Laser measurement error, rounding</td>
+                            </tr>
+                            <tr>
+                                <td>Age of Building</td>
+                                <td>8 years</td>
+                                <td>Maintenance records inconsistent</td>
+                            </tr>
+                            <tr>
+                                <td>Floor Number</td>
+                                <td>11</td>
+                                <td>Manual entry mistakes</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <p>Let the true, noise-free input be denoted by \(x_i\).
+                        The value stored in the dataset is corrupted by measurement noise:</p>
+
+                    <p>
+                        \[
+                        \tilde{x} = x_i + \epsilon_i
+                        \]
+                    </p>
+
+                    <p>We assume that the noise added to each input dimension is Gaussian with zero mean and variance
+                        \(\sigma^2\):</p>
+
+                    <p>
+                        \[
+                        \epsilon_i \sim \mathcal{N}(0,\sigma^2), \qquad
+                        \mathbb{E}[\epsilon_i] = 0, \qquad
+                        \mathbb{E}[\epsilon_i \epsilon_j] = \delta_{ij}\,\sigma^2.
+                        \]
+                    </p>
+
+                    <p>
+                        Understanding how input noise influences the learning process leads to an important and elegant
+                        result which we'll derive in the next problem.</p>
                 </div>
 
                 <div class="problem-statement">
@@ -518,8 +563,8 @@
                         y(\tilde{x}_n, w) = \underbrace{\left( w_0 + \sum_{i=1}^{D} w_i x_{ni} \right)}_{y(x_n, w)} +
                         \underbrace{\sum_{i=1}^{D} w_i \epsilon_{ni}}_{\text{Noise term}}
                         \]
-                        <p>For brevity, let's denote the noise term as \(\mathcal{N}_n = \sum_{i=1}^{D} w_i
-                            \epsilon_{ni}\). So, \(y_{noisy} = y_{clean} + \mathcal{N}_n\).</p>
+                        <p>For brevity, let's denote the noise term as \(\zeta_n = \sum_{i=1}^{D} w_i
+                            \epsilon_{ni}\). So, \(y_{noisy} = y_{clean} + \zeta_n\).</p>
                     </div>
 
                     <div class="step">
@@ -530,13 +575,13 @@
                         \tilde{E} = \mathbb{E} \left[ \frac{1}{2} \sum_{n=1}^{N} \{ y_{noisy} - t_n \}^2 \right]
                         \]
                         \[
-                        \tilde{E} = \mathbb{E} \left[ \frac{1}{2} \sum_{n=1}^{N} \{ (y(x_n, w) - t_n) + \mathcal{N}_n
+                        \tilde{E} = \mathbb{E} \left[ \frac{1}{2} \sum_{n=1}^{N} \{ (y(x_n, w) - t_n) + \zeta_n
                         \}^2 \right]
                         \]
                         <p>Expanding the square term \((A+B)^2 = A^2 + 2AB + B^2\):</p>
                         \[
                         \{ \dots \}^2 = \underbrace{(y(x_n, w) - t_n)^2}_{A^2} + \underbrace{2(y(x_n, w) -
-                        t_n)\mathcal{N}_n}_{2AB} + \underbrace{\mathcal{N}_n^2}_{B^2}
+                        t_n)\zeta_n}_{2AB} + \underbrace{\zeta_n^2}_{B^2}
                         \]
                     </div>
 
@@ -546,22 +591,22 @@
                         <ol>
                             <li><strong>Term \(A^2\):</strong> Does not contain noise \(\epsilon\). So,
                                 \(\mathbb{E}[A^2] = (y(x_n, w) - t_n)^2\).</li>
-                            <li><strong>Term \(2AB\):</strong> Contains the noise term \(\mathcal{N}_n\) which is linear
+                            <li><strong>Term \(2AB\):</strong> Contains the noise term \(\zeta_n\) which is linear
                                 in \(\epsilon\). Since \(\mathbb{E}[\epsilon] = 0\), the expectation of this whole
                                 cross-term is <strong>0</strong>.</li>
                             <li><strong>Term \(B^2\):</strong> This is the expectation of the squared noise,
-                                \(\mathbb{E}[\mathcal{N}_n^2]\).</li>
+                                \(\mathbb{E}[\zeta_n^2]\).</li>
                         </ol>
                         <p>Thus, the total expected error simplifies to:</p>
                         \[
                         \tilde{E} = \underbrace{\frac{1}{2} \sum_{n=1}^{N} (y(x_n, w) - t_n)^2}_{E_D(w)} + \frac{1}{2}
-                        \sum_{n=1}^{N} \mathbb{E}[\mathcal{N}_n^2]
+                        \sum_{n=1}^{N} \mathbb{E}[\zeta_n^2]
                         \]
                     </div>
 
                     <div class="step">
                         <strong>Step 4: Analyze the Noise Variance Term</strong>
-                        <p>We need to solve \(\mathbb{E}[\mathcal{N}_n^2]\). Let's expand the squared sum using indices
+                        <p>We need to solve \(\mathbb{E}[\zeta_n^2]\). Let's expand the squared sum using indices
                             \(i\) and \(j\):</p>
                         \[
                         \mathbb{E}\left[ \left( \sum_{i=1}^{D} w_i \epsilon_{ni} \right) \left( \sum_{j=1}^{D} w_j
@@ -601,13 +646,149 @@
             <!-- 5 -->
             <div class="problem">
                 <div class="context">
-
+                    <p>
+                        Before solving the problem, it is useful to ground this in the fundamental difference between
+                        <strong>Frequentist</strong> and <strong>Bayesian</strong> views, as seen in our lectures.
+                    </p>
+                    <ul>
+                        <li>
+                            <strong>MLE (Maximum Likelihood Estimation):</strong> Assumes the parameters $\mathbf{w}$
+                            are fixed but unknown.
+                            It relies solely on the data ("Let the data speak"). This works well for big data but can
+                            overfit when data is scarce.
+                        </li>
+                        <li>
+                            <strong>MAP (Maximum A Posteriori):</strong> A Bayesian approach where we treat $\mathbf{w}$
+                            as random variables
+                            with a <em>Prior</em> belief (e.g., "weights should be small"). This introduces
+                            regularization naturally.
+                        </li>
+                    </ul>
+                    <p>
+                        In this problem, we combine the <strong>geometric</strong> regularization we found earlier
+                        (Input Noise)
+                        with this <strong>probabilistic</strong> regularization (MAP).
+                    </p>
                 </div>
 
                 <div class="problem-statement">
+                    <div class="question-title">Question</div>
+                    <p>
+                        Consider a linear regression model of the form:
+                        $$y(\mathbf{x}, \mathbf{w}) = w_0 + \sum_{i=1}^{D} w_i x_i \tag{1}$$
+                    </p>
+                    <p>
+                        Assume the following probabilistic model:
+                    </p>
+                    <ul>
+                        <li>
+                            Each input variable is corrupted by independent Gaussian noise: $\tilde{x}_{ni} = x_{ni} +
+                            \eta_i$,
+                            where $\eta_i \sim \mathcal{N}(0, \sigma_{\text{input}}^2)$.
+                        </li>
+                        <li>
+                            The target variables have Gaussian noise: $t_n = y(\tilde{\mathbf{x}}_n, \mathbf{w}) +
+                            \epsilon_n$,
+                            where $\epsilon_n \sim \mathcal{N}(0, \sigma_{\text{output}}^2)$.
+                        </li>
+                        <li>
+                            The weights (excluding bias) have independent Gaussian priors: $p(w_i) = \mathcal{N}(w_i |
+                            0, \sigma_w^2)$.
+                        </li>
+                    </ul>
+                    <p>
+                        Show that maximizing the posterior distribution $p(\mathbf{w} | \mathbf{t}, \mathbf{X})$ over
+                        the weights,
+                        after averaging over the input noise distribution, is equivalent to minimizing the regularized
+                        error function:
+                    </p>
+                    <p>
+                        $$\tilde{E}(\mathbf{w}) = \frac{1}{2} \sum_{n=1}^{N} \{y(\mathbf{x}_n, \mathbf{w}) - t_n\}^2 +
+                        \frac{\lambda}{2} \sum_{i=1}^{D} w_i^2 \tag{2}$$
+                    </p>
+                    <p>
+                        Determine the relationship between $\lambda$, $\sigma_w^2$, $\sigma_{\text{output}}^2$, and
+                        $\sigma_{\text{input}}^2$.
+                    </p>
                 </div>
 
                 <div class="solution">
+                    <div class="solution-title">Solution:</div>
+
+                    <div class="step">
+                        <strong>Step 1: The MAP Objective</strong>
+                        <p>
+                            We want to maximize the posterior $P(\mathbf{w}|\mathbf{t})$. Using Bayes' rule (and
+                            ignoring the evidence denominator which is constant w.r.t $\mathbf{w}$):
+                            $$P(\mathbf{w}|\mathbf{t}) \propto P(\mathbf{t}|\mathbf{w}) P(\mathbf{w})$$
+                        </p>
+                        <p>
+                            Maximizing this is equivalent to minimizing the negative log-posterior:
+                            $$J(\mathbf{w}) = -\ln P(\mathbf{t}|\mathbf{w}) - \ln P(\mathbf{w})$$
+                        </p>
+                    </div>
+
+                    <div class="step">
+                        <strong>Step 2: The Likelihood Term (with Input Noise)</strong>
+                        <p>
+                            The first term, $-\ln P(\mathbf{t}|\mathbf{w})$, corresponds to the negative log-likelihood.
+                            Normally, for Gaussian noise $\sigma_{\text{output}}$, this is just the sum-of-squares error
+                            scaled by variance.
+                        </p>
+                        <p>
+                            However, we must account for the <strong>input noise</strong>. From our previous derivation
+                            (Problem 1.4),
+                            we know that averaging the error over input noise adds a regularization term.
+                            The expected error term is:
+                            $$E_{\text{noise}} \approx \frac{1}{2\sigma_{\text{output}}^2} \left( \sum_{n=1}^{N}
+                            \{y(\mathbf{x}_n, \mathbf{w}) - t_n\}^2 + N \sigma_{\text{input}}^2 \sum_{i=1}^{D} w_i^2
+                            \right)$$
+                        </p>
+                    </div>
+
+                    <div class="step">
+                        <strong>Step 3: The Prior Term</strong>
+                        <p>
+                            The second term is the log-prior. Given $w_i \sim \mathcal{N}(0, \sigma_w^2)$:
+                            $$-\ln P(\mathbf{w}) = -\ln \prod_{i=1}^D \frac{1}{\sqrt{2\pi}\sigma_w}
+                            e^{-\frac{w_i^2}{2\sigma_w^2}} = \sum_{i=1}^D \frac{w_i^2}{2\sigma_w^2} + \text{const}$$
+                        </p>
+                    </div>
+
+                    <div class="step">
+                        <strong>Step 4: Combining and Solving for $\lambda$</strong>
+                        <p>
+                            Combining Step 2 and Step 3, our total cost function $J(\mathbf{w})$ is:
+                            $$J(\mathbf{w}) = \frac{1}{2\sigma_{\text{output}}^2} \sum_{n=1}^{N} \text{Error}_n^2 +
+                            \frac{N \sigma_{\text{input}}^2}{2\sigma_{\text{output}}^2} \sum w_i^2 +
+                            \frac{1}{2\sigma_w^2} \sum w_i^2$$
+                        </p>
+                        <p>
+                            To bring this into the standard form $\frac{1}{2} \sum \text{Error}^2 + \frac{\lambda}{2}
+                            \sum w_i^2$,
+                            we multiply the entire equation by $\sigma_{\text{output}}^2$:
+                            $$\tilde{E}(\mathbf{w}) = \frac{1}{2} \sum_{n=1}^{N} \{y(\mathbf{x}_n, \mathbf{w}) - t_n\}^2
+                            + \frac{1}{2} \left( N \sigma_{\text{input}}^2 + \frac{\sigma_{\text{output}}^2}{\sigma_w^2}
+                            \right) \sum_{i=1}^{D} w_i^2$$
+                        </p>
+                        <p>
+                            Comparing the coefficients of $\sum w_i^2$, we identify $\lambda$:
+                            $$\lambda = N \sigma_{\text{input}}^2 + \frac{\sigma_{\text{output}}^2}{\sigma_w^2}$$
+                        </p>
+                    </div>
+
+                    <div class="note">
+                        <strong>💡 Key Insight:</strong>
+                        This result unifies two concepts. The total regularization strength $\lambda$ is the sum of:
+                        <ol>
+                            <li><strong>Geometric Penalty ($N \sigma_{\text{input}}^2$):</strong> Arising from the
+                                "jitter" or uncertainty in the input data.</li>
+                            <li><strong>Probabilistic Penalty ($\frac{\sigma_{\text{output}}^2}{\sigma_w^2}$):</strong>
+                                Arising from our prior belief that weights should be small.</li>
+                        </ol>
+                        Note: If input noise is zero ($\sigma_{\text{input}} = 0$), we recover the standard MAP result
+                        derived in lectures: $\lambda = \frac{\sigma_{\text{output}}^2}{\sigma_w^2}$.
+                    </div>
                 </div>
             </div>
 
