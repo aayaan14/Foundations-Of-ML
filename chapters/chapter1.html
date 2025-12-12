@@ -198,7 +198,8 @@
                     \]
 
                     <p>
-                        where \(\mathbf{t}\) is the column vector representing the target values for all data points; \(\Phi \mathbf{w}\) is the deterministic linear prediction; and \(\boldsymbol{\epsilon}\)
+                        where \(\mathbf{t}\) is the column vector representing the target values for all data points;
+                        \(\Phi \mathbf{w}\) is the deterministic linear prediction; and \(\boldsymbol{\epsilon}\)
                         represents the Gaussian noise (added so that we can generalise the model).
                     </p>
 
@@ -400,9 +401,9 @@
                         <strong>Part 1: Finding the Solution \(\mathbf{w}^*\)</strong>
                         <p>First, it is helpful to express the error function in matrix notation. We introduce a
                             diagonal
-                            matrix \(\mathbf{R}\) of size \(N \times N\) containing the weights:</p>
+                            matrix \(\mathbf{R}\) of size \(M \times M\) containing the weights:</p>
                         \[
-                        \mathbf{R} = \text{diag}(r_1, r_2, \dots, r_N)
+                        \mathbf{R} = \text{diag}(r_1, r_2, \dots, r_M)
                         \]
                         <p>The weighted sum-of-squares error can now be written as:</p>
                         \[
@@ -478,10 +479,10 @@
             <div class="problem">
                 <div class="context">
                     <p>So far, we examined several realistic sources of uncertainty in regression:</p>
-
-                    <p>i. Noise in the target variable (for example, apartment prices fluctuating).</p>
-                    <p>ii. Unequal reliability of data points, leading to Weighted Least Squares.</p>
-
+                    <ul style="margin-left: 25px;">
+                        <li>Noise in the target variable (for example, apartment prices fluctuating).</li>
+                        <li>Unequal reliability of data points, leading to Weighted Least Squares.</li>
+                    </ul>
                     <p>Consider the following examples where apartment-related measurements may contain errors:</p>
 
                     <table class="data-table">
@@ -511,12 +512,12 @@
                         </tbody>
                     </table>
 
-                    <p>Let the true, noise-free input be denoted by \(x_i\).
+                    <p>Let the true, noise-free input be denoted by \(x_n\).
                         The value stored in the dataset is corrupted by measurement noise:</p>
 
                     <p>
                         \[
-                        \tilde{x} = x_i + \epsilon_i
+                        \tilde{x_n} = x_n + \epsilon_n
                         \]
                     </p>
 
@@ -525,12 +526,14 @@
 
                     <p>
                         \[
-                        \epsilon_i \sim \mathcal{N}(0,\sigma^2), \qquad
+                        \epsilon_n \sim \mathcal{N}(0,\sigma_x^2), \qquad
                         \mathbb{E}[\epsilon_i] = 0, \qquad
                         \mathbb{E}[\epsilon_i \epsilon_j] = \delta_{ij}\,\sigma^2.
                         \]
                     </p>
-
+                    <p>
+                        where \(\delta_{ij}\) is the Kronecker delta function, which is 1 if \(i = j\) and 0 otherwise.
+                    </p>
                     <p>
                         Understanding how input noise influences the learning process leads to an important and elegant
                         result which we'll derive in the next problem.</p>
@@ -545,17 +548,17 @@
                         \]
                         together with a sum-of-squares error function
                         \[
-                        E_D(w) = \frac{1}{2}\sum_{n=1}^{N} \{\, y(x_n, w) - t_n \,\}^2 . \tag{1.106}
+                        E_D(w) = \frac{1}{2}\sum_{n=1}^{M} \{\, y(x_n, w) - t_n \,\}^2 . \tag{1.106}
                         \]
                     </p>
 
                     <p>
                         Now suppose that Gaussian noise \( \epsilon_i \) with zero mean and variance
-                        \( \sigma^2 \) is added independently to each input variable \( x_i \).
+                        \( \sigma_x^2 \) is added independently to each input variable \( x_i \).
                         Using the properties
                         \[
                         \mathbb{E}[\epsilon_i] = 0, \qquad
-                        \mathbb{E}[\epsilon_i \epsilon_j] = \delta_{ij}\,\sigma^2,
+                        \mathbb{E}[\epsilon_i \epsilon_j] = \delta_{ij}\,\sigma_x^2,
                         \]
                         show that minimizing the expected value of \( E_D \) over the noise
                         distribution is equivalent to minimizing the usual sum-of-squares error
@@ -588,10 +591,10 @@
                         <p>We want to minimize the <em>expected</em> error over the noise distribution. Let's substitute
                             \(y_{noisy}\) into the sum-of-squares error:</p>
                         \[
-                        \tilde{E} = \mathbb{E} \left[ \frac{1}{2} \sum_{n=1}^{N} \{ y_{noisy} - t_n \}^2 \right]
+                        \tilde{E} = \mathbb{E} \left[ \frac{1}{2} \sum_{n=1}^{M} \{ y_{noisy} - t_n \}^2 \right]
                         \]
                         \[
-                        \tilde{E} = \mathbb{E} \left[ \frac{1}{2} \sum_{n=1}^{N} \{ (y(x_n, w) - t_n) + \zeta_n
+                        \tilde{E} = \mathbb{E} \left[ \frac{1}{2} \sum_{n=1}^{M} \{ (y(x_n, w) - t_n) + \zeta_n
                         \}^2 \right]
                         \]
                         <p>Expanding the square term \((A+B)^2 = A^2 + 2AB + B^2\):</p>
@@ -629,10 +632,10 @@
                         \epsilon_{nj} \right) \right] = \sum_{i=1}^{D} \sum_{j=1}^{D} w_i w_j \mathbb{E}[\epsilon_{ni}
                         \epsilon_{nj}]
                         \]
-                        <p>Using the property \(\mathbb{E}[\epsilon_i \epsilon_j] = \delta_{ij} \sigma^2\), all terms
+                        <p>Using the property \(\mathbb{E}[\epsilon_i \epsilon_j] = \delta_{ij} \sigma_x^2\), all terms
                             where \(i \neq j\) vanish. We are left only with terms where \(i=j\):</p>
                         \[
-                        \sum_{i=1}^{D} w_i^2 \sigma^2 = \sigma^2 \sum_{i=1}^{D} w_i^2
+                        \sum_{i=1}^{D} w_i^2 \sigma_x^2 = \sigma_x^2 \sum_{i=1}^{D} w_i^2
                         \]
                     </div>
 
@@ -640,10 +643,10 @@
                         <strong>Step 5: Final Result</strong>
                         <p>Substituting this back into our error equation (summing over \(N\) data points):</p>
                         \[
-                        \tilde{E} = E_D(w) + \frac{1}{2} \sum_{n=1}^{N} \left( \sigma^2 \sum_{i=1}^{D} w_i^2 \right)
+                        \tilde{E} = E_D(w) + \frac{1}{2} \sum_{n=1}^{M} \left( \sigma_x^2 \sum_{i=1}^{D} w_i^2 \right)
                         \]
                         \[
-                        \tilde{E} = E_D(w) + \underbrace{\frac{1}{2} N \sigma^2}_{\lambda} \sum_{i=1}^{D} w_i^2
+                        \tilde{E} = E_D(w) + \underbrace{\frac{1}{2} M \sigma_x^2}_{\lambda} \sum_{i=1}^{D} w_i^2
                         \]
                         <p>This is exactly the form of sum-of-squares error with an L2 Regularization term (Weight
                             Decay). Note that the summation over weights starts from \(i=1\), meaning the bias \(w_0\)
@@ -663,53 +666,61 @@
             <div class="problem">
                 <div class="context">
                     <p>
-                        Before solving the problem, it is useful to ground this in the fundamental difference between
-                        <strong>Frequentist</strong> and <strong>Bayesian</strong> views, as seen in our lectures.
+                        In the previous problems, we assumed that our model parameters (\(\mathbf{w}\)) were fixed. But
+                        what if we add a constraint that the weights should be bounded?
                     </p>
-                    <ul>
-                        <li>
-                            <strong>MLE (Maximum Likelihood Estimation):</strong> Assumes the parameters $\mathbf{w}$
-                            are fixed but unknown.
-                            It relies solely on the data ("Let the data speak"). This works well for big data but can
-                            overfit when data is scarce.
-                        </li>
-                        <li>
-                            <strong>MAP (Maximum A Posteriori):</strong> A Bayesian approach where we treat $\mathbf{w}$
-                            as random variables
-                            with a <em>Prior</em> belief (e.g., "weights should be small"). This introduces
-                            regularization naturally.
-                        </li>
-                    </ul>
+                    <p>A natural question arises: <em>why do we even have to bound parameters in first place?</em></p>
+                    <p>To understand this, let’s look at how a model behaves when its weights are allowed to grow
+                        arbitrarily large.</p>
+                    <br>
+                    <img src="../assets/1_boundwts.png" alt="Bounded v/s unbounded Illustration" class="context-image"
+                        style="max-width: 100%; height: auto; display: block; margin: 0 auto;" loading="lazy">
+                    <br>
+                    <p>A single outlier can disrupt our model, inorder to tackle this we bound our weights (Normal
+                        distribution in most cases).</p>
+
+                    <p><strong>MLE (Maximum Likelihood Estimation):</strong> Assumes the parameters $\mathbf{w}$
+                        are fixed but unknown.
+                        It relies solely on the data ("Let the data speak"). This works well for big data but can
+                        overfit when data is scarce.
+                    </p>
+
+                    <p><strong>mAP (Maximum A Posteriori):</strong> A Bayesian approach where we treat $\mathbf{w}$
+                        as random variables
+                        with a <em>Prior</em> belief (here, "weights should be small").
+                    </p>
+
+
                     <p>
                         In this problem, we combine the <strong>geometric</strong> regularization we found earlier
                         (Input Noise)
-                        with this <strong>probabilistic</strong> regularization (MAP).
+                        with this <strong>probabilistic</strong> regularization (mAP).
                     </p>
                 </div>
 
                 <div class="problem-statement">
-                    <div class="question-title">Question</div>
+                    <h4>Question</h4>
                     <p>
                         Consider a linear regression model of the form:
-                        $$y(\mathbf{x}, \mathbf{w}) = w_0 + \sum_{i=1}^{D} w_i x_i \tag{1}$$
+                        $$y(x, \mathbf{w}) = w_0 + \sum_{i=1}^{D} w_i x_i \tag{1}$$
                     </p>
                     <p>
                         Assume the following probabilistic model:
                     </p>
-                    <ul>
+                    <ul style="margin-left: 25px;">
                         <li>
                             Each input variable is corrupted by independent Gaussian noise: $\tilde{x}_{ni} = x_{ni} +
-                            \eta_i$,
-                            where $\eta_i \sim \mathcal{N}(0, \sigma_{\text{input}}^2)$.
+                            \delta_i$,
+                            where $\delta_i \sim \mathcal{N}(0, \sigma_x^2)$.
                         </li>
                         <li>
                             The target variables have Gaussian noise: $t_n = y(\tilde{\mathbf{x}}_n, \mathbf{w}) +
                             \epsilon_n$,
-                            where $\epsilon_n \sim \mathcal{N}(0, \sigma_{\text{output}}^2)$.
+                            where $\epsilon_n \sim \mathcal{N}(0, \sigma_t^2)$.
                         </li>
                         <li>
-                            The weights (excluding bias) have independent Gaussian priors: $p(w_i) = \mathcal{N}(w_i |
-                            0, \sigma_w^2)$.
+                            The weights (excluding bias) have independent Gaussian priors: $p(w_i) = \mathcal{N}(0,
+                            \sigma_w^2)$.
                         </li>
                     </ul>
                     <p>
@@ -719,100 +730,137 @@
                         error function:
                     </p>
                     <p>
-                        $$\tilde{E}(\mathbf{w}) = \frac{1}{2} \sum_{n=1}^{N} \{y(\mathbf{x}_n, \mathbf{w}) - t_n\}^2 +
+                        $$\tilde{E}(\mathbf{w}) = \frac{1}{2} \sum_{n=1}^{M} \{y(\mathbf{x}_n, \mathbf{w}) - t_n\}^2 +
                         \frac{\lambda}{2} \sum_{i=1}^{D} w_i^2 \tag{2}$$
                     </p>
                     <p>
-                        Determine the relationship between $\lambda$, $\sigma_w^2$, $\sigma_{\text{output}}^2$, and
-                        $\sigma_{\text{input}}^2$.
+                        Determine the relationship between $\lambda$, $\sigma_w^2$, $\sigma_x^2$, and
+                        $\sigma_t^2$.
                     </p>
                 </div>
 
                 <div class="solution">
-                    <div class="solution-title">Solution:</div>
-
+                    <h4>Solution</h4>
                     <div class="step">
-                        <strong>Step 1: The MAP Objective</strong>
+                        <strong>1. Modeling Effective Noise Variance</strong>
                         <p>
-                            We want to maximize the posterior $P(\mathbf{w}|\mathbf{t})$. Using Bayes' rule (and
-                            ignoring the evidence denominator which is constant w.r.t $\mathbf{w}$):
-                            $$P(\mathbf{w}|\mathbf{t}) \propto P(\mathbf{t}|\mathbf{w}) P(\mathbf{w})$$
+                            First, we analyze how the noise in the input propagates to the target variable. We are
+                            given:
+                            $$ \tilde{x}_{ni} = x_{ni} + \delta_i, \quad \delta_i \sim \mathcal{N}(0,
+                            \sigma_x^2) $$
+                            $$ t_n = y(\tilde{\mathbf{x}}_n, \mathbf{w}) + \epsilon_n, \quad \epsilon_n \sim
+                            \mathcal{N}(0, \sigma_t^2) $$
                         </p>
                         <p>
-                            Maximizing this is equivalent to minimizing the negative log-posterior:
-                            $$J(\mathbf{w}) = -\ln P(\mathbf{t}|\mathbf{w}) - \ln P(\mathbf{w})$$
+                            Substituting the noisy input into the linear model
+                            $$ y(\tilde{\mathbf{x}}_n, \mathbf{w}) = \underbrace{w_0 + \sum_{i=1}^D w_i
+                            x_{ni}}_{y(\mathbf{x}_n, \mathbf{w})} + \underbrace{\sum_{i=1}^D w_i \delta_i}_{\text{Input
+                            Noise}} $$
+                        </p>
+                        <p>
+                            The target $t$ can thus be written as the true model plus a total noise term:
+                            $$ t_n = y(\mathbf{x}_n, \mathbf{w}) + \left( \sum_{i=1}^D w_i \delta_i + \epsilon_n \right)
+                            $$
+                        </p>
+                        <p>
+                            We calculate the variance of this combined noise (assuming independence):
+                            $$ \sigma_{\text{total}}^2 = \text{Var}\left( \sum w_i \delta_i \right) +
+                            \text{Var}(\epsilon) $$
+                            $$ \sigma_{\text{total}}^2 = \sum w_i^2 \text{Var}(\delta_i) + \sigma_t^2 $$
+                            $$ \sigma_{\text{total}}^2 = \sigma_x^2 \|\mathbf{w}\|^2 +
+                            \sigma_t^2 $$
                         </p>
                     </div>
 
                     <div class="step">
-                        <strong>Step 2: The Likelihood Term (with Input Noise)</strong>
+                        <strong>2. Maximum A Posteriori (MAP) Estimation</strong>
                         <p>
-                            The first term, $-\ln P(\mathbf{t}|\mathbf{w})$, corresponds to the negative log-likelihood.
-                            Normally, for Gaussian noise $\sigma_{\text{output}}$, this is just the sum-of-squares error
-                            scaled by variance.
+                            According to Bayes' Theorem:
+                            $$ P(\mathbf{w} | \mathbf{t}) = \frac{P(\mathbf{t} | \mathbf{w})
+                            P(\mathbf{w})}{P(\mathbf{t})} \propto P(\mathbf{t} | \mathbf{w}) P(\mathbf{w}) $$
                         </p>
                         <p>
-                            However, we must account for the <strong>input noise</strong>. From our previous derivation
-                            (Problem 1.4),
-                            we know that averaging the error over input noise adds a regularization term.
-                            The expected error term is:
-                            $$E_{\text{noise}} \approx \frac{1}{2\sigma_{\text{output}}^2} \left( \sum_{n=1}^{N}
-                            \{y(\mathbf{x}_n, \mathbf{w}) - t_n\}^2 + N \sigma_{\text{input}}^2 \sum_{i=1}^{D} w_i^2
-                            \right)$$
+                            We want to find the weights $\mathbf{w}^*$ that maximize the posterior probability (or
+                            minimize the negative log-posterior):
+                            $$ \mathbf{w}^* = \underset{\mathbf{w}}{\arg\min} \left( - \ln P(\mathbf{t} | \mathbf{w}) -
+                            \ln P(\mathbf{w}) \right) $$
                         </p>
                     </div>
 
                     <div class="step">
-                        <strong>Step 3: The Prior Term</strong>
+                        <strong>3. Deriving the Cost Function</strong>
                         <p>
-                            The second term is the log-prior. Given $w_i \sim \mathcal{N}(0, \sigma_w^2)$:
-                            $$-\ln P(\mathbf{w}) = -\ln \prod_{i=1}^D \frac{1}{\sqrt{2\pi}\sigma_w}
-                            e^{-\frac{w_i^2}{2\sigma_w^2}} = \sum_{i=1}^D \frac{w_i^2}{2\sigma_w^2} + \text{const}$$
+                            The Likelihood Term: Assuming $M$ i.i.d samples with variance
+                            $\sigma_{\text{total}}^2$:
+                            $$ P(\mathbf{t} | \mathbf{w}) = \prod_{n=1}^{M} \mathcal{N}(t_n | y(\mathbf{x}_n,
+                            \mathbf{w}), \sigma_{\text{total}}^2) $$
+                            Taking the negative log (ignoring constants):
+                            $$ -\ln P(\mathbf{t} | \mathbf{w}) \propto \sum_{n=1}^{M} \frac{(t_n - y(\mathbf{x}_n,
+                            \mathbf{w}))^2}{2\sigma_{\text{total}}^2} $$
+                        </p>
+                        <p>
+                            <strong>The Prior Term:</strong> Given $p(w_i) = \mathcal{N}(0, \sigma_w^2)$:
+                            $$ P(\mathbf{w}) \propto \prod_{i=1}^{D} \exp\left( -\frac{w_i^2}{2\sigma_w^2} \right) =
+                            \exp\left( -\frac{\|\mathbf{w}\|^2}{2\sigma_w^2} \right) $$
+                            Taking the negative log:
+                            $$ -\ln P(\mathbf{w}) \propto \frac{\|\mathbf{w}\|^2}{2\sigma_w^2} $$
+                        </p>
+                        <p>
+                            Combining these, our objective function $J(\mathbf{w})$ becomes:
+                            $$ J(\mathbf{w}) = \frac{1}{2\sigma_{\text{total}}^2} \sum_{n=1}^{N} \{y(\mathbf{x}_n,
+                            \mathbf{w}) - t_n\}^2 + \frac{1}{2\sigma_w^2} \|\mathbf{w}\|^2 $$
                         </p>
                     </div>
 
                     <div class="step">
-                        <strong>Step 4: Combining and Solving for $\lambda$</strong>
+                        <strong>4. Final Relationship</strong>
                         <p>
-                            Combining Step 2 and Step 3, our total cost function $J(\mathbf{w})$ is:
-                            $$J(\mathbf{w}) = \frac{1}{2\sigma_{\text{output}}^2} \sum_{n=1}^{N} \text{Error}_n^2 +
-                            \frac{N \sigma_{\text{input}}^2}{2\sigma_{\text{output}}^2} \sum w_i^2 +
-                            \frac{1}{2\sigma_w^2} \sum w_i^2$$
+                            To match the form $\tilde{E}(\mathbf{w}) = \frac{1}{2} \sum \text{error}^2 +
+                            \frac{\lambda}{2} \|\mathbf{w}\|^2$, we multiply through by $\sigma_{\text{total}}^2$:
                         </p>
                         <p>
-                            To bring this into the standard form $\frac{1}{2} \sum \text{Error}^2 + \frac{\lambda}{2}
-                            \sum w_i^2$,
-                            we multiply the entire equation by $\sigma_{\text{output}}^2$:
-                            $$\tilde{E}(\mathbf{w}) = \frac{1}{2} \sum_{n=1}^{N} \{y(\mathbf{x}_n, \mathbf{w}) - t_n\}^2
-                            + \frac{1}{2} \left( N \sigma_{\text{input}}^2 + \frac{\sigma_{\text{output}}^2}{\sigma_w^2}
-                            \right) \sum_{i=1}^{D} w_i^2$$
+                            $$ \tilde{E}(\mathbf{w}) = \frac{1}{2} \sum_{n=1}^{N} \{y(\mathbf{x}_n, \mathbf{w}) -
+                            t_n\}^2 + \underbrace{\frac{\sigma_{\text{total}}^2}{2\sigma_w^2}}_{\frac{\lambda}{2}}
+                            \|\mathbf{w}\|^2 $$
                         </p>
                         <p>
-                            Comparing the coefficients of $\sum w_i^2$, we identify $\lambda$:
-                            $$\lambda = N \sigma_{\text{input}}^2 + \frac{\sigma_{\text{output}}^2}{\sigma_w^2}$$
+                            Thus, the regularization parameter $\lambda$ is given by the ratio of the noise variance to
+                            the prior variance:
+                            $$ \lambda = \frac{\sigma_x^2 \|\mathbf{w}\|^2 +
+                            \sigma_t^2}{\sigma_w^2} $$
                         </p>
                     </div>
 
                     <div class="note">
-                        <strong>💡 Key Insight:</strong>
-                        This result unifies two concepts. The total regularization strength $\lambda$ is the sum of:
-                        <ol>
-                            <li><strong>Geometric Penalty ($N \sigma_{\text{input}}^2$):</strong> Arising from the
-                                "jitter" or uncertainty in the input data.</li>
-                            <li><strong>Probabilistic Penalty ($\frac{\sigma_{\text{output}}^2}{\sigma_w^2}$):</strong>
-                                Arising from our prior belief that weights should be small.</li>
-                        </ol>
-                        Note: If input noise is zero ($\sigma_{\text{input}} = 0$), we recover the standard MAP result
-                        derived in lectures: $\lambda = \frac{\sigma_{\text{output}}^2}{\sigma_w^2}$.
+                        <strong>💡 Key Insight from the Derivation:</strong>
+                        <p>
+                            Maximizing the posterior (mAP) with a Gaussian prior is mathematically equivalent to
+                            minimizing the Sum of Squared Errors with an $L_2$ regularization term (Ridge Regression).
+                            The "strength" of the regularization ($\lambda$) depends directly on how noisy the data is
+                            ($\sigma_{\text{total}}^2$) versus how uncertain we are about the weights ($\sigma_w^2$).
+                        </p>
                     </div>
                 </div>
             </div>
 
-            <footer>
-                <p><a href="../index.html">Home</a> | <a href="chapter2.html">Next Chapter →</a></p>
-                <p style="margin-top: 10px;">Created with ❤️ for the ML community</p>
-            </footer>
+            <!-- 6 -->
+            <div class="problem">
+                <div class="context">
+                </div>
+
+                <div class="problem-statement">
+                </div>
+
+                <div class="solution">
+                </div>
+            </div>
         </div>
+
+        <footer>
+            <p><a href="../index.html">Home</a> | <a href="chapter2.html">Next Chapter →</a></p>
+            <p style="margin-top: 10px;">Created with ❤️ for the ML community</p>
+        </footer>
+    </div>
 </body>
 
 </html>
