@@ -115,11 +115,11 @@
                     \]
                     <p>Hence show that a general linear combination of logistic sigmoid functions of the form:</p>
                     \[
-                    y(x,w) = w_0 + \sum_{j=1}^M w_j\,\sigma\!\left(\frac{x-\mu_j}{s}\right) \quad (1.101)
+                    y(x,w) = w_0 + \sum_{j=1}^M w_j\,\sigma\!\left(\frac{x-\mu_j}{s}\right) \quad (1.2)
                     \]
                     <p>is equivalent to a linear combination of \(\tanh\) functions of the form:</p>
                     \[
-                    y(x,u) = u_0 + \sum_{j=1}^M u_j\,\tanh\!\left(\frac{x-\mu_j}{s}\right) \quad (1.102)
+                    y(x,u) = u_0 + \sum_{j=1}^M u_j\,\tanh\!\left(\frac{x-\mu_j}{s}\right) \quad (1.3)
                     \]
                     <p>and find expressions relating the new parameters \(\{u_j\}\) to the original parameters
                         \(\{w_j\}\).</p>
@@ -151,7 +151,7 @@
                         \[
                         \sigma(a) = \frac{\tanh\left(\frac{a}{2}\right) + 1}{2}
                         \]
-                        <p>Substitute this relation into equation (1.101):</p>
+                        <p>Substitute this relation into equation (1.2):</p>
                         \[
                         \begin{aligned}
                         y(x,w) &= w_0 + \sum_{j=1}^M w_j\,\sigma\!\left(\frac{x-\mu_j}{s}\right) \\
@@ -161,7 +161,7 @@
                         \frac{w_j}{2}\,\tanh\!\left(\frac{x-\mu_j}{2s}\right)
                         \end{aligned}
                         \]
-                        <p>Comparing this with equation (1.102), we identify the new parameters as:</p>
+                        <p>Comparing this with equation (1.3), we identify the new parameters as:</p>
                         \[
                         u_0 \;=\; w_0 \;+\; \frac{1}{2}\sum_{j=1}^M w_j
                         \]
@@ -169,7 +169,7 @@
                         \[
                         u_j \;=\; \frac{w_j}{2} \qquad (j = 1,\ldots,M)
                         \]
-                        <p>which aligns to eqn (1.102) (not sure if there's a printing mistake but you get the idea)</p>
+                        <p>which aligns to eqn (1.3) (not sure if there's a printing mistake but you get the idea)</p>
                     </div>
 
                     <div class="note">
@@ -289,7 +289,7 @@
                     <h4>Question</h4>
                     <p>Show that the matrix
                         \[
-                        H = \Phi(\Phi^{T}\Phi)^{-1}\Phi^{T} \tag{1.103}
+                        H = \Phi(\Phi^{T}\Phi)^{-1}\Phi^{T} \tag{1.4}
                         \]
                         takes any vector \( \mathbf{v} \) and projects it onto the space spanned by the columns of \(
                         \Phi \).
@@ -544,11 +544,11 @@
                     <p>
                         Consider a linear model of the form
                         \[
-                        y(x, w) = w_0 + \sum_{i=1}^{D} w_i x_i \tag{1.105}
+                        y(x, w) = w_0 + \sum_{i=1}^{D} w_i x_i \tag{1.5}
                         \]
                         together with a sum-of-squares error function
                         \[
-                        E_D(w) = \frac{1}{2}\sum_{n=1}^{M} \{\, y(x_n, w) - t_n \,\}^2 . \tag{1.106}
+                        E_D(w) = \frac{1}{2}\sum_{n=1}^{M} \{\, y(x_n, w) - t_n \,\}^2 . \tag{1.6}
                         \]
                     </p>
 
@@ -702,7 +702,7 @@
                     <h4>Question</h4>
                     <p>
                         Consider a linear regression model of the form:
-                        $$y(x, \mathbf{w}) = w_0 + \sum_{i=1}^{D} w_i x_i \tag{1}$$
+                        \[y(x, \mathbf{w}) = w_0 + \sum_{i=1}^{D} w_i x_i \]
                     </p>
                     <p>
                         Assume the following probabilistic model:
@@ -731,7 +731,7 @@
                     </p>
                     <p>
                         $$\tilde{E}(\mathbf{w}) = \frac{1}{2} \sum_{n=1}^{M} \{y(\mathbf{x}_n, \mathbf{w}) - t_n\}^2 +
-                        \frac{\lambda}{2} \sum_{i=1}^{D} w_i^2 \tag{2}$$
+                        \frac{\lambda}{2} \sum_{i=1}^{D} w_i^2 \tag{1.7}$$
                     </p>
                     <p>
                         Determine the relationship between $\lambda$, $\sigma_w^2$, $\sigma_x^2$, and
@@ -835,7 +835,7 @@
                         <strong>💡 Key Insight from the Derivation:</strong>
                         <p>
                             Maximizing the posterior (mAP) with a Gaussian prior is mathematically equivalent to
-                            minimizing the Sum of Squared Errors with an $L_2$ regularization term (Ridge Regression).
+                            minimizing the Sum of Squared Errors with an L2 regularization term (Ridge Regression).
                             The "strength" of the regularization ($\lambda$) depends directly on how noisy the data is
                             ($\sigma_{\text{total}}^2$) versus how uncertain we are about the weights ($\sigma_w^2$).
                         </p>
@@ -846,6 +846,202 @@
             <!-- 6 -->
             <div class="problem">
                 <div class="context">
+                    <p><strong>Karush-Kuhn-Tucker (KKT) Conditions</strong> generalize the method of Lagrange
+                        Multipliers to handle <strong>inequality constraints</strong>. While Lagrange multipliers deal
+                        with equality constraints (staying <em>on</em> a line), KKT deals with boundaries (staying
+                        <em>inside</em> a region).
+                    </p>
+
+                    <p>For a general optimization problem:</p>
+                    <p>
+                        \[
+                        \text{Minimize } f(x) \quad \text{subject to } \quad g_j(x) \le 0 \quad \text{for } j=1 \dots J
+                        \]
+                    </p>
+
+                    <p>We define the <strong>Lagrangian function</strong> as:</p>
+                    <p>
+                        \[
+                        L(x, \lambda) = f(x) + \sum_{j=1}^{J} \lambda_j g_j(x)
+                        \]
+                    </p>
+
+                    <p>For a point \(x^*\) to be a local minimum, the KKT conditions require four things to happen
+                        simultaneously:</p>
+                    <ul style="margin-left: 25px;">
+                        <li><strong>Stationarity:</strong> The gradient of the Lagrangian must be zero.
+                            \[ \nabla L(x^*, \lambda) = 0 \]
+                            <small>(This is equivalent to \(\nabla f(x^*) + \sum \lambda_j \nabla g_j(x^*) =
+                                0\))</small>
+                        </li>
+                        <li><strong>Primal Feasibility:</strong> The answer is valid. \(g_j(x^*) \le 0\)</li>
+                        <li><strong>Dual Feasibility:</strong> The constraints push <em>inward</em>. \(\lambda_j \ge 0\)
+                        </li>
+                        <li><strong>Complementary Slackness:</strong> The "Switch". Either the constraint is inactive
+                            (\(\lambda_j=0\)) or you are on the boundary (\(g_j(x^*)=0\)).</li>
+                    </ul>
+                </div>
+
+                <div class="problem-statement">
+                    <h4>Question</h4>
+                    <p>
+                        Consider an objective function representing an elliptical valley centered at \((2, 1)\):
+                        \[
+                        f(x, y) = (x - 2)^2 + 2(y - 1)^2
+                        \]
+                    </p>
+                    <p>
+                        We wish to minimize this function subject to two linear inequality constraints:
+                        \[
+                        x + y \le 2 \quad \text{and} \quad x \le y
+                        \]
+                    </p>
+                    <p>
+                        Use the KKT conditions to systematically test the active/inactive constraint cases to find the
+                        optimal solution \((x^*, y^*)\).
+                    </p>
+                </div>
+
+                <div class="solution">
+                    <h4>Solution:</h4>
+
+                    <div class="step">
+                        <strong>Step 1: Standardize the Constraints</strong>
+                        <p>Convert inequalities to \(g(x) \le 0\):</p>
+                        \[
+                        g_1(x, y) = x + y - 2 \le 0
+                        \]
+                        \[
+                        g_2(x, y) = x - y \le 0
+                        \]
+                    </div>
+
+                    <div class="step">
+                        <strong>Step 2: Form the Lagrangian</strong>
+                        \[
+                        L(x, y, \lambda) = (x - 2)^2 + 2(y - 1)^2 + \lambda_1(x + y - 2) + \lambda_2(x - y)
+                        \]
+                    </div>
+
+                    <div class="step">
+                        <strong>Step 3: Establish KKT Conditions</strong>
+                        <ol style="margin-left: 25px;">
+                            <li><strong>Stationarity</strong>:
+                                \[ 2(x - 2) + \lambda_1 + \lambda_2 = 0 \tag{1.8} \]
+                                \[ 4(y - 1) + \lambda_1 - \lambda_2 = 0 \tag{1.9} \]
+                            </li>
+                            <li><strong>Primal Feasibility</strong>: \(x+y \le 2\) and \(x \le y\)</li>
+                            <li><strong>Dual Feasibility</strong>: \(\lambda_1 \ge 0, \lambda_2 \ge 0\)</li>
+                            <li><strong>Slackness</strong>: \(\lambda_1 g_1 = 0\) and \(\lambda_2 g_2 = 0\)</li>
+                        </ol>
+                    </div>
+
+                    <div class="step">
+                        <strong>Step 4: Systematic Case Testing</strong>
+                        <p>Based on Slackness, we test the 4 combinations of active/inactive constraints.</p>
+
+                        <div
+                            style="background-color: #f8d7da; padding: 10px; border-left: 5px solid #e54b5b; margin-bottom: 15px;">
+                            <strong>Case A: Both Inactive (\(\lambda_1 = 0, \lambda_2 = 0\))</strong>
+                            <p><em>Assumption: The unconstrained minimum is valid.</em></p>
+                            <ul style="margin-left: 25px;">
+                                <li><strong>Stationarity:</strong>
+                                    \(2(x-2)=0 \implies x=2\) <br>
+                                    \(4(y-1)=0 \implies y=1\)
+                                </li>
+                                <li><strong>Check Feasibility:</strong> Does \((2,1)\) satisfy \(x+y \le 2\)?<br>
+                                    \(2 + 1 = 3 \not\le 2\). Constraint violated.
+                                </li>
+                            </ul>
+                            <strong>Result: Invalid.</strong>
+                        </div>
+
+                        <div
+                            style="background-color: #f8d7da; padding: 10px; border-left: 5px solid #dc3545; margin-bottom: 15px;">
+                            <strong>Case B: Only Constraint 1 Active (\(\lambda_1 > 0, \lambda_2 = 0\))</strong>
+                            <p><em>Assumption: We hit the wall \(x+y=2\), but stay away from \(x=y\).</em></p>
+                            <ul style="margin-left: 25px;">
+                                <li><strong>Solve System:</strong>
+                                    From \(g_1=0\), we have \(y = 2-x\).<br>
+                                    Substitute \(\lambda_2=0\) into Stationarity:
+                                    <br>Eq X: \(2(x-2) = -\lambda_1\)
+                                    <br>Eq Y: \(4(y-1) = -\lambda_1\)
+                                    <br>Equating them: \(2(x-2) = 4(y-1)\).
+                                </li>
+                                <li><strong>Find Point:</strong> Substitute \(y=2-x\) into \(2(x-2) = 4((2-x)-1)\):<br>
+                                    \(2x - 4 = 4(1 - x) \implies 2x - 4 = 4 - 4x \implies 6x = 8 \implies \mathbf{x =
+                                    4/3}\).<br>
+                                    Then \(y = 2 - 4/3 = \mathbf{2/3}\).
+                                </li>
+                                <li><strong>Check Feasibility (Constraint 2):</strong> Is \(x \le y\)?<br>
+                                    \(4/3 \le 2/3\) is <strong>False</strong>.
+                                </li>
+                            </ul>
+                            <strong>Result: Invalid.</strong>
+                        </div>
+
+                        <div
+                            style="background-color: #f8d7da; padding: 10px; border-left: 5px solid #dc3545; margin-bottom: 15px;">
+                            <strong>Case C: Only Constraint 2 Active (\(\lambda_1 = 0, \lambda_2 > 0\))</strong>
+                            <p><em>Assumption: We hit the wall \(x=y\), but stay away from \(x+y=2\).</em></p>
+                            <ul style="margin-left: 25px;">
+                                <li><strong>Solve System:</strong>
+                                    From \(g_2=0\), we have \(x=y\).<br>
+                                    Substitute \(\lambda_1=0\) into Stationarity:<br>
+                                    Eq X: \(2(x-2) + \lambda_2 = 0 \implies \lambda_2 = -2(x-2)\)<br>
+                                    Eq Y: \(4(y-1) - \lambda_2 = 0 \implies \lambda_2 = 4(y-1)\)
+                                </li>
+                                <li><strong>Find Point:</strong> Equate \(\lambda_2\) (and set \(y=x\)):<br>
+                                    \(-2(x-2) = 4(x-1) \implies -2x + 4 = 4x - 4 \implies 6x = 8 \implies \mathbf{x =
+                                    4/3}\).<br>
+                                    So \(y=4/3\).
+                                </li>
+                                <li><strong>Check Feasibility (Constraint 1):</strong> Is \(x+y \le 2\)?<br>
+                                    \(4/3 + 4/3 = 8/3 \approx 2.66\). This is \(> 2\).
+                                </li>
+                            </ul>
+                            <strong>Result: Invalid.</strong>
+                        </div>
+
+                        <div style="background-color: #d4edda; padding: 10px; border-left: 5px solid #28a745;">
+                            <strong>Case D: Both Active (\(\lambda_1 > 0, \lambda_2 > 0\))</strong>
+                            <p><em>Assumption: We are stuck at the intersection (corner).</em></p>
+                            <ul style="margin-left: 25px;">
+                                <li><strong>Solve Geometry:</strong>
+                                    \(x + y = 2\) and \(x = y\) <br>
+                                    \(2x = 2 \implies \mathbf{x = 1, y = 1}\).
+                                </li>
+                                <li><strong>Verify Forces (\(\lambda\)):</strong>
+                                    Eq X: \(2(1-2) + \lambda_1 + \lambda_2 = 0 \implies -2 + \lambda_1 + \lambda_2 =
+                                    0\)<br>
+                                    Eq Y: \(4(1-1) + \lambda_1 - \lambda_2 = 0 \implies 0 + \lambda_1 - \lambda_2 =
+                                    0\)<br>
+                                    From Eq Y, \(\lambda_1 = \lambda_2\). Plug into Eq X: \(2\lambda_1 = 2 \implies
+                                    \mathbf{\lambda_1 = 1}\).<br>
+                                    Therefore \(\mathbf{\lambda_2 = 1}\).
+                                </li>
+                                <li><strong>Check Dual Feasibility:</strong> Are \(\lambda \ge 0\)?
+                                    <strong>Yes.</strong>
+                                </li>
+                            </ul>
+                            <strong>Result: Valid Solution.</strong>
+                        </div>
+                        <br>
+                        <p>The minima is at \((1, 1)\). and the value of the objective function is \(f(1, 1) = 2(1)^2 +
+                            4(1)^2 = 6\).</p>
+                    </div>
+
+                    <div class="note">
+                        <strong>💡 Conclusion:</strong> All other cases led to contradictions (violations of
+                        constraints). The only valid KKT point is \((1, 1)\), where the objective gradient is perfectly
+                        balanced by the "push" from both constraint walls.
+                    </div>
+                </div>
+            </div>
+
+            <!-- 7 -->
+            <div class="problem">
+                <div class="context">
                 </div>
 
                 <div class="problem-statement">
@@ -854,11 +1050,12 @@
                 <div class="solution">
                 </div>
             </div>
+
         </div>
 
         <footer>
             <p><a href="../index.html">Home</a> | <a href="chapter2.html">Next Chapter →</a></p>
-            <p style="margin-top: 10px;">Created with ❤️ for the ML community</p>
+            <p style="margin-top: 10px;">Created with ❤️ by Aayaan</p>
         </footer>
     </div>
 </body>
