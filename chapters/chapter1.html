@@ -964,8 +964,8 @@
                                 <li><strong>Solve System:</strong>
                                     From \(g_1=0\), we have \(y = 2-x\).<br>
                                     Substitute \(\lambda_2=0\) into Stationarity:
-                                    <br>Eq X: \(2(x-2) = -\lambda_1\)
-                                    <br>Eq Y: \(4(y-1) = -\lambda_1\)
+                                    <br>Eqn (1.8): \(2(x-2) = -\lambda_1\)
+                                    <br>Eqn (1.9): \(4(y-1) = -\lambda_1\)
                                     <br>Equating them: \(2(x-2) = 4(y-1)\).
                                 </li>
                                 <li><strong>Find Point:</strong> Substitute \(y=2-x\) into \(2(x-2) = 4((2-x)-1)\):<br>
@@ -988,8 +988,8 @@
                                 <li><strong>Solve System:</strong>
                                     From \(g_2=0\), we have \(x=y\).<br>
                                     Substitute \(\lambda_1=0\) into Stationarity:<br>
-                                    Eq X: \(2(x-2) + \lambda_2 = 0 \implies \lambda_2 = -2(x-2)\)<br>
-                                    Eq Y: \(4(y-1) - \lambda_2 = 0 \implies \lambda_2 = 4(y-1)\)
+                                    Eqn (1.8): \(2(x-2) + \lambda_2 = 0 \implies \lambda_2 = -2(x-2)\)<br>
+                                    Eqn (1.9): \(4(y-1) - \lambda_2 = 0 \implies \lambda_2 = 4(y-1)\)
                                 </li>
                                 <li><strong>Find Point:</strong> Equate \(\lambda_2\) (and set \(y=x\)):<br>
                                     \(-2(x-2) = 4(x-1) \implies -2x + 4 = 4x - 4 \implies 6x = 8 \implies \mathbf{x =
@@ -1012,11 +1012,13 @@
                                     \(2x = 2 \implies \mathbf{x = 1, y = 1}\).
                                 </li>
                                 <li><strong>Verify Forces (\(\lambda\)):</strong>
-                                    Eq X: \(2(1-2) + \lambda_1 + \lambda_2 = 0 \implies -2 + \lambda_1 + \lambda_2 =
+                                    Eqn (1.8): \(2(1-2) + \lambda_1 + \lambda_2 = 0 \implies -2 + \lambda_1 + \lambda_2
+                                    =
                                     0\)<br>
-                                    Eq Y: \(4(1-1) + \lambda_1 - \lambda_2 = 0 \implies 0 + \lambda_1 - \lambda_2 =
+                                    Eqn (1.9): \(4(1-1) + \lambda_1 - \lambda_2 = 0 \implies 0 + \lambda_1 - \lambda_2 =
                                     0\)<br>
-                                    From Eq Y, \(\lambda_1 = \lambda_2\). Plug into Eq X: \(2\lambda_1 = 2 \implies
+                                    From Eqn (1.9), \(\lambda_1 = \lambda_2\). Plug into Eqn (1.8): \(2\lambda_1 = 2
+                                    \implies
                                     \mathbf{\lambda_1 = 1}\).<br>
                                     Therefore \(\mathbf{\lambda_2 = 1}\).
                                 </li>
@@ -1031,10 +1033,26 @@
                             4(1)^2 = 6\).</p>
                     </div>
 
-                    <div class="note">
-                        <strong>💡 Conclusion:</strong> All other cases led to contradictions (violations of
-                        constraints). The only valid KKT point is \((1, 1)\), where the objective gradient is perfectly
-                        balanced by the "push" from both constraint walls.
+                    <div class="problem">
+                        <div class="note">
+                            <strong>💡 Follow-up:</strong> Now using the KKT conditions we learnt, try to solve the
+                            following problem:
+                            <div>
+                                Show that minimization of the regularized
+                                error function (general form)
+                                \[
+                                \frac{1}{2} \sum_{n=1}^{N} \{t_n - w^T\phi(x_n)\}^2 + \frac{\lambda}{2} \sum_{j=1}^{M}
+                                |w_j|^q \tag{1.10}
+                                \]
+                                is equivalent to minimizing the unregularized sum-of-squares error (1.6)
+                                subject to the constraint
+                                \[
+                                \sum_{j=1}^{M} |w_j|^q \le \eta \tag{1.11}
+                                \]
+                                Try to establish the relationship between the parameters \(\eta\) and \(\lambda\).
+                            
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
