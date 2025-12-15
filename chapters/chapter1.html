@@ -281,7 +281,7 @@
                     \]
 
                     \[
-                    \Rightarrow \mathbf{w} = (\Phi^T\Phi)^{-1}\Phi^T\mathbf{t}
+                    \Rightarrow \mathbf{w} = (\Phi^T\Phi)^{-1}\Phi^T\mathbf{t} \tag{1.4}
                     \]
                 </div>
 
@@ -289,7 +289,7 @@
                     <h4>Question</h4>
                     <p>Show that the matrix
                         \[
-                        H = \Phi(\Phi^{T}\Phi)^{-1}\Phi^{T} \tag{1.4}
+                        H = \Phi(\Phi^{T}\Phi)^{-1}\Phi^{T} \tag{1.5}
                         \]
                         takes any vector \( \mathbf{v} \) and projects it onto the space spanned by the columns of \(
                         \Phi \).
@@ -544,11 +544,11 @@
                     <p>
                         Consider a linear model of the form
                         \[
-                        y(x, w) = w_0 + \sum_{i=1}^{D} w_i x_i \tag{1.5}
+                        y(x, w) = w_0 + \sum_{i=1}^{D} w_i x_i \tag{1.6}
                         \]
                         together with a sum-of-squares error function
                         \[
-                        E_D(w) = \frac{1}{2}\sum_{n=1}^{M} \{\, y(x_n, w) - t_n \,\}^2 . \tag{1.6}
+                        E_D(w) = \frac{1}{2}\sum_{n=1}^{M} \{\, y(x_n, w) - t_n \,\}^2 . \tag{1.7}
                         \]
                     </p>
 
@@ -731,7 +731,7 @@
                     </p>
                     <p>
                         $$\tilde{E}(\mathbf{w}) = \frac{1}{2} \sum_{n=1}^{M} \{y(\mathbf{x}_n, \mathbf{w}) - t_n\}^2 +
-                        \frac{\lambda}{2} \sum_{i=1}^{D} w_i^2 \tag{1.7}$$
+                        \frac{\lambda}{2} \sum_{i=1}^{D} w_i^2 \tag{1.8}$$
                     </p>
                     <p>
                         Determine the relationship between $\lambda$, $\sigma_w^2$, $\sigma_x^2$, and
@@ -927,8 +927,8 @@
                         <strong>Step 3: Establish KKT Conditions</strong>
                         <ol style="margin-left: 25px;">
                             <li><strong>Stationarity</strong>:
-                                \[ 2(x - 2) + \lambda_1 + \lambda_2 = 0 \tag{1.8} \]
-                                \[ 4(y - 1) + \lambda_1 - \lambda_2 = 0 \tag{1.9} \]
+                                \[ 2(x - 2) + \lambda_1 + \lambda_2 = 0 \tag{1.9} \]
+                                \[ 4(y - 1) + \lambda_1 - \lambda_2 = 0 \tag{1.10} \]
                             </li>
                             <li><strong>Primal Feasibility</strong>: \(x+y \le 2\) and \(x \le y\)</li>
                             <li><strong>Dual Feasibility</strong>: \(\lambda_1 \ge 0, \lambda_2 \ge 0\)</li>
@@ -964,8 +964,8 @@
                                 <li><strong>Solve System:</strong>
                                     From \(g_1=0\), we have \(y = 2-x\).<br>
                                     Substitute \(\lambda_2=0\) into Stationarity:
-                                    <br>Eqn (1.8): \(2(x-2) = -\lambda_1\)
-                                    <br>Eqn (1.9): \(4(y-1) = -\lambda_1\)
+                                    <br>Eqn (1.9): \(2(x-2) = -\lambda_1\)
+                                    <br>Eqn (1.10): \(4(y-1) = -\lambda_1\)
                                     <br>Equating them: \(2(x-2) = 4(y-1)\).
                                 </li>
                                 <li><strong>Find Point:</strong> Substitute \(y=2-x\) into \(2(x-2) = 4((2-x)-1)\):<br>
@@ -988,8 +988,8 @@
                                 <li><strong>Solve System:</strong>
                                     From \(g_2=0\), we have \(x=y\).<br>
                                     Substitute \(\lambda_1=0\) into Stationarity:<br>
-                                    Eqn (1.8): \(2(x-2) + \lambda_2 = 0 \implies \lambda_2 = -2(x-2)\)<br>
-                                    Eqn (1.9): \(4(y-1) - \lambda_2 = 0 \implies \lambda_2 = 4(y-1)\)
+                                    Eqn (1.9): \(2(x-2) + \lambda_2 = 0 \implies \lambda_2 = -2(x-2)\)<br>
+                                    Eqn (1.10): \(4(y-1) - \lambda_2 = 0 \implies \lambda_2 = 4(y-1)\)
                                 </li>
                                 <li><strong>Find Point:</strong> Equate \(\lambda_2\) (and set \(y=x\)):<br>
                                     \(-2(x-2) = 4(x-1) \implies -2x + 4 = 4x - 4 \implies 6x = 8 \implies \mathbf{x =
@@ -1012,12 +1012,13 @@
                                     \(2x = 2 \implies \mathbf{x = 1, y = 1}\).
                                 </li>
                                 <li><strong>Verify Forces (\(\lambda\)):</strong>
-                                    Eqn (1.8): \(2(1-2) + \lambda_1 + \lambda_2 = 0 \implies -2 + \lambda_1 + \lambda_2
+                                    Eqn (1.9): \(2(1-2) + \lambda_1 + \lambda_2 = 0 \implies -2 + \lambda_1 + \lambda_2
                                     =
                                     0\)<br>
-                                    Eqn (1.9): \(4(1-1) + \lambda_1 - \lambda_2 = 0 \implies 0 + \lambda_1 - \lambda_2 =
+                                    Eqn (1.10): \(4(1-1) + \lambda_1 - \lambda_2 = 0 \implies 0 + \lambda_1 - \lambda_2
+                                    =
                                     0\)<br>
-                                    From Eqn (1.9), \(\lambda_1 = \lambda_2\). Plug into Eqn (1.8): \(2\lambda_1 = 2
+                                    \(\lambda_1 = \lambda_2\). Plug into Eqn (1.9): \(2\lambda_1 = 2
                                     \implies
                                     \mathbf{\lambda_1 = 1}\).<br>
                                     Therefore \(\mathbf{\lambda_2 = 1}\).
@@ -1032,26 +1033,23 @@
                         <p>The minima is at \((1, 1)\). and the value of the objective function is \(f(1, 1) = 2(1)^2 +
                             4(1)^2 = 6\).</p>
                     </div>
+                    <div class="note">
+                        <strong>💡 Follow-up:</strong> Now using the KKT conditions we learnt, try to solve the
+                        following problem on your own:
+                        <div>
+                            Show that minimization of the regularized
+                            error function (general form)
+                            \[
+                            \frac{1}{2} \sum_{n=1}^{M} \{t_n - w^T\phi(x_n)\}^2 + \frac{\lambda}{2} \sum_{j=1}^{D}
+                            |w_j|^q \tag{1.11}
+                            \]
+                            is equivalent to minimizing the unregularized sum-of-squares error (1.7)
+                            subject to the constraint
+                            \[
+                            \sum_{j=1}^{D} |w_j|^q \le \eta \tag{1.12}
+                            \]
+                            Try to establish the relationship between the parameters \(\eta\) and \(\lambda\).
 
-                    <div class="problem">
-                        <div class="note">
-                            <strong>💡 Follow-up:</strong> Now using the KKT conditions we learnt, try to solve the
-                            following problem:
-                            <div>
-                                Show that minimization of the regularized
-                                error function (general form)
-                                \[
-                                \frac{1}{2} \sum_{n=1}^{N} \{t_n - w^T\phi(x_n)\}^2 + \frac{\lambda}{2} \sum_{j=1}^{M}
-                                |w_j|^q \tag{1.10}
-                                \]
-                                is equivalent to minimizing the unregularized sum-of-squares error (1.6)
-                                subject to the constraint
-                                \[
-                                \sum_{j=1}^{M} |w_j|^q \le \eta \tag{1.11}
-                                \]
-                                Try to establish the relationship between the parameters \(\eta\) and \(\lambda\).
-                            
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -1060,9 +1058,136 @@
             <!-- 7 -->
             <div class="problem">
                 <div class="context">
+                    <p>
+                        So far in this chapter, we considered regression problems where the target variable
+                        \( t \) was a single scalar quantity (apartment price).
+                        We now extend this framework to the case of <em>multiple outputs</em>.
+                    </p>
+
+                    \[
+                    \mathbf{t}_n =
+                    \begin{bmatrix}
+                    \text{Price} \\
+                    \text{Rent} \\
+                    \text{Maintenance}
+                    \end{bmatrix}
+                    \in \mathbb{R}^K
+                    \]
+
+                    <p>
+                        where \( \mathbf{t}_n \) is the target vector associated with the \( n \)-th input,
+                        and \( K \) denotes the dimensionality of the output space.
+                    </p>
+
+                    <p>
+                        To model multiple outputs, a single weight vector is no longer sufficient.
+                        Instead, we introduce a <em>weight matrix</em> \( \mathbf{W} \), where:
+                    </p>
+                    <ul style="margin-left: 25px;">
+                        <li>Each column of \( \mathbf{W} \) corresponds to one output variable.</li>
+                        <li>Each output has its own linear regression model, sharing the same basis functions.</li>
+                    </ul>
+                    <p>
+                        The model now takes the form:
+                    </p>
+
+                    \[
+                    \mathbf{y}(\mathbf{x}, \mathbf{W}) = \mathbf{W}^T \boldsymbol{\phi}(x) 
+                    \]
+                    <p>
+                        which produces a <em>vector-valued prediction</em>, matching the structure of the target
+                        \( \mathbf{t}_n \).
+                    </p>
+
+                    <p>
+                        In earlier sections, we assumed that the noise in the target variable was scalar and
+                        independent.
+                        In the multivariate setting, the prediction errors across outputs may be correlated.
+                    </p>
+
+                    <p>
+                        For example:
+                    </p>
+
+                    <ul style="margin-left: 25px;">
+                        <li>Apartments with high prices often also have high rents.</li>
+                        <li>Maintenance costs may be correlated with apartment size.</li>
+                    </ul>
+
+                    <p>
+                        To capture both uncertainty and correlation between outputs, we assume that the target vector
+                        follows a <em>multivariate Gaussian distribution</em>:
+                    </p>
+
+                    \[
+                    p(\mathbf{t} \mid \mathbf{W}, \boldsymbol{\Sigma})
+                    =
+                    \mathcal{N}\!\left(
+                    \mathbf{t} \mid \mathbf{y}(x, \mathbf{W}), \boldsymbol{\Sigma}
+                    \right)
+                    \]
+
+                    <p>
+                        The multivariate Gaussian distribution is defined as:
+                    </p>
+
+                    \[
+                    \mathcal{N}(\mathbf{x} \mid \boldsymbol{\mu}, \boldsymbol{\Sigma})
+                    =
+                    \frac{1}{(2\pi)^{K/2} \lvert \boldsymbol{\Sigma} \rvert^{1/2}}
+                    \exp\!\left(
+                    -\frac{1}{2}
+                    (\mathbf{x} - \boldsymbol{\mu})^T
+                    \boldsymbol{\Sigma}^{-1}
+                    (\mathbf{x} - \boldsymbol{\mu})
+                    \right) \tag{1.13}
+                    \]
+
+                    <p>
+                        where \( \boldsymbol{\mu} \) represents the mean vector, \( \boldsymbol{\Sigma} \) is the
+                        covariance matrix, and \( K \) denotes the dimensionality of the random vector.
+                        This distribution naturally generalizes the univariate Gaussian and allows us to model
+                        correlated noise in multiple dimensions.
+                    </p>
+                    <img src="../assets/1_multivariate_normal.png" alt="Linear Regression Illustration" class="context-image"
+                        style="max-width: 100%; height: auto; display: block; margin: 0 auto;" loading="lazy">
                 </div>
 
                 <div class="problem-statement">
+                    <h4>Question</h4>
+                    <p>
+                        Consider a linear basis function regression model for a multivariate target variable
+                        $\mathbf{t}$ having a Gaussian distribution of the form
+                    </p>
+                    <p>
+                        $$p(\mathbf{t}|\mathbf{W}, \mathbf{\Sigma}) = \mathcal{N}(\mathbf{t}|\mathbf{y}(\mathbf{x},
+                        \mathbf{W}), \mathbf{\Sigma}) \tag{1.14}$$
+                    </p>
+                    <p>
+                        where
+                    </p>
+                    <p>
+                        $$\mathbf{y}(\mathbf{x}, \mathbf{W}) = \mathbf{W}^T\boldsymbol{\phi}(\mathbf{x}) \tag{1.15}$$
+                    </p>
+                    <p>
+                        together with a training data set comprising input basis vectors
+                        $\boldsymbol{\phi}(\mathbf{x}_n)$ and corresponding target vectors $\mathbf{t}_n$, with $n = 1,
+                        \dots, N$.
+                    </p>
+                    <p>
+                        Show that the maximum likelihood solution $\mathbf{W}_{ML}$ for the parameter matrix
+                        $\mathbf{W}$ has the property that each column is given by an expression of the form (1.4),
+                        which was the solution for an isotropic noise distribution. Note that this is independent of the
+                        covariance matrix $\mathbf{\Sigma}$.
+                    </p>
+                    <p>
+                        Show that the maximum likelihood solution for $\mathbf{\Sigma}$ is given by
+                    </p>
+                    <p>
+                        $$\mathbf{\Sigma} = \frac{1}{N} \sum_{n=1}^N (\mathbf{t}_n -
+                        \mathbf{W}_{ML}^T\boldsymbol{\phi}(\mathbf{x}_n)) (\mathbf{t}_n -
+                        \mathbf{W}_{ML}^T\boldsymbol{\phi}(\mathbf{x}_n))^T \tag{1.16}$$
+                    </p>
                 </div>
 
                 <div class="solution">
