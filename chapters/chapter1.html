@@ -44,7 +44,6 @@
                 <li>\(\phi(x)\): Basis function applied to input \(x\) (for example, polynomial, Gaussian, etc.)</li>
                 <li>\(\Phi\): Design matrix containing basis function evaluations for all data points</li>
             </ul>
-
         </div>
 
         <div class="chapter">
@@ -679,22 +678,47 @@
                     <p>A single outlier can disrupt our model, inorder to tackle this we bound our weights (Normal
                         distribution in most cases).</p>
 
-                    <p><strong>MLE (Maximum Likelihood Estimation):</strong> Assumes the parameters $\mathbf{w}$
-                        are fixed but unknown.
-                        It relies solely on the data ("Let the data speak"). This works well for big data but can
-                        overfit when data is scarce.
-                    </p>
-
-                    <p><strong>mAP (Maximum A Posteriori):</strong> A Bayesian approach where we treat $\mathbf{w}$
-                        as random variables
-                        with a <em>Prior</em> belief (here, "weights should be small").
-                    </p>
-
+                    <table class="data-table" style="width: 95%; max-width: 850px;">
+                        <thead>
+                            <tr>
+                                <th>Aspect</th>
+                                <th>MLE</th>
+                                <th>MAP</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>View of Weights \( \mathbf{w} \)</td>
+                                <td>Fixed but unknown parameters</td>
+                                <td>Random variables (weights are bounded)</td>
+                            </tr>
+                            <tr>
+                                <td>Objective Function</td>
+                                <td>
+                                    \( \displaystyle
+                                    \mathbf{w}_{\text{MLE}}
+                                    = \arg\max_{\mathbf{w}} \; p(\mathbf{t}\mid \mathbf{w})
+                                    \)
+                                </td>
+                                <td>
+                                    \( \displaystyle
+                                    \mathbf{w}_{\text{MAP}}
+                                    = \arg\max_{\mathbf{w}} \; p(\mathbf{w}\mid \mathbf{t})
+                                    \)
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Best Use Case</td>
+                                <td>Large datasets</td>
+                                <td>Limited or noisy data</td>
+                            </tr>
+                        </tbody>
+                    </table>
 
                     <p>
                         In this problem, we combine the <strong>geometric</strong> regularization we found earlier
                         (Input Noise)
-                        with this <strong>probabilistic</strong> regularization (mAP).
+                        with this <strong>probabilistic</strong> regularization (MAP).
                     </p>
                 </div>
 
@@ -834,7 +858,7 @@
                     <div class="note">
                         <strong>💡 Key Insight from the Derivation:</strong>
                         <p>
-                            Maximizing the posterior (mAP) with a Gaussian prior is mathematically equivalent to
+                            Maximizing the posterior (MAP) with a Gaussian prior is mathematically equivalent to
                             minimizing the Sum of Squared Errors with an L2 regularization term (Ridge Regression).
                             The "strength" of the regularization ($\lambda$) depends directly on how noisy the data is
                             ($\sigma_{\text{total}}^2$) versus how uncertain we are about the weights ($\sigma_w^2$).
@@ -847,58 +871,77 @@
             <div class="problem">
                 <div class="context">
                     <p><strong>Karush-Kuhn-Tucker (KKT) Conditions</strong> generalize the method of Lagrange
-                        Multipliers to handle <strong>inequality constraints</strong>. While Lagrange multipliers deal
-                        with equality constraints (staying <em>on</em> a line), KKT deals with boundaries (staying
-                        <em>inside</em> a region).
+                        Multipliers to handle both <strong>equality and inequality constraints</strong>. While Lagrange
+                        multipliers deal
+                        with equality constraints (staying <em>on</em> a surface), KKT handles both surfaces (equality)
+                        and boundaries (inequality).
                     </p>
 
                     <p>For a general optimization problem:</p>
                     <p>
                         \[
-                        \text{Minimize } f(x) \quad \text{subject to } \quad g_j(x) \le 0 \quad \text{for } j=1 \dots J
+                        \text{Minimize } f(x) \quad \text{subject to}
+                        \]
+                        \[
+                        g_j(x) \le 0 \quad \text{for } j=1 \dots J \quad \text{(inequality constraints)}
+                        \]
+                        \[
+                        h_k(x) = 0 \quad \text{for } k=1 \dots K \quad \text{(equality constraints)}
                         \]
                     </p>
 
                     <p>We define the <strong>Lagrangian function</strong> as:</p>
                     <p>
                         \[
-                        L(x, \lambda) = f(x) + \sum_{j=1}^{J} \lambda_j g_j(x)
+                        L(x, \lambda, \mu) = f(x) + \sum_{j=1}^{J} \lambda_j g_j(x) + \sum_{k=1}^{K} \mu_k h_k(x)
                         \]
                     </p>
 
-                    <p>For a point \(x^*\) to be a local minimum, the KKT conditions require four things to happen
-                        simultaneously:</p>
-                    <ul style="margin-left: 25px;">
+                    <p>For a point \(x^*\) to be a local minimum, the KKT conditions require:</p>
+                    <ul>
                         <li><strong>Stationarity:</strong> The gradient of the Lagrangian must be zero.
-                            \[ \nabla L(x^*, \lambda) = 0 \]
-                            <small>(This is equivalent to \(\nabla f(x^*) + \sum \lambda_j \nabla g_j(x^*) =
-                                0\))</small>
+                            \[ \nabla_x L(x^*, \lambda, \mu) = 0 \]
+                            <small>(Equivalent to \(\nabla f(x^*) + \sum \lambda_j \nabla g_j(x^*) + \sum \mu_k \nabla
+                                h_k(x^*) = 0\))</small>
                         </li>
-                        <li><strong>Primal Feasibility:</strong> The answer is valid. \(g_j(x^*) \le 0\)</li>
-                        <li><strong>Dual Feasibility:</strong> The constraints push <em>inward</em>. \(\lambda_j \ge 0\)
+                        <li><strong>Primal Feasibility:</strong> The solution must satisfy all constraints.
+                            \[g_j(x^*) \le 0 \quad \text{and} \quad h_k(x^*) = 0\]
                         </li>
-                        <li><strong>Complementary Slackness:</strong> The "Switch". Either the constraint is inactive
-                            (\(\lambda_j=0\)) or you are on the boundary (\(g_j(x^*)=0\)).</li>
+                        <li><strong>Dual Feasibility:</strong> Inequality multipliers must be non-negative. \(\lambda_j
+                            \ge 0\)
+                            <br><small>(Note: \(\mu_k\) can be any real number)</small>
+                        </li>
+                        <li><strong>Complementary Slackness:</strong> For each inequality constraint:
+                            \[\lambda_j \cdot g_j(x^*) = 0\]
+                            Either the constraint is inactive (\(\lambda_j=0\)) or you are on the boundary
+                            (\(g_j(x^*)=0\)).
+                        </li>
                     </ul>
                 </div>
 
                 <div class="problem-statement">
                     <h4>Question</h4>
                     <p>
-                        Consider an objective function representing an elliptical valley centered at \((2, 1)\):
+                        Consider an objective function representing a paraboloid:
                         \[
-                        f(x, y) = (x - 2)^2 + 2(y - 1)^2
+                        f(x, y) = x^2 + 2y^2
                         \]
                     </p>
                     <p>
-                        We wish to minimize this function subject to two linear inequality constraints:
-                        \[
-                        x + y \le 2 \quad \text{and} \quad x \le y
-                        \]
+                        We wish to minimize this function subject to:
                     </p>
+
+                    \[
+                    h(x, y) = x + 2y = 3
+                    \]
+
+                    \[
+                    g(x, y) = x \le y \quad
+                    \]
+                    </li>
+                    </ul>
                     <p>
-                        Use the KKT conditions to systematically test the active/inactive constraint cases to find the
-                        optimal solution \((x^*, y^*)\).
+                        Use the KKT conditions to find the optimal solution \((x^*, y^*)\).
                     </p>
                 </div>
 
@@ -906,151 +949,170 @@
                     <h4>Solution:</h4>
 
                     <div class="step">
-                        <strong>Step 1: Standardize the Constraints</strong>
-                        <p>Convert inequalities to \(g(x) \le 0\):</p>
+                        <strong>Step 1: Identify the Constraints</strong>
+                        <p>Equality constraint (must always be satisfied):</p>
                         \[
-                        g_1(x, y) = x + y - 2 \le 0
+                        h(x, y) = x + 2y - 3 = 0
                         \]
+                        <p>Inequality constraint (in standard form \(g \le 0\)):</p>
                         \[
-                        g_2(x, y) = x - y \le 0
+                        g(x, y) = x - y \le 0
                         \]
                     </div>
 
                     <div class="step">
                         <strong>Step 2: Form the Lagrangian</strong>
                         \[
-                        L(x, y, \lambda) = (x - 2)^2 + 2(y - 1)^2 + \lambda_1(x + y - 2) + \lambda_2(x - y)
+                        L(x, y, \lambda, \mu) = x^2 + 2y^2 + \lambda(x - y) + \mu(x + 2y - 3)
                         \]
+                        <p>where \(\lambda\) is the multiplier for the inequality and \(\mu\) is the multiplier for the
+                            equality.</p>
                     </div>
 
                     <div class="step">
                         <strong>Step 3: Establish KKT Conditions</strong>
-                        <ol style="margin-left: 25px;">
+                        <ol>
                             <li><strong>Stationarity</strong>:
-                                \[ 2(x - 2) + \lambda_1 + \lambda_2 = 0 \tag{1.9} \]
-                                \[ 4(y - 1) + \lambda_1 - \lambda_2 = 0 \tag{1.10} \]
+                                \[ \frac{\partial L}{\partial x} = 2x + \lambda + \mu = 0 \tag{1.9} \]
+                                \[ \frac{\partial L}{\partial y} = 4y - \lambda + 2\mu = 0 \tag{1.10} \]
                             </li>
-                            <li><strong>Primal Feasibility</strong>: \(x+y \le 2\) and \(x \le y\)</li>
-                            <li><strong>Dual Feasibility</strong>: \(\lambda_1 \ge 0, \lambda_2 \ge 0\)</li>
-                            <li><strong>Slackness</strong>: \(\lambda_1 g_1 = 0\) and \(\lambda_2 g_2 = 0\)</li>
+                            <li><strong>Primal Feasibility</strong>:
+                                \(x + 2y = 3\) (equality always holds) and \(x \le y\) (inequality)
+                            </li>
+                            <li><strong>Dual Feasibility</strong>: \(\lambda \ge 0\) (no restriction on \(\mu\))</li>
+                            <li><strong>Complementary Slackness</strong>: \(\lambda \cdot g(x,y) = 0\)</li>
                         </ol>
                     </div>
 
                     <div class="step">
-                        <strong>Step 4: Systematic Case Testing</strong>
-                        <p>Based on Slackness, we test the 4 combinations of active/inactive constraints.</p>
+                        <strong>Step 4: Case Testing</strong>
+                        <p>Since the equality constraint is always active, we only test two cases for the inequality.
+                        </p>
 
-                        <div
-                            style="background-color: #f8d7da; padding: 10px; border-left: 5px solid #e54b5b; margin-bottom: 15px;">
-                            <strong>Case A: Both Inactive (\(\lambda_1 = 0, \lambda_2 = 0\))</strong>
-                            <p><em>Assumption: The unconstrained minimum is valid.</em></p>
-                            <ul style="margin-left: 25px;">
-                                <li><strong>Stationarity:</strong>
-                                    \(2(x-2)=0 \implies x=2\) <br>
-                                    \(4(y-1)=0 \implies y=1\)
+                        <div class="case-box invalid">
+                            <strong>Case A: Inequality Inactive (\(\lambda = 0\))</strong>
+                            <p><em>Assumption: The constraint \(x \le y\) is not binding.</em></p>
+                            <ul>
+                                <li><strong>Solve the System:</strong><br>
+                                    From (1.9) with \(\lambda=0\): \(2x + \mu = 0 \implies \mu = -2x\)<br>
+                                    From (1.10) with \(\lambda=0\): \(4y + 2\mu = 0 \implies \mu = -2y\)<br>
+                                    Therefore: \(-2x = -2y \implies x = y\)
                                 </li>
-                                <li><strong>Check Feasibility:</strong> Does \((2,1)\) satisfy \(x+y \le 2\)?<br>
-                                    \(2 + 1 = 3 \not\le 2\). Constraint violated.
+                                <li><strong>Find the Point:</strong><br>
+                                    Substitute \(x = y\) into the equality constraint \(x + 2y = 3\):<br>
+                                    \(y + 2y = 3 \implies 3y = 3 \implies \mathbf{y = 1}\)<br>
+                                    Therefore \(\mathbf{x = 1}\)
+                                </li>
+                                <li><strong>Check Inequality:</strong> Is \(x \le y\)?<br>
+                                    \(1 \le 1\) is <strong>True</strong> (boundary case).
+                                </li>
+                                <li><strong>Verify Multipliers:</strong><br>
+                                    \(\mu = -2x = -2(1) = -2\) ✓ (no restriction)<br>
+                                    \(\lambda = 0\) ✓
+                                </li>
+                                <li><strong>Check Slackness:</strong><br>
+                                    \(\lambda \cdot g(x,y) = 0 \cdot (1-1) = 0\) ✓
                                 </li>
                             </ul>
-                            <strong>Result: Invalid.</strong>
+                            <strong>Result: Actually Valid!</strong> Even though we assumed the constraint was inactive,
+                            the solution naturally lies on the boundary \(x = y\). This is a <em>degenerate case</em>.
                         </div>
 
-                        <div
-                            style="background-color: #f8d7da; padding: 10px; border-left: 5px solid #dc3545; margin-bottom: 15px;">
-                            <strong>Case B: Only Constraint 1 Active (\(\lambda_1 > 0, \lambda_2 = 0\))</strong>
-                            <p><em>Assumption: We hit the wall \(x+y=2\), but stay away from \(x=y\).</em></p>
-                            <ul style="margin-left: 25px;">
-                                <li><strong>Solve System:</strong>
-                                    From \(g_1=0\), we have \(y = 2-x\).<br>
-                                    Substitute \(\lambda_2=0\) into Stationarity:
-                                    <br>Eqn (1.9): \(2(x-2) = -\lambda_1\)
-                                    <br>Eqn (1.10): \(4(y-1) = -\lambda_1\)
-                                    <br>Equating them: \(2(x-2) = 4(y-1)\).
+                        <div class="case-box valid">
+                            <strong>Case B: Inequality Active (\(\lambda > 0\))</strong>
+                            <p><em>Assumption: The constraint \(x = y\) is binding.</em></p>
+                            <ul>
+                                <li><strong>Solve the System:</strong><br>
+                                    From the active constraint: \(x = y\)<br>
+                                    From equality: \(x + 2y = 3 \implies y + 2y = 3 \implies \mathbf{y = 1, x = 1}\)
                                 </li>
-                                <li><strong>Find Point:</strong> Substitute \(y=2-x\) into \(2(x-2) = 4((2-x)-1)\):<br>
-                                    \(2x - 4 = 4(1 - x) \implies 2x - 4 = 4 - 4x \implies 6x = 8 \implies \mathbf{x =
-                                    4/3}\).<br>
-                                    Then \(y = 2 - 4/3 = \mathbf{2/3}\).
+                                <li><strong>Find Multipliers:</strong><br>
+                                    From (1.9): \(2(1) + \lambda + \mu = 0 \implies \lambda + \mu = -2\) ...(i)<br>
+                                    From (1.10): \(4(1) - \lambda + 2\mu = 0 \implies -\lambda + 2\mu = -4\) ...(ii)<br>
+                                    <br>
+                                    Add (i) and (ii): \(3\mu = -6 \implies \mathbf{\mu = -2}\)<br>
+                                    From (i): \(\lambda = -2 - \mu = -2 - (-2) = \mathbf{0}\)
                                 </li>
-                                <li><strong>Check Feasibility (Constraint 2):</strong> Is \(x \le y\)?<br>
-                                    \(4/3 \le 2/3\) is <strong>False</strong>.
+                                <li><strong>Check Dual Feasibility:</strong><br>
+                                    \(\lambda = 0 \ge 0\) ✓
                                 </li>
                             </ul>
-                            <strong>Result: Invalid.</strong>
+                            <strong>Result: This reduces to Case A.</strong> The multiplier \(\lambda = 0\) indicates
+                            the inequality constraint is not actually "pushing" at the optimum.
                         </div>
-
-                        <div
-                            style="background-color: #f8d7da; padding: 10px; border-left: 5px solid #dc3545; margin-bottom: 15px;">
-                            <strong>Case C: Only Constraint 2 Active (\(\lambda_1 = 0, \lambda_2 > 0\))</strong>
-                            <p><em>Assumption: We hit the wall \(x=y\), but stay away from \(x+y=2\).</em></p>
-                            <ul style="margin-left: 25px;">
-                                <li><strong>Solve System:</strong>
-                                    From \(g_2=0\), we have \(x=y\).<br>
-                                    Substitute \(\lambda_1=0\) into Stationarity:<br>
-                                    Eqn (1.9): \(2(x-2) + \lambda_2 = 0 \implies \lambda_2 = -2(x-2)\)<br>
-                                    Eqn (1.10): \(4(y-1) - \lambda_2 = 0 \implies \lambda_2 = 4(y-1)\)
-                                </li>
-                                <li><strong>Find Point:</strong> Equate \(\lambda_2\) (and set \(y=x\)):<br>
-                                    \(-2(x-2) = 4(x-1) \implies -2x + 4 = 4x - 4 \implies 6x = 8 \implies \mathbf{x =
-                                    4/3}\).<br>
-                                    So \(y=4/3\).
-                                </li>
-                                <li><strong>Check Feasibility (Constraint 1):</strong> Is \(x+y \le 2\)?<br>
-                                    \(4/3 + 4/3 = 8/3 \approx 2.66\). This is \(> 2\).
-                                </li>
-                            </ul>
-                            <strong>Result: Invalid.</strong>
-                        </div>
-
-                        <div style="background-color: #d4edda; padding: 10px; border-left: 5px solid #28a745;">
-                            <strong>Case D: Both Active (\(\lambda_1 > 0, \lambda_2 > 0\))</strong>
-                            <p><em>Assumption: We are stuck at the intersection (corner).</em></p>
-                            <ul style="margin-left: 25px;">
-                                <li><strong>Solve Geometry:</strong>
-                                    \(x + y = 2\) and \(x = y\) <br>
-                                    \(2x = 2 \implies \mathbf{x = 1, y = 1}\).
-                                </li>
-                                <li><strong>Verify Forces (\(\lambda\)):</strong>
-                                    Eqn (1.9): \(2(1-2) + \lambda_1 + \lambda_2 = 0 \implies -2 + \lambda_1 + \lambda_2
-                                    =
-                                    0\)<br>
-                                    Eqn (1.10): \(4(1-1) + \lambda_1 - \lambda_2 = 0 \implies 0 + \lambda_1 - \lambda_2
-                                    =
-                                    0\)<br>
-                                    \(\lambda_1 = \lambda_2\). Plug into Eqn (1.9): \(2\lambda_1 = 2
-                                    \implies
-                                    \mathbf{\lambda_1 = 1}\).<br>
-                                    Therefore \(\mathbf{\lambda_2 = 1}\).
-                                </li>
-                                <li><strong>Check Dual Feasibility:</strong> Are \(\lambda \ge 0\)?
-                                    <strong>Yes.</strong>
-                                </li>
-                            </ul>
-                            <strong>Result: Valid Solution.</strong>
-                        </div>
-                        <br>
-                        <p>The minima is at \((1, 1)\). and the value of the objective function is \(f(1, 1) = 2(1)^2 +
-                            4(1)^2 = 6\).</p>
                     </div>
-                    <div class="note">
-                        <strong>💡 Follow-up:</strong> Now using the KKT conditions we learnt, try to solve the
-                        following problem on your own:
-                        <div>
-                            Show that minimization of the regularized
-                            error function (general form)
-                            \[
-                            \frac{1}{2} \sum_{n=1}^{M} \{t_n - w^T\phi(x_n)\}^2 + \frac{\lambda}{2} \sum_{j=1}^{D}
-                            |w_j|^q \tag{1.11}
-                            \]
-                            is equivalent to minimizing the unregularized sum-of-squares error (1.7)
-                            subject to the constraint
-                            \[
-                            \sum_{j=1}^{D} |w_j|^q \le \eta \tag{1.12}
-                            \]
-                            Try to establish the relationship between the parameters \(\eta\) and \(\lambda\).
 
+                    <div class="step">
+                        <strong>Step 5: Conclusion</strong>
+                        <p>The optimal solution is:
+                            \[
+                            (x^*, y^*) = (1, 1)
+                            \]
+                        </p>
+                        <p>The optimal objective value is:
+                            \[
+                            f(1, 1) = 1^2 + 2(1)^2 = 3
+                            \]
+                        </p>
+                    </div>
+                </div>
+
+                <div class="visualization">
+                    <h3>Interactive Visualization: Constrained Optimization</h3>
+                    <p>This visualization demonstrates a constrained optimization problem where we minimize f(x,y) = x²
+                        + 2y² subject to x ≤ y and x + 2y = 3.</p>
+
+                    <canvas id="canvas" width="600" height="600"></canvas>
+
+                    <div class="controls">
+                        <button onclick="toggleContours()">Toggle Contours</button>
+                        <button onclick="toggleGradients()">Toggle Gradients</button>
+                        <button onclick="resetView()">Reset View</button>
+                    </div>
+
+                    <div class="legend">
+                        <div class="legend-item">
+                            <div class="legend-box" style="background-color: rgba(46, 204, 113, 0.3);"></div>
+                            <span>Feasible Region (x ≤ y)</span>
                         </div>
+                        <div class="legend-item">
+                            <div class="legend-box" style="background-color: #2ecc71; border: 2px dashed #2ecc71;">
+                            </div>
+                            <span>Boundary x = y</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-box" style="background-color: #e74c3c;"></div>
+                            <span>Equality Constraint x + 2y = 3</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-box" style="background-color: rgba(33, 150, 243, 0.5);"></div>
+                            <span>Objective Function Contours</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-box"
+                                style="background-color: #f39c12; border: 2px solid #333; border-radius: 50%;"></div>
+                            <span>Optimal Point (1, 1)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="note">
+                    <strong>💡 Challenge Problem:</strong> Now using the KKT conditions we learnt, try to solve the
+                    following problem on your own:
+                    <div>
+                        Show that minimization of the regularized
+                        error function (general form)
+                        \[
+                        \frac{1}{2} \sum_{n=1}^{M} \{t_n - w^T\phi(x_n)\}^2 + \frac{\lambda}{2} \sum_{j=1}^{D}
+                        |w_j|^q \tag{1.11}
+                        \]
+                        is equivalent to minimizing the unregularized sum-of-squares error (1.7)
+                        subject to the constraint
+                        \[
+                        \sum_{j=1}^{D} |w_j|^q \le \eta \tag{1.12}
+                        \]
+                        Try to establish the relationship between the parameters \(\eta\) and \(\lambda\).
+
                     </div>
                 </div>
             </div>
@@ -1059,7 +1121,7 @@
             <div class="problem">
                 <div class="context">
                     <p>
-                        So far in this chapter, we considered regression problems where the target variable
+                        So far in this chapter, we considered the target variable
                         \( t \) was a single scalar quantity (apartment price).
                         We now extend this framework to the case of <em>multiple outputs</em>.
                     </p>
@@ -1087,12 +1149,27 @@
                         <li>Each column of \( \mathbf{W} \) corresponds to one output variable.</li>
                         <li>Each output has its own linear regression model, sharing the same basis functions.</li>
                     </ul>
+
+                    \[
+                    \mathbf{W}
+                    =
+                    \begin{bmatrix}
+                    \mid & \mid & & \mid \\
+                    \mathbf{w}_{\text{price}} &
+                    \mathbf{w}_{\text{rent}} &
+                    \cdots &
+                    \mathbf{w}_{\text{maintenance}} \\
+                    \mid & \mid & & \mid
+                    \end{bmatrix}
+                    _{\;D \times K}
+                    \]
+
                     <p>
                         The model now takes the form:
                     </p>
 
                     \[
-                    \mathbf{y}(\mathbf{x}, \mathbf{W}) = \mathbf{W}^T \boldsymbol{\phi}(x) 
+                    \mathbf{y}(\mathbf{x}, \mathbf{W}) = \mathbf{W}^T \boldsymbol{\phi}(x)
                     \]
                     <p>
                         which produces a <em>vector-valued prediction</em>, matching the structure of the target
@@ -1102,7 +1179,7 @@
                     <p>
                         In earlier sections, we assumed that the noise in the target variable was scalar and
                         independent.
-                        In the multivariate setting, the prediction errors across outputs may be correlated.
+                        In the multivariate setting, the prediction errors across outputs may or may not be correlated.
                     </p>
 
                     <p>
@@ -1145,12 +1222,13 @@
 
                     <p>
                         where \( \boldsymbol{\mu} \) represents the mean vector, \( \boldsymbol{\Sigma} \) is the
-                        covariance matrix, and \( K \) denotes the dimensionality of the random vector.
+                        covariance matrix.
                         This distribution naturally generalizes the univariate Gaussian and allows us to model
                         correlated noise in multiple dimensions.
                     </p>
-                    <img src="../assets/1_multivariate_normal.png" alt="Linear Regression Illustration" class="context-image"
-                        style="max-width: 100%; height: auto; display: block; margin: 0 auto;" loading="lazy">
+                    <img src="../assets/1_multivariate_normal.png" alt="Linear Regression Illustration"
+                        class="context-image" style="max-width: 100%; height: auto; display: block; margin: 0 auto;"
+                        loading="lazy">
                 </div>
 
                 <div class="problem-statement">
@@ -1191,6 +1269,233 @@
                 </div>
 
                 <div class="solution">
+                    <h4>Solution:</h4>
+
+                    <div class="step">
+                        <strong>Part 1: Maximum Likelihood Solution for \(\mathbf{W}\)</strong>
+                        <p>
+                            We begin by writing the likelihood function for the entire dataset. Given \(M\) independent
+                            observations, the likelihood is:
+                        </p>
+                        \[
+                        p(\mathbf{T}|\mathbf{W}, \boldsymbol{\Sigma}) = \prod_{n=1}^{M} \mathcal{N}(\mathbf{t}_n |
+                        \mathbf{W}^T\boldsymbol{\phi}(\mathbf{x}_n), \boldsymbol{\Sigma})
+                        \]
+                        <p>
+                            where \(\mathbf{T}\) is the \(M \times K\) matrix whose \(n\)-th row is \(\mathbf{t}_n^T\).
+                        </p>
+                        <p>
+                            Taking the logarithm of the likelihood:
+                        </p>
+                        \[
+                        \ln p(\mathbf{T}|\mathbf{W}, \boldsymbol{\Sigma}) = \sum_{n=1}^{M} \ln \mathcal{N}(\mathbf{t}_n
+                        | \mathbf{W}^T\boldsymbol{\phi}(\mathbf{x}_n), \boldsymbol{\Sigma})
+                        \]
+                        <p>
+                            Using the definition of the multivariate Gaussian from equation (1.13):
+                        </p>
+                        \[
+                        \begin{aligned}
+                        \ln p(\mathbf{T}|\mathbf{W}, \boldsymbol{\Sigma}) &= \sum_{n=1}^{M} \left[ -\frac{K}{2}\ln(2\pi)
+                        - \frac{1}{2}\ln|\boldsymbol{\Sigma}| \right. \\
+                        &\quad \left. - \frac{1}{2}(\mathbf{t}_n - \mathbf{W}^T\boldsymbol{\phi}(\mathbf{x}_n))^T
+                        \boldsymbol{\Sigma}^{-1} (\mathbf{t}_n - \mathbf{W}^T\boldsymbol{\phi}(\mathbf{x}_n)) \right]
+                        \end{aligned}
+                        \]
+                        <p>
+                            Removing constant terms and focusing on the term that depends on \(\mathbf{W}\):
+                        </p>
+                        \[
+                        \ln p(\mathbf{T}|\mathbf{W}, \boldsymbol{\Sigma}) = \text{const} - \frac{1}{2} \sum_{n=1}^{M}
+                        (\mathbf{t}_n - \mathbf{W}^T\boldsymbol{\phi}(\mathbf{x}_n))^T \boldsymbol{\Sigma}^{-1}
+                        (\mathbf{t}_n - \mathbf{W}^T\boldsymbol{\phi}(\mathbf{x}_n))
+                        \]
+                        <p>Taking the derivative with respect to \(\mathbf{W}\):</p>
+                        \[
+                        \nabla_{\mathbf{W}} \ln p
+                        =
+                        \sum_{n=1}^{M}
+                        \boldsymbol{\phi}_n
+                        \left(
+                        t_n - \mathbf{W}^T \boldsymbol{\phi}_n
+                        \right)^T
+                        \boldsymbol{\Sigma}^{-1}
+                        =
+                        0
+                        \]
+
+                        <p>Since \(\boldsymbol{\Sigma}^{-1}\) is symmetric and positive definite, we can simplify the
+                            derivative:</p>
+                        \[
+                        \sum_{n=1}^{M}
+                        \boldsymbol{\phi}_n
+                        \left(
+                        t_n - \mathbf{W}^T \boldsymbol{\phi}_n
+                        \right)^T
+                        =
+                        0
+                        \]
+                        <p>
+                            Rearranging terms:
+                        </p>
+                        \[
+                        \sum_{n=1}^{M}
+                        \boldsymbol{\phi}_n
+                        t_n^T
+                        =
+                        \sum_{n=1}^{M}
+                        \boldsymbol{\phi}_n
+                        \boldsymbol{\phi}_n^T
+                        \mathbf{W}
+                        \]
+                        <p>
+                            Solving for \(\mathbf{W}\), we obtain:
+                        </p>
+                        \[
+                        {\Phi}^T {T}
+                        =
+                        \left( {\Phi}^T {\Phi} \right)\mathbf{W}
+                        \]
+                        \[
+                        \mathbf{W}_{ML}
+                        =
+                        \left( {\Phi}^T {\Phi} \right)^{-1}
+                        {\Phi}^T {T}
+                        \]
+                    </div>
+
+                    <div class="step">
+                        <strong>Part 2: Maximum Likelihood Solution for \(\boldsymbol{\Sigma}\)</strong>
+                        <p>
+                            Now we find the ML estimate for the covariance matrix. We maximize the log-likelihood with
+                            respect to \(\boldsymbol{\Sigma}\):
+                        </p>
+                        \[
+                        \ln p
+                        =
+                        -\frac{N}{2}\ln |\boldsymbol{\Sigma}|
+                        -\frac{1}{2}
+                        \sum_{n=1}^{N}
+                        \left(
+                        \mathbf{t}_n - \mathbf{y}_n
+                        \right)^{T}
+                        \boldsymbol{\Sigma}^{-1}
+                        \left(
+                        \mathbf{t}_n - \mathbf{y}_n
+                        \right)
+                        + \text{const}
+                        \]
+
+                        <strong>Trace Trick</strong>
+
+                        <p>
+                            Scalar values (single numbers) are their own trace ($\text{Tr}(x)=x$). Also, the trace has a
+                            "cyclic property":
+                            $\text{Tr}(\mathbf{A}\mathbf{B}\mathbf{C}) = \text{Tr}(\mathbf{B}\mathbf{C}\mathbf{A}) = \text{Tr}(\mathbf{C}\mathbf{A}\mathbf{B})$.
+                        </p>
+                        <p>
+                            We use this on the summation term in the likelihood function:
+                        </p>
+                        <p>
+                            $$ (\mathbf{t}_n - \mathbf{y}_n)^T \mathbf{\Sigma}^{-1} (\mathbf{t}_n - \mathbf{y}_n) $$
+                        </p>
+                        <p>
+                            $$ = \text{Tr}\left( (\mathbf{t}_n - \mathbf{y}_n)^T \mathbf{\Sigma}^{-1} (\mathbf{t}_n -
+                            \mathbf{y}_n) \right) $$
+                        </p>
+                        <p>
+                            Using the cyclic property to move the vector to the end:
+                        </p>
+                        <p>
+                            $$ = \text{Tr}\left( \mathbf{\Sigma}^{-1} (\mathbf{t}_n - \mathbf{y}_n)(\mathbf{t}_n -
+                            \mathbf{y}_n)^T \right) $$
+                        </p>
+                        <p>
+                            Now we can pull the summation inside the trace:
+                        </p>
+                        <p>
+                            $$ \sum_{n=1}^N (\dots) = \text{Tr}\left( \mathbf{\Sigma}^{-1} \sum_{n=1}^N (\mathbf{t}_n -
+                            \mathbf{y}_n)(\mathbf{t}_n - \mathbf{y}_n)^T \right) $$
+                        </p>
+                        <p>
+                            Let's call that big summation matrix $\mathbf{S}$:
+                        </p>
+                        <p>
+                            $$ \mathbf{S} = \sum_{n=1}^N (\mathbf{t}_n - \mathbf{y}_n)(\mathbf{t}_n - \mathbf{y}_n)^T $$
+                        </p>
+                        <p>
+                            So our Likelihood to maximize is simpler now:
+                        </p>
+                        <p>
+                            $$ \mathcal{L}(\mathbf{\Sigma}) = -\frac{N}{2} \ln|\mathbf{\Sigma}| - \frac{1}{2}
+                            \text{Tr}(\mathbf{\Sigma}^{-1} \mathbf{S}) $$
+                        </p>
+                        <br>
+                        <strong>The Derivative w.r.t $\mathbf{\Sigma}^{-1}$</strong>
+                        <p>
+                            It is often easier to take the derivative with respect to the inverse matrix
+                            $\mathbf{\Lambda} = \mathbf{\Sigma}^{-1}$.
+                            <br>
+                            (Note: $\ln|\mathbf{\Sigma}| = -\ln|\mathbf{\Sigma}^{-1}| = -\ln|\mathbf{\Lambda}|$)
+                        </p>
+                        <p>
+                            $$ \mathcal{L}(\mathbf{\Lambda}) = \frac{N}{2} \ln|\mathbf{\Lambda}| - \frac{1}{2}
+                            \text{Tr}(\mathbf{\Lambda}\mathbf{S}) $$
+                        </p>
+                        <p>
+                            Using standard matrix derivative identities:
+                        </p>
+                        <ul>
+                            <li>$\frac{\partial}{\partial \mathbf{X}} \ln|\mathbf{X}| = (\mathbf{X}^{-1})^T =
+                                \mathbf{X}^{-T}$</li>
+                            <li>$\frac{\partial}{\partial \mathbf{X}} \text{Tr}(\mathbf{X}\mathbf{A}) = \mathbf{A}^T$
+                            </li>
+                        </ul>
+                        <p>
+                            We differentiate $\mathcal{L}$ with respect to $\mathbf{\Lambda}$ and set to 0:
+                        </p>
+                        <p>
+                            $$ \frac{N}{2} \mathbf{\Lambda}^{-1} - \frac{1}{2} \mathbf{S} = \mathbf{0} $$
+                        </p>
+                        <p>
+                            Since $\mathbf{\Lambda} = \mathbf{\Sigma}^{-1}$, then $\mathbf{\Lambda}^{-1} =
+                            \mathbf{\Sigma}$.
+                        </p>
+                        <p>
+                            $$ \frac{N}{2} \mathbf{\Sigma} - \frac{1}{2} \mathbf{S} = \mathbf{0} $$
+                        </p>
+                        <p>
+                            $$ N\mathbf{\Sigma} = \mathbf{S} \implies \mathbf{\Sigma}_{ML} = \frac{1}{N} \mathbf{S} $$
+                        </p>
+                        <p>
+                            Substituting $\mathbf{S}$ back in, we get the final result:
+                        </p>
+                        <p>
+                            $$ \mathbf{\Sigma}_{ML} = \frac{1}{N} \sum_{n=1}^N (\mathbf{t}_n -
+                            \mathbf{W}_{ML}^T\phi(\mathbf{x}_n)) (\mathbf{t}_n - \mathbf{W}_{ML}^T\phi(\mathbf{x}_n))^T
+                            $$
+                        </p>
+                    </div>
+
+                    <div class="note">
+                        <strong>💡 Key Insights:</strong>
+                        <ul style="margin-left: 25px; margin-top: 10px;">
+                            <li><strong>Decoupling Property:</strong> Even though the outputs may be correlated
+                                (captured by \(\boldsymbol{\Sigma}\)), the optimal weights for each output can be
+                                computed independently using the standard least squares formula. This is computationally
+                                very convenient!</li>
+                            <li><strong>Two-Stage Process:</strong> First, solve \(K\) independent regression problems
+                                to get \(\mathbf{W}_{ML}\). Then, compute the covariance of the residuals to get
+                                \(\boldsymbol{\Sigma}_{ML}\).</li>
+                            <li><strong>Geometric Interpretation:</strong> The covariance matrix \(\boldsymbol{\Sigma}\)
+                                tells us the shape of the error ellipsoid in output space, but doesn't affect where the
+                                center of that ellipsoid should be positioned (which is determined by \(\mathbf{W}\)).
+                            </li>
+                            <li><strong>Connection to Univariate Case:</strong> When \(K=1\), this reduces exactly to
+                                the single-output regression we studied earlier, with \(\boldsymbol{\Sigma} = \sigma^2\)
+                                being a scalar variance.</li>
+                        </ul>
+                    </div>
                 </div>
             </div>
 
@@ -1201,6 +1506,7 @@
             <p style="margin-top: 10px;">Created with ❤️ by Aayaan</p>
         </footer>
     </div>
+    <script src="../js/canvas.js"></script>
 </body>
 
 </html>
