@@ -30,7 +30,6 @@
                 \[
                 y(x) = w_0 + \sum_{i=1}^D w_i\,\phi\!\left({x}\right)\quad (1.1)
                 \]
-                where 'N' is the total number of features and \(w_i\) is the weight associated to the \(i\)-th feature.
             </p>
             <p>These are the key notations we'll be using in the chapter:</p>
             <ul style="margin-left: 25px;">
@@ -705,6 +704,10 @@
                                     \mathbf{w}_{\text{MAP}}
                                     = \arg\max_{\mathbf{w}} \; p(\mathbf{w}\mid \mathbf{t})
                                     \)
+                                    \[
+                                    = \arg\max_{\mathbf{w}} \; {p(\mathbf{t}\mid
+                                    \mathbf{w})\,p(\mathbf{w})}
+                                    \]
                                 </td>
                             </tr>
                             <tr>
@@ -1250,7 +1253,7 @@
                     <p>
                         together with a training data set comprising input basis vectors
                         $\boldsymbol{\phi}(\mathbf{x}_n)$ and corresponding target vectors $\mathbf{t}_n$, with $n = 1,
-                        \dots, N$.
+                        \dots, M$.
                     </p>
                     <p>
                         Show that the maximum likelihood solution $\mathbf{W}_{ML}$ for the parameter matrix
@@ -1262,7 +1265,7 @@
                         Show that the maximum likelihood solution for $\mathbf{\Sigma}$ is given by
                     </p>
                     <p>
-                        $$\mathbf{\Sigma} = \frac{1}{N} \sum_{n=1}^N (\mathbf{t}_n -
+                        $$\mathbf{\Sigma} = \frac{1}{M} \sum_{n=1}^M (\mathbf{t}_n -
                         \mathbf{W}_{ML}^T\boldsymbol{\phi}(\mathbf{x}_n)) (\mathbf{t}_n -
                         \mathbf{W}_{ML}^T\boldsymbol{\phi}(\mathbf{x}_n))^T \tag{1.16}$$
                     </p>
@@ -1373,9 +1376,9 @@
                         \[
                         \ln p
                         =
-                        -\frac{N}{2}\ln |\boldsymbol{\Sigma}|
+                        -\frac{M}{2}\ln |\boldsymbol{\Sigma}|
                         -\frac{1}{2}
-                        \sum_{n=1}^{N}
+                        \sum_{n=1}^{M}
                         \left(
                         \mathbf{t}_n - \mathbf{y}_n
                         \right)^{T}
@@ -1391,7 +1394,8 @@
                         <p>
                             Scalar values (single numbers) are their own trace ($\text{Tr}(x)=x$). Also, the trace has a
                             "cyclic property":
-                            $\text{Tr}(\mathbf{A}\mathbf{B}\mathbf{C}) = \text{Tr}(\mathbf{B}\mathbf{C}\mathbf{A}) = \text{Tr}(\mathbf{C}\mathbf{A}\mathbf{B})$.
+                            $\text{Tr}(\mathbf{A}\mathbf{B}\mathbf{C}) = \text{Tr}(\mathbf{B}\mathbf{C}\mathbf{A}) =
+                            \text{Tr}(\mathbf{C}\mathbf{A}\mathbf{B})$.
                         </p>
                         <p>
                             We use this on the summation term in the likelihood function:
@@ -1414,20 +1418,20 @@
                             Now we can pull the summation inside the trace:
                         </p>
                         <p>
-                            $$ \sum_{n=1}^N (\dots) = \text{Tr}\left( \mathbf{\Sigma}^{-1} \sum_{n=1}^N (\mathbf{t}_n -
+                            $$ \sum_{n=1}^M (\dots) = \text{Tr}\left( \mathbf{\Sigma}^{-1} \sum_{n=1}^M (\mathbf{t}_n -
                             \mathbf{y}_n)(\mathbf{t}_n - \mathbf{y}_n)^T \right) $$
                         </p>
                         <p>
                             Let's call that big summation matrix $\mathbf{S}$:
                         </p>
                         <p>
-                            $$ \mathbf{S} = \sum_{n=1}^N (\mathbf{t}_n - \mathbf{y}_n)(\mathbf{t}_n - \mathbf{y}_n)^T $$
+                            $$ \mathbf{S} = \sum_{n=1}^M (\mathbf{t}_n - \mathbf{y}_n)(\mathbf{t}_n - \mathbf{y}_n)^T $$
                         </p>
                         <p>
                             So our Likelihood to maximize is simpler now:
                         </p>
                         <p>
-                            $$ \mathcal{L}(\mathbf{\Sigma}) = -\frac{N}{2} \ln|\mathbf{\Sigma}| - \frac{1}{2}
+                            $$ \mathcal{L}(\mathbf{\Sigma}) = -\frac{M}{2} \ln|\mathbf{\Sigma}| - \frac{1}{2}
                             \text{Tr}(\mathbf{\Sigma}^{-1} \mathbf{S}) $$
                         </p>
                         <br>
@@ -1439,7 +1443,7 @@
                             (Note: $\ln|\mathbf{\Sigma}| = -\ln|\mathbf{\Sigma}^{-1}| = -\ln|\mathbf{\Lambda}|$)
                         </p>
                         <p>
-                            $$ \mathcal{L}(\mathbf{\Lambda}) = \frac{N}{2} \ln|\mathbf{\Lambda}| - \frac{1}{2}
+                            $$ \mathcal{L}(\mathbf{\Lambda}) = \frac{M}{2} \ln|\mathbf{\Lambda}| - \frac{1}{2}
                             \text{Tr}(\mathbf{\Lambda}\mathbf{S}) $$
                         </p>
                         <p>
@@ -1455,23 +1459,23 @@
                             We differentiate $\mathcal{L}$ with respect to $\mathbf{\Lambda}$ and set to 0:
                         </p>
                         <p>
-                            $$ \frac{N}{2} \mathbf{\Lambda}^{-1} - \frac{1}{2} \mathbf{S} = \mathbf{0} $$
+                            $$ \frac{M}{2} \mathbf{\Lambda}^{-1} - \frac{1}{2} \mathbf{S} = \mathbf{0} $$
                         </p>
                         <p>
                             Since $\mathbf{\Lambda} = \mathbf{\Sigma}^{-1}$, then $\mathbf{\Lambda}^{-1} =
                             \mathbf{\Sigma}$.
                         </p>
                         <p>
-                            $$ \frac{N}{2} \mathbf{\Sigma} - \frac{1}{2} \mathbf{S} = \mathbf{0} $$
+                            $$ \frac{M}{2} \mathbf{\Sigma} - \frac{1}{2} \mathbf{S} = \mathbf{0} $$
                         </p>
                         <p>
-                            $$ N\mathbf{\Sigma} = \mathbf{S} \implies \mathbf{\Sigma}_{ML} = \frac{1}{N} \mathbf{S} $$
+                            $$ M\mathbf{\Sigma} = \mathbf{S} \implies \mathbf{\Sigma}_{ML} = \frac{1}{M} \mathbf{S} $$
                         </p>
                         <p>
                             Substituting $\mathbf{S}$ back in, we get the final result:
                         </p>
                         <p>
-                            $$ \mathbf{\Sigma}_{ML} = \frac{1}{N} \sum_{n=1}^N (\mathbf{t}_n -
+                            $$ \mathbf{\Sigma}_{ML} = \frac{1}{M} \sum_{n=1}^M (\mathbf{t}_n -
                             \mathbf{W}_{ML}^T\phi(\mathbf{x}_n)) (\mathbf{t}_n - \mathbf{W}_{ML}^T\phi(\mathbf{x}_n))^T
                             $$
                         </p>
@@ -1499,14 +1503,242 @@
                 </div>
             </div>
 
-        </div>
+            <!-- 8 -->
+            <div class="problem">
+                <div class="context">
+                    <p>In all the problems we've tackled so far, we assumed that we had access to the <strong>entire
+                            dataset at once</strong>. We computed the posterior distribution (MAP) in a single batch by
+                        processing all \(M\) data points together.
+                    </p>
 
-        <footer>
-            <p><a href="../index.html">Home</a> | <a href="chapter2.html">Next Chapter →</a></p>
-            <p style="margin-top: 10px;">Created with ❤️ by Aayaan</p>
-        </footer>
-    </div>
-    <script src="../js/canvas.js"></script>
+                    <p>Suppose we've already built a model using data from apartments F1 through F6 (our original 6 data
+                        points). Our real estate contact just called—<strong>a new apartment F7 has been sold</strong>,
+                        and we now have its size and price information.</p>
+
+                    <p>We have two options:</p>
+
+                    <h4>1. Batch Retraining</h4>
+                    <p>Recompute the entire model from scratch using all \(M+1\) samples (F1 through F7). This means:
+                    </p>
+                    <ol>
+                        <li>Reconstructing the full \((M+1) \times D\) design matrix \(\mathbf{\Phi}_{M+1}\)</li>
+                        <li>Inverting a \(D \times D\) matrix: \((\mathbf{\Phi}_{M+1}^T \mathbf{\Phi}_{M+1})^{-1}\)</li>
+                        <li>Repeating all matrix multiplications</li>
+                    </ol>
+                    <p>This is <strong>computationally expensive</strong> and wasteful—we're throwing away all the work
+                        we already did!</p>
+
+                    <h4>2. Sequential Update</h4>
+                    <p>Use <strong>Sequential Bayesian Learning</strong> to update our existing model incrementally:</p>
+                    <ol>
+                        <li><strong>Use our current posterior as the new prior</strong> — our existing knowledge about
+                            apartment prices becomes our starting point</li>
+                        <li><strong>Calculate the likelihood</strong> of the new observation \((x_{M+1}, t_{M+1})\)</li>
+                        <li><strong>Update the posterior</strong> using Bayes' rule</li>
+                    </ol>
+                    <p>This requires <strong>only the new data point</strong>—no need to store or reprocess the old
+                        data!</p>
+
+                    <p>The beautiful property of Bayesian inference is that:</p>
+
+                    <blockquote>
+                        <strong>Today's posterior becomes tomorrow's prior.</strong>
+                    </blockquote>
+
+                    <p>After observing \(M\) apartment sales, we have a posterior distribution \(p(\mathbf{w} \mid
+                        \mathbf{t}_M, \mathbf{X}_M)\). When apartment F7's data \((x_{M+1}, t_{M+1})\) arrives:</p>
+
+                    \[\underbrace{p(\mathbf{w} \mid \text{F1,...,F6})}_{\text{Previous Posterior}}
+                    \xrightarrow{\text{New data: F7}} \underbrace{p(\mathbf{w} \mid \text{F1,...,F7})}_{\text{Updated
+                    Posterior}}\]
+
+                    <p>This incremental update is mathematically equivalent to batch processing all \(M+1\) points at
+                        once (we'll try to prove this in the coding section), but computationally much more efficient.
+                    </p>
+
+                </div>
+
+                <div class="problem-statement">
+                    <h4>Question</h4>
+
+                    <p>Consider the linear basis function model from (1.1), where we have already observed \(M\)
+                        data points. The posterior distribution over the weight vector \(\mathbf{w}\)
+                        is given by:</p>
+
+                    \[
+                    p(\mathbf{w} \mid \mathbf{t}_M, \mathbf{X}_M, \sigma_w^2, \sigma_t^2)
+                    =
+                    \mathcal{N}(\mathbf{w} \mid \boldsymbol{\mu}_M, \boldsymbol{\Sigma}_M)
+                    \tag{1.17}
+                    \]
+                    <p>where \(\boldsymbol{\mu}_M\) is the posterior mean / MAP estimate and \(\boldsymbol{\Sigma}_M\)
+                        is the covariance matrix of weights distribution.</p>
+
+                    <p><strong>This posterior can be regarded as the prior for the next observation.</strong></p>
+
+                    <p>By considering this additional data point \((x_{M+1},
+                        t_{M+1})\), and <strong>completing the square in the
+                            exponential</strong>, show that:</p>
+
+                    <ol>
+                        <li>The resulting posterior distribution is <strong>still Gaussian</strong> (i.e., maintains the
+                            form of equation 1.17)</li>
+                        <li>The updated posterior has:
+                            <ul>
+                                <li>Covariance matrix: \(\boldsymbol{\Sigma}_M\) <strong>replaced by</strong>
+                                    \(\boldsymbol{\Sigma}_{M+1}\)</li>
+                                <li>Mean vector: \(\boldsymbol{\mu}_M\) <strong>replaced by</strong>
+                                    \(\boldsymbol{\mu}_{M+1}\)</li>
+                            </ul>
+                        </li>
+                    </ol>
+
+                    <p>In other words, prove that:</p>
+
+                    \[p(\mathbf{w} \mid \mathbf{t}_{M+1}, \mathbf{X}_{M+1}, \boldsymbol{\Sigma}_{M+1}, \sigma_t) =
+                    \mathcal{N}(\mathbf{w} \mid \boldsymbol{\mu}_{M+1}, \boldsymbol{\Sigma}_{M+1})\tag{1.18}\]
+
+                    <p>and derive explicit update formulas for \(\boldsymbol{\Sigma}_{M+1}\) and
+                        \(\boldsymbol{\mu}_{M+1}\) in terms of \(\boldsymbol{\Sigma}_M\), \(\boldsymbol{\mu}_M\).</p>
+                </div>
+
+                <div class="solution">
+                    <h4>Solution:</h4>
+
+                    <div class="step">
+                        <p>We have a posterior distribution after observing \(M\) data points. Let's denote
+                            \(\boldsymbol{\phi}_{M+1} = \boldsymbol{\phi}(x_{M+1})\) for brevity.</p>
+
+                        <p><strong>Prior (our current posterior after M observations):</strong></p>
+                        \[
+                        p(\mathbf{w} \mid \mathbf{t}_M, \mathbf{X}_M) = \mathcal{N}(\mathbf{w} \mid \boldsymbol{\mu}_M,
+                        \boldsymbol{\Sigma}_M) \propto \exp\left(-\frac{1}{2}(\mathbf{w} - \boldsymbol{\mu}_M)^T
+                        \boldsymbol{\Sigma}_M^{-1} (\mathbf{w} - \boldsymbol{\mu}_M)\right)
+                        \]
+
+                        <p><strong>Likelihood (new observation):</strong></p>
+                        \[
+                        p(t_{M+1} \mid \mathbf{w}, x_{M+1}) = \mathcal{N}(t_{M+1} \mid \mathbf{w}^T
+                        \boldsymbol{\phi}_{M+1}, \sigma_t^2) \propto \exp\left(-\frac{1}{2\sigma_t^2}(t_{M+1} -
+                        \mathbf{w}^T \boldsymbol{\phi}_{M+1})^2\right)
+                        \]
+
+                        <p><strong>Posterior (by Bayes' rule):</strong></p>
+                        \[
+                        p(\mathbf{w} \mid \mathbf{t}_{M+1}, \mathbf{X}_{M+1}) \propto p(t_{M+1} \mid \mathbf{w},
+                        x_{M+1}) \cdot p(\mathbf{w} \mid \mathbf{t}_M, \mathbf{X}_M)
+                        \]
+                    </div>
+
+                    <div class="step">
+                        <strong>Step 1: Combine the Exponents</strong>
+                        <p>Multiplying the likelihood and prior means adding their exponents:</p>
+                        \[
+                        \begin{aligned}
+                        \log p(\mathbf{w} \mid \mathbf{t}_{M+1}, \mathbf{X}_{M+1}) &= -\frac{1}{2\sigma_t^2}(t_{M+1} -
+                        \mathbf{w}^T \boldsymbol{\phi}_{M+1})^2 \\
+                        &\quad - \frac{1}{2}(\mathbf{w} - \boldsymbol{\mu}_M)^T \boldsymbol{\Sigma}_M^{-1} (\mathbf{w} -
+                        \boldsymbol{\mu}_M) + \text{const}
+                        \end{aligned}
+                        \]
+                        <p>We need to show this is still a Gaussian in \(\mathbf{w}\) by completing the square.</p>
+                    </div>
+
+                    <div class="step">
+                        <strong>Step 2: Expand the Likelihood Term</strong>
+                        <p>Let's expand \((t_{M+1} - \mathbf{w}^T \boldsymbol{\phi}_{M+1})^2\):</p>
+                        \[
+                        -\frac{1}{2\sigma_t^2}(t_{M+1} - \mathbf{w}^T \boldsymbol{\phi}_{M+1})^2 =
+                        -\frac{1}{2\sigma_t^2}\mathbf{w}^T (\boldsymbol{\phi}_{M+1}\boldsymbol{\phi}_{M+1}^T) \mathbf{w}
+                        + \frac{t_{M+1}}{\sigma_t^2}\mathbf{w}^T\boldsymbol{\phi}_{M+1} - \frac{t_{M+1}^2}{2\sigma_t^2}
+                        \]
+                    </div>
+
+                    <div class="step">
+                        <strong>Step 3: Expand the Prior Term</strong>
+
+                        \[
+                        -\frac{1}{2}(\mathbf{w} - \boldsymbol{\mu}_M)^T \boldsymbol{\Sigma}_M^{-1} (\mathbf{w} -
+                        \boldsymbol{\mu}_M) = -\frac{1}{2}\mathbf{w}^T \boldsymbol{\Sigma}_M^{-1} \mathbf{w} +
+                        \mathbf{w}^T \boldsymbol{\Sigma}_M^{-1} \boldsymbol{\mu}_M - \frac{1}{2}\boldsymbol{\mu}_M^T
+                        \boldsymbol{\Sigma}_M^{-1} \boldsymbol{\mu}_M
+                        \]
+                    </div>
+
+                    <div class="step">
+                        <strong>Step 4: Collect All Terms</strong>
+                        <p>Combining Steps 2 and 3, the log posterior becomes:</p>
+                        \[
+                        \begin{aligned}
+                        \log p(\mathbf{w} \mid \mathbf{t}_{M+1}, \mathbf{X}_{M+1}) &= -\frac{1}{2}\mathbf{w}^T
+                        \left(\boldsymbol{\Sigma}_M^{-1} +
+                        \frac{1}{\sigma_t^2}\boldsymbol{\phi}_{M+1}\boldsymbol{\phi}_{M+1}^T\right) \mathbf{w} \\
+                        &\quad + \mathbf{w}^T \left(\boldsymbol{\Sigma}_M^{-1}\boldsymbol{\mu}_M +
+                        \frac{t_{M+1}}{\sigma_t^2}\boldsymbol{\phi}_{M+1}\right) + \text{const}
+                        \end{aligned}
+                        \]
+                        <p>This is a <strong>quadratic form in \(\mathbf{w}\)</strong>, which means it's a Gaussian
+                            distribution!</p>
+                    </div>
+
+                    <div class="step">
+                        <strong>Step 5: Complete the Square</strong>
+                        <p>A general Gaussian \(\mathcal{N}(\mathbf{w} \mid \boldsymbol{\mu}, \boldsymbol{\Sigma})\) has
+                            log-density:</p>
+                        \[
+                        \log p(\mathbf{w}) = -\frac{1}{2}\mathbf{w}^T \boldsymbol{\Sigma}^{-1} \mathbf{w} + \mathbf{w}^T
+                        \boldsymbol{\Sigma}^{-1}\boldsymbol{\mu} + \text{const}
+                        \]
+                        <p>Comparing with our expression from Step 4, we can read off the parameters by <strong>matching
+                                coefficients</strong>:</p>
+
+                        <p><strong>From the quadratic term</strong> (coefficient of \(\mathbf{w}^T \mathbf{w}\)):</p>
+                        \[
+                        \boxed{\boldsymbol{\Sigma}_{M+1}^{-1} = \boldsymbol{\Sigma}_M^{-1} +
+                        \frac{1}{\sigma_t^2}\boldsymbol{\phi}_{M+1}\boldsymbol{\phi}_{M+1}^T}
+                        \]
+
+                        <p><strong>From the linear term</strong> (coefficient of \(\mathbf{w}\)):</p>
+                        \[
+                        \boldsymbol{\Sigma}_{M+1}^{-1}\boldsymbol{\mu}_{M+1} =
+                        \boldsymbol{\Sigma}_M^{-1}\boldsymbol{\mu}_M + \frac{t_{M+1}}{\sigma_t^2}\boldsymbol{\phi}_{M+1}
+                        \]
+                        <p>Multiplying both sides by \(\boldsymbol{\Sigma}_{M+1}\):</p>
+                        \[
+                        \boxed{\boldsymbol{\mu}_{M+1} =
+                        \boldsymbol{\Sigma}_{M+1}\left(\boldsymbol{\Sigma}_M^{-1}\boldsymbol{\mu}_M +
+                        \frac{t_{M+1}}{\sigma_t^2}\boldsymbol{\phi}_{M+1}\right)}
+                        \]
+                    </div>
+
+                    <div class="note">
+                        <strong>💡 Computational Advantage:</strong> This sequential update requires only \(O(D^2)\)
+                        operations (using Sherman-Morrison formula for matrix inversion), compared to \(O(MD^2 + D^3)\)
+                        for batch retraining. We don't need to store or reprocess the old data—the posterior
+                        \(p(\mathbf{w} \mid \mathbf{t}_M, \mathbf{X}_M)\) is a <strong>sufficient statistic</strong>
+                        that encodes all information from the past.
+                    </div>
+
+                    <div style="margin:20px; padding:10px; border:1px solid #ddd; border-radius:6px;">
+                        <h3 style="margin-top:0;">Bayesian Learning Notebook</h3>
+                        <p>
+                            Explore and run the Bayesian Learning code interactively in Google Colab.<br>
+                            <a href="https://colab.research.google.com/drive/1fBqnkW1bbh6kbtZnLN-pZ2cjz3F7BBxP?usp=sharing"
+                                target="_blank" style="font-weight:bold; color:#0066cc; text-decoration:none;">
+                                Bayesian Learning Notebook in Colab
+                            </a>
+                        </p>
+
+                    </div>
+                </div>
+            </div>
+
+            <footer>
+                <p><a href="../index.html">Home</a> | <a href="chapter2.html">Next Chapter →</a></p>
+                <p style="margin-top: 10px;">Created with ❤️ by Aayaan</p>
+            </footer>
+        </div>
+        <script src="../js/canvas.js"></script>
 </body>
 
 </html>

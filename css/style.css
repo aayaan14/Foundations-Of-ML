@@ -337,3 +337,17 @@ button:hover {
     height: 20px;
     border-radius: 3px;
 }
+
+blockquote {
+    background-color: #f8f9fa;
+    border-left: 4px solid #007bff;
+    padding: 15px 20px;
+    margin: 20px 0;
+    font-style: italic;
+    color: #495057;
+}
+
+blockquote strong {
+    font-style: normal;
+    color: #212529;
+}
