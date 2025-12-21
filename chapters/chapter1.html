@@ -1695,7 +1695,7 @@
                         <p><strong>From the quadratic term</strong> (coefficient of \(\mathbf{w}^T \mathbf{w}\)):</p>
                         \[
                         \boxed{\boldsymbol{\Sigma}_{M+1}^{-1} = \boldsymbol{\Sigma}_M^{-1} +
-                        \frac{1}{\sigma_t^2}\boldsymbol{\phi}_{M+1}\boldsymbol{\phi}_{M+1}^T}
+                        \frac{1}{\sigma_t^2}\boldsymbol{\phi}_{M+1}\boldsymbol{\phi}_{M+1}^T} \tag{1.19}
                         \]
 
                         <p><strong>From the linear term</strong> (coefficient of \(\mathbf{w}\)):</p>
@@ -1707,7 +1707,7 @@
                         \[
                         \boxed{\boldsymbol{\mu}_{M+1} =
                         \boldsymbol{\Sigma}_{M+1}\left(\boldsymbol{\Sigma}_M^{-1}\boldsymbol{\mu}_M +
-                        \frac{t_{M+1}}{\sigma_t^2}\boldsymbol{\phi}_{M+1}\right)}
+                        \frac{t_{M+1}}{\sigma_t^2}\boldsymbol{\phi}_{M+1}\right)} \tag{1.20}
                         \]
                     </div>
 
@@ -1729,6 +1729,408 @@
                             </a>
                         </p>
 
+                    </div>
+                </div>
+            </div>
+
+            <!-- 9 -->
+            <div class="problem">
+                <div class="context">
+                    <p>Up until now, we have focused on finding the "best" weights <strong>w</strong>. But in the real
+                        world, a buyer doesn't care about your weight vector (<strong>w</strong>); they care about the
+                        price of the apartment
+                        they are looking at (\(t_*\)).</p>
+
+                    <p>If we only provide a single price (either by MLE or MAP), we are hiding the most important part
+                        of
+                        the story: <strong>How much do we trust our own prediction (variance)?</strong></p>
+
+                    <p>In a Bayesian world, we don't just predict a number. We predict a <strong>probability
+                            distribution</strong>. This distribution tells us:</p>
+
+                    <ol style="margin-left: 25px;">
+                        <li><strong>The Most Likely Price:</strong> The center of our prediction (\(\boldsymbol{\mu}\))
+                        </li>
+                        <li><strong>The Risk:</strong> The spread or "uncertainty" around that price
+                            (\(\boldsymbol{\sigma}^2\))</li>
+                    </ol>
+
+                    <p>The <strong>predictive distribution</strong> answers the question: <em>"What is the probability
+                            of different prices for a new apartment at size</em> \(\mathbf{x}_*\)<em>(new input
+                            vector)?"</em></p>
+
+                    \[
+                    p(t_* \mid \mathbf{x}_*, \mathbf{t}, \mathbf{X}) = \int p(t_* \mid \mathbf{x}_*, \mathbf{w}) \,
+                    p(\mathbf{w} \mid \mathbf{t}, \mathbf{X}) \, d\mathbf{w} \tag{1.21}
+                    \]
+
+                    <p>where \(t_*\) is the target value for the new input \(\mathbf{x}_*\), \(\mathbf{t}\) is the
+                        training target vector and \(\mathbf{X}\) is the training input matrix.</p>
+
+                    <p>The terms -
+                    <ul>
+                        <li>
+                            \( p(t_* \mid \mathbf{x}_*, \mathbf{w}) \) — the likelihood of the target value
+                            for a new input given the weights - given by
+                            \( \mathcal{N}(t_* \mid \mathbf{w}^\top \boldsymbol{\phi}(\mathbf{x}_*), \sigma_{t}^2) \)
+                        </li>
+
+                        <li>
+                            \( p(\mathbf{w} \mid \mathbf{t}, \mathbf{X}) \) — the posterior distribution over weights —
+                            \( \mathcal{N}\!\left(
+                            \mathbf{w} \;\middle|\;
+                            \boldsymbol{\mu}_M,
+                            \boldsymbol{\Sigma}_M
+                            \right) \),
+                            where \( \boldsymbol{\mu}_M \) is the MAP estimate (for a Gaussian posterior) and
+                            \( \boldsymbol{\Sigma}_M \) is the posterior covariance of the weights.
+                        </li>
+
+                    </ul>
+                    <p>Now we'll prove that the predictive distribution is also a Gaussian in the upcoming section.</p>
+                </div>
+
+                <div class="problem-statement">
+                    <p>Show that the predictive distribution \( p(t_* \mid \mathbf{x}_*, \mathbf{t}, \mathbf{X}) \) is a
+                        Gaussian distribution by evaluating (1.21).</p>
+
+                    <p>
+                        Assume:
+                    <ul>
+                        <li> \( p(t_* \mid \mathbf{x}_*, \mathbf{w}) = \mathcal{N}(t_* \mid \mathbf{w}^\top
+                            \boldsymbol{\phi}(\mathbf{x}_*), \sigma_t^2) \)</li>
+                        <li> \( p(\mathbf{w} \mid \mathbf{t}, \mathbf{X}) = \mathcal{N}\!\left(
+                            \mathbf{w} \;\middle|\;
+                            \boldsymbol{\mu}_M,
+                            \boldsymbol{\Sigma}_M
+                            \right) \)</li>
+                    </ul>
+                    </p>
+                    <p>Verify that the result takes the form: </p>
+                    \[p(t_* \mid \mathbf{x}_*, \mathbf{t}, \mathbf{X}) = \mathcal{N}(t_* \mid \mu_*, \sigma_*^2)
+                    \tag{1.22}\]
+                    <p>where the predictive mean \(\mu_*\) and variance \(\sigma_*^2\) are given by:</p>
+                    \[\mu_* = \boldsymbol{\mu}_M^T \boldsymbol{\phi}(\mathbf{x}_*) \tag{1.23}\]
+                    \[\sigma_*^2 = \sigma_t^2 + \boldsymbol{\phi}(\mathbf{x}_*)^T \boldsymbol{\Sigma}_M
+                    \boldsymbol{\phi}(\mathbf{x}_*) \tag{1.24}\]
+                </div>
+
+                <div class="solution">
+                    <h4>Solution: Showing the Predictive Distribution is Gaussian</h4>
+
+                    <div class="step">
+                        <strong>Setup: What We Need to Show</strong>
+                        <p>
+                            We wish to compute the predictive distribution for a new input \( x_* \) by marginalizing
+                            over the uncertain weight vector \( \mathbf{w} \):
+                        </p>
+                        \[
+                        p(t_* \mid x_*, \mathbf{t}, X)
+                        =
+                        \int p(t_* \mid x_*, \mathbf{w}) \, p(\mathbf{w} \mid \mathbf{t}, X) \, d\mathbf{w}
+                        \]
+                        <p>We are given:</p>
+                        \[
+                        p(t_* \mid x_*, \mathbf{w})
+                        =
+                        \mathcal{N}(t_* \mid \mathbf{w}^T \phi(x_*), \sigma_t^2)
+                        \]
+                        \[
+                        p(\mathbf{w} \mid \mathbf{t}, X)
+                        =
+                        \mathcal{N}(\mathbf{w} \mid \boldsymbol{\mu}_M, \boldsymbol{\Sigma}_M)
+                        \]
+                    </div>
+
+                    <div class="step">
+                        <strong>Step 1: Express the Integral</strong>
+                        <p>Substituting the Gaussian forms into the predictive distribution:</p>
+                        \[
+                        p(t_* \mid x_*, \mathbf{t}, X)
+                        =
+                        \int
+                        \mathcal{N}(t_* \mid \mathbf{w}^T \phi(x_*), \sigma_t^2)
+                        \,
+                        \mathcal{N}(\mathbf{w} \mid \boldsymbol{\mu}_M, \boldsymbol{\Sigma}_M)
+                        \, d\mathbf{w}
+                        \]
+
+                        <p>Writing the Gaussian densities explicitly:</p>
+                        \[
+                        p(t_* \mid x_*, \mathbf{t}, X)
+                        =
+                        \int
+                        \frac{1}{\sqrt{2\pi\sigma_t^2}}
+                        \exp\!\left(
+                        -\frac{(t_* - \mathbf{w}^T \phi(x_*))^2}{2\sigma_t^2}
+                        \right)
+                        \]
+                        \[
+                        \times
+                        \frac{1}{(2\pi)^{D/2}|\boldsymbol{\Sigma}_M|^{1/2}}
+                        \exp\!\left(
+                        -\frac{1}{2}
+                        (\mathbf{w} - \boldsymbol{\mu}_M)^T
+                        \boldsymbol{\Sigma}_M^{-1}
+                        (\mathbf{w} - \boldsymbol{\mu}_M)
+                        \right)
+                        d\mathbf{w}
+                        \]
+                    </div>
+
+                    <div class="step">
+                        <strong>Step 2: Combine the Exponents</strong>
+                        <p>
+                            Since both terms are exponential, we may combine the exponents.
+                            Let \( \boldsymbol{\phi}_* = \phi(x_*) \). The total exponent becomes:
+                        </p>
+                        \[
+                        -\frac{1}{2}
+                        \left[
+                        \frac{(t_* - \mathbf{w}^T \boldsymbol{\phi}_*)^2}{\sigma_t^2}
+                        +
+                        (\mathbf{w} - \boldsymbol{\mu}_M)^T
+                        \boldsymbol{\Sigma}_M^{-1}
+                        (\mathbf{w} - \boldsymbol{\mu}_M)
+                        \right]
+                        \]
+
+                        <p>Expanding the first term:</p>
+                        \[
+                        \frac{(t_* - \mathbf{w}^T \boldsymbol{\phi}_*)^2}{\sigma_t^2}
+                        =
+                        \frac{t_*^2}{\sigma_t^2}
+                        -
+                        \frac{2t_*}{\sigma_t^2} \mathbf{w}^T \boldsymbol{\phi}_*
+                        +
+                        \frac{1}{\sigma_t^2}
+                        \mathbf{w}^T \boldsymbol{\phi}_* \boldsymbol{\phi}_*^T \mathbf{w}
+                        \]
+
+                        <p>Expanding the second term:</p>
+                        \[
+                        (\mathbf{w} - \boldsymbol{\mu}_M)^T
+                        \boldsymbol{\Sigma}_M^{-1}
+                        (\mathbf{w} - \boldsymbol{\mu}_M)
+                        =
+                        \mathbf{w}^T \boldsymbol{\Sigma}_M^{-1} \mathbf{w}
+                        -
+                        2\mathbf{w}^T \boldsymbol{\Sigma}_M^{-1} \boldsymbol{\mu}_M
+                        +
+                        \boldsymbol{\mu}_M^T \boldsymbol{\Sigma}_M^{-1} \boldsymbol{\mu}_M
+                        \]
+                    </div>
+
+                    <div class="step">
+                        <strong>Step 3: Complete the Square in \( \mathbf{w} \)</strong>
+                        <p>Collecting all terms involving \( \mathbf{w} \), the quadratic term is:</p>
+                        \[
+                        \mathbf{w}^T
+                        \left(
+                        \boldsymbol{\Sigma}_M^{-1}
+                        +
+                        \frac{\boldsymbol{\phi}_* \boldsymbol{\phi}_*^T}{\sigma_t^2}
+                        \right)
+                        \mathbf{w}
+                        \]
+
+                        <p>The linear term is:</p>
+                        \[
+                        -2\mathbf{w}^T
+                        \left(
+                        \boldsymbol{\Sigma}_M^{-1}\boldsymbol{\mu}_M
+                        +
+                        \frac{t_* \boldsymbol{\phi}_*}{\sigma_t^2}
+                        \right)
+                        \]
+
+                        <p>
+                            Completing the square, the quadratic form can be written as
+                            \( (\mathbf{w} - \boldsymbol{\mu}_{new})^T
+                            \boldsymbol{\Sigma}_{new}^{-1}
+                            (\mathbf{w} - \boldsymbol{\mu}_{new}) \),
+                            where:
+                        </p>
+                        \[
+                        \boldsymbol{\Sigma}_{new}^{-1}
+                        =
+                        \boldsymbol{\Sigma}_M^{-1}
+                        +
+                        \frac{\boldsymbol{\phi}_* \boldsymbol{\phi}_*^T}{\sigma_t^2}
+                        \]
+                        \[
+                        \boldsymbol{\mu}_{new}
+                        =
+                        \boldsymbol{\Sigma}_{new}
+                        \left(
+                        \boldsymbol{\Sigma}_M^{-1}\boldsymbol{\mu}_M
+                        +
+                        \frac{t_* \boldsymbol{\phi}_*}{\sigma_t^2}
+                        \right)
+                        \]
+                    </div>
+
+                    <div class="step">
+                        <strong>Step 4: Integrate Out \( \mathbf{w} \)</strong>
+                        <p>
+                            The exponent now separates into a term depending on \( \mathbf{w} \)
+                            and a term depending only on \( t_* \).
+                            The integral over \( \mathbf{w} \) is therefore a standard Gaussian integral:
+                        </p>
+                        \[
+                        \int
+                        \exp\!\left(
+                        -\frac{1}{2}
+                        (\mathbf{w} - \boldsymbol{\mu}_{new})^T
+                        \boldsymbol{\Sigma}_{new}^{-1}
+                        (\mathbf{w} - \boldsymbol{\mu}_{new})
+                        \right)
+                        d\mathbf{w}
+                        =
+                        (2\pi)^{D/2}
+                        |\boldsymbol{\Sigma}_{new}|^{1/2}
+                        \]
+
+                        <p>
+                            This factor is independent of \( t_* \). The remaining terms in the exponent,
+                            which depend only on \( t_* \), form a quadratic function of \( t_* \).
+                            The exponential of this quadratic therefore defines a Gaussian distribution
+                            in \( t_* \).
+                        </p>
+                    </div>
+
+                    <div class="step">
+                        <strong>Step 5: Show the Remaining Exponent is Quadratic in \(t_*\)</strong>
+
+                        <p>
+                            After integrating out \(\mathbf{w}\), the predictive distribution has the form:
+                        </p>
+
+                        \[
+                        p(t_* \mid \mathbf{x}_*, \mathbf{t}, \mathbf{X})
+                        \propto
+                        \exp\!\left(
+                        -\frac{1}{2} C(t_*)
+                        \right)
+                        \]
+
+                        <p>
+                            where \(C(t_*)\) contains all terms independent of \(\mathbf{w}\):
+                        </p>
+
+                        \[
+                        C(t_*)
+                        =
+                        \frac{t_*^2}{\sigma_t^2}
+                        +
+                        \boldsymbol{\mu}_M^T \boldsymbol{\Sigma}_M^{-1} \boldsymbol{\mu}_M
+                        -
+                        \boldsymbol{\mu}_{new}^T
+                        \boldsymbol{\Sigma}_{new}^{-1}
+                        \boldsymbol{\mu}_{new}
+                        \]
+
+                        <p>
+                            Using
+                            \(
+                            \boldsymbol{\mu}_{new}
+                            =
+                            \boldsymbol{\Sigma}_{new}
+                            \left(
+                            \boldsymbol{\Sigma}_M^{-1}\boldsymbol{\mu}_M
+                            +
+                            \frac{t_*\boldsymbol{\phi}_*}{\sigma_t^2}
+                            \right)
+                            \),
+                            the last term expands into constant, linear, and quadratic terms in \(t_*\).
+                            Hence \(C(t_*)\) is a quadratic function of \(t_*\):
+                        </p>
+
+                        \[
+                        C(t_*) = a t_*^2 - 2 b t_* + c
+                        \]
+
+                        <p>
+                            The exponential of a quadratic function defines a Gaussian distribution.
+                            Therefore, the predictive distribution is Gaussian in \(t_*\).
+                        </p>
+                    </div>
+
+                    <div class="step">
+                        <strong>Step 6: Identify the Predictive Mean and Variance</strong>
+
+                        <p>
+                            Rewriting the quadratic form in canonical Gaussian form:
+                        </p>
+
+                        \[
+                        C(t_*)
+                        =
+                        \frac{(t_* - \mu_*)^2}{\sigma_*^2}
+                        + \text{constant}
+                        \]
+
+                        <p>
+                            we can directly read off the predictive mean and variance:
+                        </p>
+
+                        \[
+                        \boxed{
+                        \mu_* = \boldsymbol{\mu}_M^T \boldsymbol{\phi}(\mathbf{x}_*)
+                        }
+                        \quad \text{(1.23)}
+                        \]
+
+                        \[
+                        \boxed{
+                        \sigma_*^2
+                        =
+                        \sigma_t^2
+                        +
+                        \boldsymbol{\phi}(\mathbf{x}_*)^T
+                        \boldsymbol{\Sigma}_M
+                        \boldsymbol{\phi}(\mathbf{x}_*)
+                        }
+                        \quad \text{(1.24)}
+                        \]
+                    </div>
+
+                    <div class="step">
+                        <strong>Step 7: Final Result</strong>
+
+                        <p>
+                            Since the remaining exponent is quadratic in \(t_*\),
+                            the predictive distribution is Gaussian:
+                        </p>
+
+                        \[
+                        \boxed{
+                        p(t_* \mid \mathbf{x}_*, \mathbf{t}, \mathbf{X})
+                        =
+                        \mathcal{N}(t_* \mid \mu_*, \sigma_*^2)
+                        }
+                        \]
+
+                        <p>
+                            where the predictive mean and variance are given by
+                            (1.23) and (1.24).
+                            This completes the proof.
+                        </p>
+                    </div>
+
+                    <div class="note">
+                        <strong>💡 Key Insight:</strong> The predictive variance has two components: (1) the irreducible
+                        noise \(\sigma_t^2\) inherent in the data, and (2) the model uncertainty \(\phi(x_*)^T
+                        \boldsymbol{\Sigma}_M \phi(x_*)\) arising from uncertainty in the weight vector. As we collect
+                        more data, \(\boldsymbol{\Sigma}_M\) shrinks and model uncertainty decreases, but the noise
+                        variance remains.
+                    </div>
+
+                    <div class="note">
+                        <strong>🔑 Mathematical Technique:</strong> This derivation uses the fundamental property that
+                        the marginal distribution of a Gaussian (integrating out some variables) is also Gaussian. By
+                        completing the square in \(\mathbf{w}\), we can perform the Gaussian integral analytically,
+                        leaving us with a Gaussian distribution over \(t_*\).
                     </div>
                 </div>
             </div>
