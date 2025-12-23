@@ -1867,7 +1867,7 @@
                         \]
                         \[
                         \times
-                        \frac{1}{(2\pi)^{D/2}|\boldsymbol{\Sigma}_M|^{1/2}}
+                        \frac{1}{(2\pi)^{K/2}|\boldsymbol{\Sigma}_M|^{1/2}}
                         \exp\!\left(
                         -\frac{1}{2}
                         (\mathbf{w} - \boldsymbol{\mu}_M)^T
@@ -1973,29 +1973,38 @@
                     <div class="step">
                         <strong>Step 4: Integrate Out \( \mathbf{w} \)</strong>
                         <p>
-                            The exponent now separates into a term depending on \( \mathbf{w} \)
-                            and a term depending only on \( t_* \).
-                            The integral over \( \mathbf{w} \) is therefore a standard Gaussian integral:
+                            By completing the square for \(\mathbf{w}\) in the combined exponent, we can split the total
+                            exponent into a quadratic form involving \(\mathbf{w}\) and a "remainder" term \(C(t_*)\)
+                            that depends only on \(t_*\). The integral becomes:
                         </p>
                         \[
-                        \int
-                        \exp\!\left(
-                        -\frac{1}{2}
-                        (\mathbf{w} - \boldsymbol{\mu}_{new})^T
-                        \boldsymbol{\Sigma}_{new}^{-1}
-                        (\mathbf{w} - \boldsymbol{\mu}_{new})
-                        \right)
+                        \int \exp\!\left( -\frac{1}{2} \left[ (\mathbf{w} - \boldsymbol{\mu}_{new})^T
+                        \boldsymbol{\Sigma}_{new}^{-1} (\mathbf{w} - \boldsymbol{\mu}_{new}) + C(t_*) \right] \right)
                         d\mathbf{w}
-                        =
-                        (2\pi)^{D/2}
-                        |\boldsymbol{\Sigma}_{new}|^{1/2}
                         \]
-
                         <p>
-                            This factor is independent of \( t_* \). The remaining terms in the exponent,
-                            which depend only on \( t_* \), form a quadratic function of \( t_* \).
-                            The exponential of this quadratic therefore defines a Gaussian distribution
-                            in \( t_* \).
+                            The term \(\exp(-\frac{1}{2}C(t_*))\) is constant with respect to \(\mathbf{w}\) and can be
+                            pulled out of the integral:
+                        </p>
+                        \[
+                        \exp\!\left( -\frac{1}{2} C(t_*) \right) \int \exp\!\left( -\frac{1}{2} (\mathbf{w} -
+                        \boldsymbol{\mu}_{new})^T \boldsymbol{\Sigma}_{new}^{-1} (\mathbf{w} - \boldsymbol{\mu}_{new})
+                        \right) d\mathbf{w}
+                        \]
+                        <p>
+                            The remaining integral is a standard Gaussian integral which evaluates to \((2\pi)^{K/2}
+                            |\boldsymbol{\Sigma}_{new}|^{1/2}\). The "remaining terms" that form our predictive
+                            distribution are captured in \(C(t_*)\):
+                        </p>
+                        \[
+                        C(t_*) = \frac{t_*^2}{\sigma_t^2} + \boldsymbol{\mu}_M^T \boldsymbol{\Sigma}_M^{-1}
+                        \boldsymbol{\mu}_M - \boldsymbol{\mu}_{new}^T \boldsymbol{\Sigma}_{new}^{-1}
+                        \boldsymbol{\mu}_{new}
+                        \]
+                        <p>
+                            Because the normalization factor of the integral is independent of \(t_*\), the predictive
+                            distribution \(p(t_* \mid \dots)\) is determined entirely by the exponential of this
+                            quadratic form \(C(t_*)\).
                         </p>
                     </div>
 
@@ -2031,47 +2040,49 @@
                         \]
 
                         <p>
-                            Using
-                            \(
-                            \boldsymbol{\mu}_{new}
-                            =
-                            \boldsymbol{\Sigma}_{new}
-                            \left(
-                            \boldsymbol{\Sigma}_M^{-1}\boldsymbol{\mu}_M
-                            +
-                            \frac{t_*\boldsymbol{\phi}_*}{\sigma_t^2}
-                            \right)
-                            \),
-                            the last term expands into constant, linear, and quadratic terms in \(t_*\).
-                            Hence \(C(t_*)\) is a quadratic function of \(t_*\):
+                            Substituting \(\boldsymbol{\mu}_{new} = \boldsymbol{\Sigma}_{new} \left(
+                            \boldsymbol{\Sigma}_M^{-1}\boldsymbol{\mu}_M + \frac{t_* \boldsymbol{\phi}_*}{\sigma_t^2}
+                            \right)\) into the expression, the middle \(\boldsymbol{\Sigma}_{new}^{-1}\) term is
+                            cancelled by the \(\boldsymbol{\Sigma}_{new}\) matrix inside \(\boldsymbol{\mu}_{new}\). To
+                            simplify the resulting expression, we use <strong>Woodbury's Identity</strong>:
                         </p>
 
                         \[
-                        C(t_*) = a t_*^2 - 2 b t_* + c
+                        \underbrace{(\mathbf{A} + \mathbf{u}\mathbf{v}^T)^{-1} = \mathbf{A}^{-1} -
+                        \frac{\mathbf{A}^{-1}\mathbf{u}\mathbf{v}^T\mathbf{A}^{-1}}{1 +
+                        \mathbf{v}^T\mathbf{A}^{-1}\mathbf{u}}}_{\text{Woodbury's Identity}}
                         \]
 
                         <p>
-                            The exponential of a quadratic function defines a Gaussian distribution.
-                            Therefore, the predictive distribution is Gaussian in \(t_*\).
+                            Applying this to our specific case where \(\boldsymbol{\Sigma}_{new}^{-1} =
+                            \boldsymbol{\Sigma}_M^{-1} + \sigma_t^{-2} \boldsymbol{\phi}_* \boldsymbol{\phi}_*^T\), we
+                            can expand the quadratic form to show that \(C(t_*)\) is indeed a quadratic function of
+                            \(t_*\):
                         </p>
+
+                        \[
+                        C(t_*) = \frac{1}{\sigma_t^2 + \boldsymbol{\phi}_*^T \boldsymbol{\Sigma}_M \boldsymbol{\phi}_*}
+                        \left[ t_*^2 - 2t_*(\boldsymbol{\phi}_*^T \boldsymbol{\mu}_M) + (\boldsymbol{\phi}_*^T
+                        \boldsymbol{\mu}_M)^2 \right]
+                        \]
                     </div>
 
                     <div class="step">
                         <strong>Step 6: Identify the Predictive Mean and Variance</strong>
 
                         <p>
-                            Rewriting the quadratic form in canonical Gaussian form:
+                            The expression inside the brackets is a perfect square. Rewriting the quadratic form:
                         </p>
 
                         \[
                         C(t_*)
                         =
-                        \frac{(t_* - \mu_*)^2}{\sigma_*^2}
-                        + \text{constant}
+                        \frac{(t_* - \boldsymbol{\mu}_M^T \boldsymbol{\phi}_*)^2}{\sigma_t^2 + \boldsymbol{\phi}_*^T
+                        \boldsymbol{\Sigma}_M \boldsymbol{\phi}_*}
                         \]
 
                         <p>
-                            we can directly read off the predictive mean and variance:
+                            We can now directly read off the predictive mean and variance:
                         </p>
 
                         \[
@@ -2126,12 +2137,6 @@
                         variance remains.
                     </div>
 
-                    <div class="note">
-                        <strong>🔑 Mathematical Technique:</strong> This derivation uses the fundamental property that
-                        the marginal distribution of a Gaussian (integrating out some variables) is also Gaussian. By
-                        completing the square in \(\mathbf{w}\), we can perform the Gaussian integral analytically,
-                        leaving us with a Gaussian distribution over \(t_*\).
-                    </div>
                 </div>
             </div>
 
