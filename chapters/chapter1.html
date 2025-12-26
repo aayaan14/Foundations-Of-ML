@@ -1816,7 +1816,7 @@
                 </div>
 
                 <div class="solution">
-                    <h4>Solution: Showing the Predictive Distribution is Gaussian</h4>
+                    <h4>Solution:</h4>
 
                     <div class="step">
                         <strong>Setup: What We Need to Show</strong>
@@ -2032,7 +2032,7 @@
                         =
                         \frac{t_*^2}{\sigma_t^2}
                         +
-                        \boldsymbol{\mu}_M^T \boldsymbol{\Sigma}_M^{-1} \boldsymbol{\mu}_M
+                        \boldsymbol{\mu}_M^T \boldsymbol{\Sigma}_M \boldsymbol{\mu}_M
                         -
                         \boldsymbol{\mu}_{new}^T
                         \boldsymbol{\Sigma}_{new}^{-1}
@@ -2061,7 +2061,8 @@
                         </p>
 
                         \[
-                        C(t_*) = \frac{1}{\sigma_t^2 + \boldsymbol{\phi}_*^T \boldsymbol{\Sigma}_M \boldsymbol{\phi}_*}
+                        C(t_*) = \frac{1}{\sigma_t^2 + \boldsymbol{\phi}_*^T \boldsymbol{\Sigma}_M
+                        \boldsymbol{\phi}_*}
                         \left[ t_*^2 - 2t_*(\boldsymbol{\phi}_*^T \boldsymbol{\mu}_M) + (\boldsymbol{\phi}_*^T
                         \boldsymbol{\mu}_M)^2 \right]
                         \]
@@ -2132,11 +2133,162 @@
                     <div class="note">
                         <strong>💡 Key Insight:</strong> The predictive variance has two components: (1) the irreducible
                         noise \(\sigma_t^2\) inherent in the data, and (2) the model uncertainty \(\phi(x_*)^T
-                        \boldsymbol{\Sigma}_M \phi(x_*)\) arising from uncertainty in the weight vector. As we collect
-                        more data, \(\boldsymbol{\Sigma}_M\) shrinks and model uncertainty decreases, but the noise
-                        variance remains.
+                        \boldsymbol{\Sigma}_M \phi(x_*)\) arising from uncertainty in the weight vector. 
                     </div>
 
+                </div>
+            </div>
+
+            <!-- 10 -->
+            <div class="problem">
+                <div class="context">
+                    Previously, we derived the predictive distribution for a new input \( x_* \) given the training data
+                    \( (\mathbf{X}, \mathbf{t}) \). Let's prove that
+                    as more data points are observed, the uncertainty associated with the model’s parameters must
+                    decrease.
+                </div>
+
+                <div class="problem-statement">
+                    <h4>Question</h4>
+                    <p>
+                        Show that
+                        \[
+                        \sigma_{M+1}^2 \le \sigma_M^2 \tag{1.25}
+                        \]
+                        where \( \sigma_M^2 \) denotes the predictive variance after observing \( M \) data points,
+                        and \( \sigma_{M+1}^2 \) denotes the predictive variance after observing \( M+1 \) data points.
+                        (Hint: Use Woodbury’s identity.)
+                    </p>
+
+                </div>
+
+                <div class="solution">
+                    <h4>Solution:</h4>
+
+                    <div class="step">
+                        We know from (1.24) that the predictive variance after observing \(M\) data points is given by:
+                        \[\sigma_{M+1}^2 = \sigma_t^2 + \boldsymbol{\phi}(\mathbf{x}_*)^T \boldsymbol{\Sigma}_{M+1}
+                        \boldsymbol{\phi}(\mathbf{x}_*)\]
+
+                        Let's use the equation we derived earlier for (1.19):
+                        \[\boldsymbol{\Sigma}_{M+1}^{-1} = \boldsymbol{\Sigma}_M^{-1} +
+                        \frac{1}{\sigma_t^2}\boldsymbol{\phi}_{M+1}\boldsymbol{\phi}_{M+1}^T\]
+
+                        To find \(\boldsymbol{\Sigma}_{M+1}\), we can apply
+
+                        Woodbury’s identity:
+                        \[(\mathbf{M} + \mathbf{u}\mathbf{v}^T)^{-1} = \mathbf{M}^{-1} -
+                        \frac{\mathbf{M}^{-1}\mathbf{u}\mathbf{v}^T\mathbf{M}^{-1}}{1 +
+                        \mathbf{v}^T\mathbf{M}^{-1}\mathbf{u}}\]
+
+                        where \(\mathbf{M} = \boldsymbol{\Sigma}_M^{-1}\), \(\mathbf{u} = \frac{1}{\sigma_t}
+                        \boldsymbol{\phi}_{M+1}\), and \(\mathbf{v} = \frac{1}{\sigma_t}
+                        \boldsymbol{\phi}_{M+1}\).
+
+                        Thus, we have:
+                        \[\boldsymbol{\Sigma}_{M+1} = \boldsymbol{\Sigma}_M -
+                        \frac{\boldsymbol{\Sigma}_M \boldsymbol{\phi}_{M+1} \boldsymbol{\phi}_{M+1}^T
+                        \boldsymbol{\Sigma}_M}{\sigma_t^2 + \boldsymbol{\phi}_{M+1}^T \boldsymbol{\Sigma}_M
+                        \boldsymbol{\phi}_{M+1}}\]
+
+                        Substituting this into the expression for \(\sigma_{M+1}^2\):
+                        \[\sigma_{M+1}^2 = \sigma_t^2 + \boldsymbol{\phi}(\mathbf{x}_*)^T \left( \boldsymbol{\Sigma}_M -
+                        \frac{\boldsymbol{\Sigma}_M \boldsymbol{\phi}_{M+1} \boldsymbol{\phi}_{M+1}^T
+                        \boldsymbol{\Sigma}_M}{\sigma_t^2 + \boldsymbol{\phi}_{M+1}^T \boldsymbol{\Sigma}_M
+                        \boldsymbol{\phi}_{M+1}} \right) \boldsymbol{\phi}(\mathbf{x}_*)\]
+
+                        \[= \sigma_t^2 + \boldsymbol{\phi}(\mathbf{x}_*)^T \boldsymbol{\Sigma}_M
+                        \boldsymbol{\phi}(\mathbf{x}_*) -
+                        \frac{\left( \boldsymbol{\phi}(\mathbf{x}_*)^T \boldsymbol{\Sigma}_M
+                        \boldsymbol{\phi}_{M+1} \right)^2}{\sigma_t^2 + \boldsymbol{\phi}_{M+1}^T \boldsymbol{\Sigma}_M
+                        \boldsymbol{\phi}_{M+1}}\]
+
+                        \[= \sigma_M^2 -
+                        \frac{\left( \boldsymbol{\phi}(\mathbf{x}_*)^T \boldsymbol{\Sigma}_M
+                        \boldsymbol{\phi}_{M+1} \right)^2}{\sigma_t^2 + \boldsymbol{\phi}_{M+1}^T \boldsymbol{\Sigma}_M
+                        \boldsymbol{\phi}_{M+1}}\]
+
+                        Since the term being subtracted is non-negative, we conclude that:
+                        \[\sigma_{M+1}^2 \le \sigma_M^2\]
+                    </div>
+
+                    <div class="note">
+                        <strong>💡 Intuition:</strong> As we observe more data points, our uncertainty about the model
+                        parameters decreases, leading to a reduction in the predictive variance. This reflects the
+                        principle that more data generally leads to more confident predictions.
+                    </div>
+
+                    <div style="margin:20px; padding:10px; border:1px solid #ddd; border-radius:6px;">
+                        <h3 style="margin-top:0;">Predictive Distribution Notebook</h3>
+                        <p>
+                            Explore and run the Predictive Distribution code interactively in Google Colab.<br>
+                            <a href="https://colab.research.google.com/drive/12r4iUjAyS8dPpU_Nb7T3Tg-RIVAygH8T?usp=sharing"
+                                target="_blank" style="font-weight:bold; color:#0066cc; text-decoration:none;">
+                                Predictive Distribution Notebook in Colab
+                            </a>
+                        </p>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- 11 -->
+            <div class="problem">
+                <div class="context">
+                </div>
+
+                <div class="problem-statement">
+                    <h4>Question</h4>
+                </div>
+
+                <div class="solution">
+                    <h4>Solution:</h4>
+
+                    <div class="step">
+                    </div>
+
+                    <div class="note">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 12 -->
+            <div class="problem">
+                <div class="context">
+                </div>
+
+                <div class="problem-statement">
+                    <h4>Question</h4>
+                </div>
+
+                <div class="solution">
+                    <h4>Solution:</h4>
+
+                    <div class="step">
+                    </div>
+
+                    <div class="note">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 13 -->
+            <div class="problem">
+                <div class="context">
+                </div>
+
+                <div class="problem-statement">
+                    <h4>Question</h4>
+                </div>
+
+                <div class="solution">
+                    <h4>Solution:</h4>
+
+                    <div class="step">
+                    </div>
+
+                    <div class="note">
+                    </div>
                 </div>
             </div>
 
