@@ -2133,7 +2133,7 @@
                     <div class="note">
                         <strong>💡 Key Insight:</strong> The predictive variance has two components: (1) the irreducible
                         noise \(\sigma_t^2\) inherent in the data, and (2) the model uncertainty \(\phi(x_*)^T
-                        \boldsymbol{\Sigma}_M \phi(x_*)\) arising from uncertainty in the weight vector. 
+                        \boldsymbol{\Sigma}_M \phi(x_*)\) arising from uncertainty in the weight vector.
                     </div>
 
                 </div>
@@ -2235,19 +2235,478 @@
             <!-- 11 -->
             <div class="problem">
                 <div class="context">
+                    <p>
+                        Up until now, we have been using polynomial basis functions for our use case of the form:
+                    </p>
+
+                    \[
+                    \boldsymbol{\phi}(x) = [\,1,\; x,\; x^2,\; \dots \,]^T
+                    \]
+
+                    <p>
+                        These functions can be interpreted as <strong>global functions</strong>, as they span the entire
+                        domain of the input space, capturing long-range dependencies and global trends.
+                    </p>
+
+                    <p>
+                        We now switch to <strong>Gaussian basis functions</strong>, which are <strong>local
+                            functions</strong>
+                        that influence only a small region of the input space around their center:
+                    </p>
+
+                    \[
+                    \boldsymbol{\phi}_j(x)
+                    =
+                    \exp\!\left(
+                    -\frac{(x - \mu_j)^2}{2\sigma^2}
+                    \right)
+                    \tag{1.26}
+                    \]
+
+                    <p>
+                        The key advantages of using Gaussian basis functions include:
+                    </p>
+
+                    <ul>
+                        <li>
+                            They are <strong>local</strong>, meaning each basis function only affects a small
+                            neighborhood
+                            around its center.
+                        </li>
+                        <li>
+                            They provide smooth transitions between neighboring basis functions.
+                        </li>
+                        <li>
+                            They allow flexible modeling when the underlying relationship is not well captured by
+                            polynomials.
+                        </li>
+                    </ul>
+
+                    <p>
+                        <strong>Example:</strong> For our apartment price prediction task, we might place Gaussian basis
+                        functions at:
+                    </p>
+
+                    <ul>
+                        <li>\(\mu_1 = 650\) sq.ft (small apartments)</li>
+                        <li>\(\mu_2 = 1100\) sq.ft (medium apartments)</li>
+                        <li>\(\mu_3 = 1800\) sq.ft (large apartments)</li>
+                    </ul>
+
+                    <p>
+                        Each basis function captures pricing behavior in its local neighborhood.
+                    </p>
+
+                    <p>
+                        However, Gaussian basis functions exhibit a fundamental <strong>failure</strong>
+                        when used for extrapolation.
+                    </p>
+
+                    <p>
+                        Consider the same example, and suppose we are asked to predict the price of an apartment
+                        with size 3000 sq.ft.
+                    </p>
+
+                    <p>
+                        For a test point far from all centers \( \mu_j \), the basis function activations vanish:
+                    </p>
+
+                    \[
+                    \boldsymbol{\phi}(x_*) \to \mathbf{0}.
+                    \]
+
+                    <p>
+                        Recall the predictive variance from equation (1.24):
+                    </p>
+
+                    \[
+                    \sigma_*^2
+                    =
+                    \sigma_t^2
+                    +
+                    \boldsymbol{\phi}(x_*)^T
+                    \boldsymbol{\Sigma}_M
+                    \boldsymbol{\phi}(x_*).
+                    \]
+
+                    <p>
+                        As \( \boldsymbol{\phi}(x_*) \to \mathbf{0} \), the predictive variance reduces to
+                    </p>
+
+                    \[
+                    \sigma_*^2 \to \sigma_t^2.
+                    \]
+
+                    <p>
+                        This implies that the model becomes <strong>overconfident</strong> when extrapolating far
+                        outside
+                        the region covered by the training data, expressing uncertainty only at the level of the
+                        observation noise.
+                    </p>
+
+                    <p>
+                        In other words, the model appears <em>most certain exactly where it should be least
+                            certain</em>.
+                    </p>
+
+                    <p>
+                        To address this issue, we must go one step further and incorporate uncertainty in the
+                        noise variance \( \sigma_t^2 \) itself.
+                    </p>
+
+                    <p>
+                        We now recognize that our regression model contains <strong>two sources of uncertainty</strong>:
+                    </p>
+
+                    <ul>
+                        <li><strong>Weights:</strong> \( \mathbf{w} \)</li>
+                        <li><strong>Noise variance:</strong> \( \sigma_t^2 \)</li>
+                    </ul>
+
+                    <p>
+                        Since both quantities are unknown, we must place a <strong>joint prior distribution</strong>
+                        over
+                        them:
+                    </p>
+
+                    \[
+                    p(\mathbf{w}, \beta)
+                    \;\propto\;
+                    p(\mathbf{w} \mid \beta)\, p(\beta).
+                    \]
+
+                    <p>where \( \beta = \frac{1}{\sigma_t^2} \) (Precision)</p>
+                    <p>
+                        Look at the likelihood now as a function of
+                        \( \beta \):
+                    </p>
+
+                    \[
+                    p(\mathbf{t} \mid \mathbf{w}, \beta)
+                    \propto
+                    \beta^{M/2}
+                    \exp\!\left(
+                    -\frac{\beta}{2}
+                    \sum_{n=1}^M
+                    \bigl(t_n - \mathbf{w}^T \boldsymbol{\phi}_n\bigr)^2
+                    \right)
+                    \]
+
+                    <p>
+                        Viewed as a function of \( \beta \), this expression has the generic form:
+                    </p>
+
+                    \[
+                    \beta^{(a-1)}
+                    \exp\!\left(
+                    -b \beta
+                    \right)
+                    \]
+
+                    <p>
+                        This is exactly the kernel of a <strong>Gamma distribution</strong>.
+                    </p>
+
+                    <p>
+                        Therefore, the conjugate prior for the noise precision is chosen as:
+                    </p>
+
+                    \[
+                    p(\beta)
+                    =
+                    \mathrm{Gam}
+                    \bigl(\beta \mid a_0, b_0\bigr)
+                    \tag{1.27}
+                    \]
+
+                    <p>
+                        <strong>Interpretation:</strong>
+                    </p>
+
+                    <ul>
+                        <li>
+                            \( a_0 \): prior confidence in the noise estimate
+                        </li>
+                        <li>
+                            \( b_0 \): prior noise scale
+                        </li>
+                    </ul>
+
+                    <p>
+                        Now, consider the exponent of the prior \( p(\mathbf{w} \mid \beta) \):
+                    </p>
+
+                    \[
+                    p(\mathbf{w} \mid \beta)
+                    \;\propto\;
+                    \exp\!\left(
+                    -\frac{\beta}{2}
+                    (\mathbf{w} - \boldsymbol{\mu}_0)^T
+                    \boldsymbol{\Sigma}_0^{-1}
+                    (\mathbf{w} - \boldsymbol{\mu}_0)
+                    \right)
+                    \]
+
+                    <p>
+                        Since \( \beta\,\boldsymbol{\Sigma}_0^{-1} = (\beta^{-1}\boldsymbol{\Sigma}_0)^{-1} \), this
+                        simplifies to:
+                    </p>
+
+                    \[
+                    p(\mathbf{w} \mid \beta)
+                    \;\propto\;
+                    \exp\!\left(
+                    -\frac{1}{2}
+                    (\mathbf{w} - \boldsymbol{\mu}_0)^T
+                    (\beta^{-1}\boldsymbol{\Sigma}_0)^{-1}
+                    (\mathbf{w} - \boldsymbol{\mu}_0)
+                    \right)
+                    \]
+
+                    <p>which can be further written as:</p>
+
+                    \[
+                    p(\mathbf{w} \mid \beta)
+                    =
+                    \mathcal{N}\!\left(
+                    \mathbf{w} \;\middle|\;
+                    \boldsymbol{\mu}_0,
+                    \beta^{-1} \boldsymbol{\Sigma}_0
+                    \right)
+                    \tag{1.28}
+                    \]
+
+                    <p>Combining (1.27) and (1.28), we obtain the joint distribution:</p>
+
+                    \[
+                    p(\mathbf{w}, \beta)
+                    =
+                    \mathcal{N}\!\left(
+                    \mathbf{w} \;\middle|\;
+                    \boldsymbol{\mu}_0,
+                    \beta^{-1} \boldsymbol{\Sigma}_0
+                    \right)
+                    \mathrm{Gam}
+                    \bigl(\beta \mid a_0, b_0\bigr)
+                    \tag{1.29}
+                    \]
+
+                    <p>Thus, the joint distribution of weights and noise precision is a <strong>Normal-Gamma
+                            distribution</strong>.</p>
                 </div>
 
                 <div class="problem-statement">
                     <h4>Question</h4>
+
+                    <p>
+                        Consider the linear basis function regression model with Gaussian likelihood
+                        and precision \( \beta \), and assume the following conjugate prior over the
+                        weights and noise precision derived in (1.29).
+                    </p>
+
+                    <p>
+                        Show that, after observing a training dataset
+                        \( \mathcal{D} = \{(\mathbf{x}_n, t_n)\}_{n=1}^M \),
+                        the posterior distribution over \( \mathbf{w} \) and \( \beta \) takes the
+                        same functional form:
+                    </p>
+
+                    \[
+                    p(\mathbf{w}, \beta \mid \mathbf{t})
+                    =
+                    \mathcal{N}\!\left(
+                    \mathbf{w} \mid \boldsymbol{\mu}_N,\; \beta^{-1}\boldsymbol{\Sigma}_N
+                    \right)
+                    \;
+                    \mathrm{Gam}(\beta \mid a_N, b_N).
+                    \tag{1.30}
+                    \]
+
+                    <p>
+                        Derive explicit expressions for the posterior parameters
+                        \( \boldsymbol{\mu}_N \),
+                        \( \boldsymbol{\Sigma}_N \),
+                        \( a_N \),
+                        and \( b_N \)
+                        in terms of the prior parameters and the observed data.
+                    </p>
                 </div>
 
                 <div class="solution">
                     <h4>Solution:</h4>
 
                     <div class="step">
+                        <strong>Step 1: Write down the posterior using Bayes' theorem</strong>
+                        <p>
+                            The posterior distribution is given by:
+                            $$p(\mathbf{w}, \beta \mid \mathbf{t}) \propto p(\mathbf{t} \mid \mathbf{w}, \beta) \,
+                            p(\mathbf{w}, \beta)$$
+                        </p>
+                        <p>
+                            Substituting the prior from equation (1.29):
+                            $$p(\mathbf{w}, \beta \mid \mathbf{t}) \propto p(\mathbf{t} \mid \mathbf{w}, \beta) \,
+                            \mathcal{N}\!\left(\mathbf{w} \mid \boldsymbol{\mu}_0,
+                            \beta^{-1}\boldsymbol{\Sigma}_0\right) \, \mathrm{Gam}(\beta \mid a_0, b_0)$$
+                        </p>
+                    </div>
+
+                    <div class="step">
+                        <strong>Step 2: Expand the likelihood</strong>
+                        <p>
+                            The likelihood for the observed data is:
+                            $$p(\mathbf{t} \mid \mathbf{w}, \beta) = \prod_{n=1}^{M} \mathcal{N}(t_n \mid \mathbf{w}^T
+                            \boldsymbol{\phi}_n, \beta^{-1})$$
+                        </p>
+                        <p>
+                            This can be written as:
+                            $$p(\mathbf{t} \mid \mathbf{w}, \beta) \propto \beta^{M/2} \exp\!\left(-\frac{\beta}{2}
+                            \sum_{n=1}^{M} (t_n - \mathbf{w}^T \boldsymbol{\phi}_n)^2\right)$$
+                        </p>
+                    </div>
+
+                    <div class="step">
+                        <strong>Step 3: Expand the prior distributions</strong>
+                        <p>
+                            The prior on weights:
+                            $$\mathcal{N}\!\left(\mathbf{w} \mid \boldsymbol{\mu}_0,
+                            \beta^{-1}\boldsymbol{\Sigma}_0\right) \propto \beta^{D/2}
+                            \exp\!\left(-\frac{\beta}{2}(\mathbf{w} - \boldsymbol{\mu}_0)^T \boldsymbol{\Sigma}_0^{-1}
+                            (\mathbf{w} - \boldsymbol{\mu}_0)\right)$$
+                            where \(D\) is the dimension of \(\mathbf{w}\).
+                        </p>
+                        <p>
+                            The prior on precision:
+                            $$\mathrm{Gam}(\beta \mid a_0, b_0) \propto \beta^{a_0 - 1} \exp(-b_0 \beta)$$
+                        </p>
+                    </div>
+
+                    <div class="step">
+                        <strong>Step 4: Combine all terms in the posterior</strong>
+                        <p>
+                            Taking the product of all three terms:
+                            $$p(\mathbf{w}, \beta \mid \mathbf{t}) \propto \beta^{M/2} \beta^{D/2} \beta^{a_0 - 1}
+                            \exp\!\left(-\frac{\beta}{2} \sum_{n=1}^{M} (t_n - \mathbf{w}^T \boldsymbol{\phi}_n)^2 -
+                            \frac{\beta}{2}(\mathbf{w} - \boldsymbol{\mu}_0)^T \boldsymbol{\Sigma}_0^{-1} (\mathbf{w} -
+                            \boldsymbol{\mu}_0) - b_0 \beta\right)$$
+                        </p>
+                        <p>
+                            Collecting powers of \(\beta\):
+                            $$p(\mathbf{w}, \beta \mid \mathbf{t}) \propto \beta^{(M + D)/2 + a_0 - 1}
+                            \exp\!\left(-\frac{\beta}{2}\left[\sum_{n=1}^{M} (t_n - \mathbf{w}^T \boldsymbol{\phi}_n)^2
+                            + (\mathbf{w} - \boldsymbol{\mu}_0)^T \boldsymbol{\Sigma}_0^{-1} (\mathbf{w} -
+                            \boldsymbol{\mu}_0) + 2b_0\right]\right)$$
+                        </p>
+                    </div>
+
+                    <div class="step">
+                        <strong>Step 5: Complete the square for \(\mathbf{w}\)</strong>
+                        <p>
+                            Define the design matrix \(\boldsymbol{\Phi}\) where the \(n\)-th row is
+                            \(\boldsymbol{\phi}_n^T\). The sum of squared errors can be written as:
+                            $$\sum_{n=1}^{M} (t_n - \mathbf{w}^T \boldsymbol{\phi}_n)^2 = (\mathbf{t} -
+                            \boldsymbol{\Phi} \mathbf{w})^T(\mathbf{t} - \boldsymbol{\Phi} \mathbf{w}) = \mathbf{t}^T
+                            \mathbf{t} - 2\mathbf{t}^T \boldsymbol{\Phi} \mathbf{w} + \mathbf{w}^T \boldsymbol{\Phi}^T
+                            \boldsymbol{\Phi} \mathbf{w}$$
+                        </p>
+                        <p>
+                            Expanding the prior term:
+                            $$(\mathbf{w} - \boldsymbol{\mu}_0)^T \boldsymbol{\Sigma}_0^{-1} (\mathbf{w} -
+                            \boldsymbol{\mu}_0) = \mathbf{w}^T \boldsymbol{\Sigma}_0^{-1} \mathbf{w} -
+                            2\boldsymbol{\mu}_0^T \boldsymbol{\Sigma}_0^{-1} \mathbf{w} + \boldsymbol{\mu}_0^T
+                            \boldsymbol{\Sigma}_0^{-1} \boldsymbol{\mu}_0$$
+                        </p>
+                        <p>
+                            Combining quadratic and linear terms in \(\mathbf{w}\):
+                            $$\mathbf{w}^T(\boldsymbol{\Phi}^T \boldsymbol{\Phi} + \boldsymbol{\Sigma}_0^{-1})\mathbf{w}
+                            - 2\mathbf{w}^T(\boldsymbol{\Phi}^T \mathbf{t} + \boldsymbol{\Sigma}_0^{-1}
+                            \boldsymbol{\mu}_0) + \text{const}$$
+                        </p>
+                    </div>
+
+                    <div class="step">
+                        <strong>Step 6: Identify the posterior covariance</strong>
+                        <p>
+                            The posterior covariance is:
+                            $$\boldsymbol{\Sigma}_N^{-1} = \boldsymbol{\Phi}^T \boldsymbol{\Phi} +
+                            \boldsymbol{\Sigma}_0^{-1}$$
+                        </p>
+                        <p>
+                            Therefore:
+                            $$\boxed{\boldsymbol{\Sigma}_N = (\boldsymbol{\Phi}^T \boldsymbol{\Phi} +
+                            \boldsymbol{\Sigma}_0^{-1})^{-1}}$$
+                        </p>
+                    </div>
+
+                    <div class="step">
+                        <strong>Step 7: Identify the posterior mean</strong>
+                        <p>
+                            Completing the square, the posterior mean satisfies:
+                            $$\boldsymbol{\Sigma}_N^{-1} \boldsymbol{\mu}_N = \boldsymbol{\Phi}^T \mathbf{t} +
+                            \boldsymbol{\Sigma}_0^{-1} \boldsymbol{\mu}_0$$
+                        </p>
+                        <p>
+                            Therefore:
+                            $$\boxed{\boldsymbol{\mu}_N = \boldsymbol{\Sigma}_N(\boldsymbol{\Phi}^T \mathbf{t} +
+                            \boldsymbol{\Sigma}_0^{-1} \boldsymbol{\mu}_0)}$$
+                        </p>
+                    </div>
+
+                    <div class="step">
+                        <strong>Step 8: Identify the posterior Gamma parameters</strong>
+                        <p>
+                            From the power of \(\beta\), we identify:
+                            $$a_N - 1 = \frac{M + D}{2} + a_0 - 1$$
+                        </p>
+                        <p>
+                            Therefore:
+                            $$\boxed{a_N = a_0 + \frac{M + D}{2}}$$
+                        </p>
+                    </div>
+
+                    <div class="step">
+                        <strong>Step 9: Derive \(b_N\)</strong>
+                        <p>
+                            After completing the square for \(\mathbf{w}\), the constant term (which doesn't depend on
+                            \(\mathbf{w}\)) in the exponent is:
+                            $$b_N = b_0 + \frac{1}{2}\left[\mathbf{t}^T \mathbf{t} + \boldsymbol{\mu}_0^T
+                            \boldsymbol{\Sigma}_0^{-1} \boldsymbol{\mu}_0 - \boldsymbol{\mu}_N^T
+                            \boldsymbol{\Sigma}_N^{-1} \boldsymbol{\mu}_N\right]$$
+                        </p>
+                        <p>
+                            This can be simplified using the matrix identity. After algebraic manipulation:
+                            $$\boxed{b_N = b_0 + \frac{1}{2}\left[\mathbf{t}^T \mathbf{t} + \boldsymbol{\mu}_0^T
+                            \boldsymbol{\Sigma}_0^{-1} \boldsymbol{\mu}_0 - (\boldsymbol{\Phi}^T \mathbf{t} +
+                            \boldsymbol{\Sigma}_0^{-1} \boldsymbol{\mu}_0)^T \boldsymbol{\Sigma}_N (\boldsymbol{\Phi}^T
+                            \mathbf{t} + \boldsymbol{\Sigma}_0^{-1} \boldsymbol{\mu}_0)\right]}$$
+                        </p>
+                    </div>
+
+                    <div class="step">
+                        <strong>Step 10: Verify the functional form</strong>
+                        <p>
+                            We have shown that:
+                            $$p(\mathbf{w}, \beta \mid \mathbf{t}) \propto \beta^{K/2}
+                            \exp\!\left(-\frac{\beta}{2}(\mathbf{w} - \boldsymbol{\mu}_N)^T \boldsymbol{\Sigma}_N^{-1}
+                            (\mathbf{w} - \boldsymbol{\mu}_N)\right) \times \beta^{a_N - 1} \exp(-b_N \beta)$$
+                        </p>
+                        <p>
+                            This is exactly:
+                            $$\boxed{p(\mathbf{w}, \beta \mid \mathbf{t}) = \mathcal{N}\!\left(\mathbf{w} \mid
+                            \boldsymbol{\mu}_N, \beta^{-1} \boldsymbol{\Sigma}_N\right) \; \mathrm{Gam}(\beta \mid a_N,
+                            b_N)}$$
+                        </p>
+                        <p>
+                            which confirms the Normal-Gamma conjugacy.
+                        </p>
                     </div>
 
                     <div class="note">
+                        <strong>Summary of Posterior Parameters:</strong>
+                        <p>
+                            The posterior maintains the same functional form as the prior (Normal-Gamma), confirming
+                            that the Normal-Gamma distribution is conjugate to the Gaussian likelihood with unknown mean
+                            and precision.
+                        </p>
                     </div>
                 </div>
             </div>
