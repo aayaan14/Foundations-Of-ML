@@ -316,65 +316,62 @@
                             style="max-width: 100%; height: auto; display: block; margin: 0 auto;" loading="lazy">
                         <br>
 
+                        <p>A more detailed explanation of multi-head attention looks like this:</p>
+                        <br>
+                        <img src="../assets/t_multidet.png" alt="Black box" class="context-image"
+                            style="max-width: 100%; height: auto; display: block; margin: 0 auto;" loading="lazy">
+                        <br>
                     </div>
 
                     <div class="problem-statement">
-                        <h4>The Multi-Head Formula</h4>
-                        <p>Instead of one attention mechanism, use \(h\) parallel ones:</p>
-                        \[
-                        \text{MultiHead}(Q, K, V) = \text{Concat}(\text{head}_1, \ldots, \text{head}_h)W^O
-                        \]
-                        <p>where each head is:</p>
-                        \[
-                        \text{head}_i = \text{Attention}(QW_i^Q, KW_i^K, VW_i^V)
-                        \]
+                        <h4>Construction of Multi-Head Attention</h4>
+                        <p>Let’s formalize this:</p>
 
-                        <p><strong>Parameters:</strong></p>
                         <ul>
-                            <li>\(h = 8\): Number of heads</li>
-                            <li>\(d_k = d_{model} / h = 512 / 8 = 64\): Dimension per head</li>
-                            <li>\(W_i^Q, W_i^K, W_i^V \in \mathbb{R}^{d_{model} \times d_k}\): Per-head weight matrices
-                            </li>
-                            <li>\(W^O \in \mathbb{R}^{hd_k \times d_{model}}\): Output projection matrix</li>
+                            <li>Model Dimension: \(d_{model} = 512 \)</li>
+                            <li>Number of heads: \(h = 8\)</li>
                         </ul>
+                        <p>Each head operates in a lower-dimensional subspace:</p>
+                        \[d_k = d_v = \frac{d_{model}}{h} = \frac{512}{8} = 64\]
                     </div>
 
                     <div class="solution">
-                        <h4>How It Works Mathematically</h4>
 
                         <div class="step">
-                            <strong>Step 1: Split Into Heads</strong>
-                            <p>Starting from input \(\mathbf{X} \in \mathbb{R}^{n \times d_{model}}\):</p>
+                            <strong>Step 1: Linear Projections (Per Head)</strong>
+                            <p>Instead of one set of matrices \(W_Q, W_K, W_V\), we now have one set per head:</p>
                             \[
-                            d_{model} = 512 \xrightarrow{\text{split}} h \times d_k = 8 \times 64
+                            W^{(i)}_Q, W^{(i)}_K, W^{(i)}_V \text{ for } i=1…h
                             \]
 
-                            <p>Each head gets its own projection:</p>
+                            <p>For head \(i\):</p>
                             \[
-                            Q_i = XW_i^Q, \quad K_i = XW_i^K, \quad V_i = XW_i^V
+                            Q^{(i)} = XW^{(i)}_Q, \quad K^{(i)} = XW^{(i)}_K, \quad V^{(i)} = XW^{(i)}_V
                             \]
-                            <p>where \(Q_i, K_i, V_i \in \mathbb{R}^{n \times d_k}\)</p>
+                            <p>where \(Q^{(i)}, K^{(i)}, V^{(i)} \in \mathbb{R}^{n \times d_k}\)</p>
+
+                            <p>Each head sees the same input embeddings
+                                \(X\),
+                                but projects them into different subspaces.</p>
                         </div>
 
                         <div class="step">
-                            <strong>Step 2: Parallel Attention Computation</strong>
+                            <strong>Step 2: Scaled Dot-Product Attention (Per Head)</strong>
                             <p>Each head independently computes attention:</p>
                             \[
-                            \text{head}_i = \text{softmax}\left(\frac{Q_i K_i^T}{\sqrt{d_k}}\right) V_i \in
-                            \mathbb{R}^{n
-                            \times d_k}
+                            \text{head}_i = \text{softmax}\left(\frac{Q^{(i)} K^{(i)T}}{\sqrt{d_k}}\right) V^{(i)}
                             \]
 
-                            <p>All \(h=8\) heads run in parallel, each learning different patterns.</p>
+                            <p>So we now have \(h\) different outputs, one per head.</p>
                         </div>
 
                         <div class="step">
-                            <strong>Step 3: Concatenate Heads</strong>
-                            <p>Combine outputs from all heads:</p>
+                            <strong>Step 3: Concatenation</strong>
+                            <p>We stack the outputs of all heads:</p>
                             \[
                             \text{Concat}(\text{head}_1, \ldots, \text{head}_8) \in \mathbb{R}^{n \times (8 \times 64)}
                             =
-                            \mathbb{R}^{n \times 512}
+                            \mathbb{R}^{n \times d_{model}}
                             \]
                         </div>
 
@@ -382,10 +379,14 @@
                             <strong>Step 4: Final Linear Projection</strong>
                             <p>Apply output transformation:</p>
                             \[
-                            \text{Output} = \text{Concat}(\text{heads}) \cdot W^O \in \mathbb{R}^{n \times d_{model}}
+                            \text{Output} = \text{Concat}(\text{heads}) \cdot W_{O} \in \mathbb{R}^{n \times d_{model}}
                             \]
 
-                            <p>This allows the model to combine information from all heads in a learned way.</p>
+                            <p>Now you might ask why yet another linear projection?</p>
+                            <p>Since the concatenated outputs don't really communicate to each other, by allowing another linear projection, we enable the model to combine information from all heads in a learned way.</p>
+                        </div>
+                        <div class="note">
+                            The resulting multi-head attention mechanism allows the model to jointly attend to information from different representation subspaces at different positions. This is crucial for capturing the complex relationships in language.
                         </div>
                     </div>
                 </div>

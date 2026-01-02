@@ -2515,19 +2515,19 @@
                     p(\mathbf{w}, \beta \mid \mathbf{t})
                     =
                     \mathcal{N}\!\left(
-                    \mathbf{w} \mid \boldsymbol{\mu}_N,\; \beta^{-1}\boldsymbol{\Sigma}_N
+                    \mathbf{w} \mid \boldsymbol{\mu}_M,\; \beta^{-1}\boldsymbol{\Sigma}_M
                     \right)
                     \;
-                    \mathrm{Gam}(\beta \mid a_N, b_N).
+                    \mathrm{Gam}(\beta \mid a_M, b_M).
                     \tag{1.30}
                     \]
 
                     <p>
                         Derive explicit expressions for the posterior parameters
-                        \( \boldsymbol{\mu}_N \),
-                        \( \boldsymbol{\Sigma}_N \),
-                        \( a_N \),
-                        and \( b_N \)
+                        \( \boldsymbol{\mu}_M \),
+                        \( \boldsymbol{\Sigma}_M \),
+                        \( a_M \),
+                        and \( b_M \)
                         in terms of the prior parameters and the observed data.
                     </p>
                 </div>
@@ -2627,12 +2627,12 @@
                         <strong>Step 6: Identify the posterior covariance</strong>
                         <p>
                             The posterior covariance is:
-                            $$\boldsymbol{\Sigma}_N^{-1} = \boldsymbol{\Phi}^T \boldsymbol{\Phi} +
+                            $$\boldsymbol{\Sigma}_M^{-1} = \boldsymbol{\Phi}^T \boldsymbol{\Phi} +
                             \boldsymbol{\Sigma}_0^{-1}$$
                         </p>
                         <p>
                             Therefore:
-                            $$\boxed{\boldsymbol{\Sigma}_N = (\boldsymbol{\Phi}^T \boldsymbol{\Phi} +
+                            $$\boxed{\boldsymbol{\Sigma}_M = (\boldsymbol{\Phi}^T \boldsymbol{\Phi} +
                             \boldsymbol{\Sigma}_0^{-1})^{-1}}$$
                         </p>
                     </div>
@@ -2641,12 +2641,12 @@
                         <strong>Step 7: Identify the posterior mean</strong>
                         <p>
                             Completing the square, the posterior mean satisfies:
-                            $$\boldsymbol{\Sigma}_N^{-1} \boldsymbol{\mu}_N = \boldsymbol{\Phi}^T \mathbf{t} +
+                            $$\boldsymbol{\Sigma}_M^{-1} \boldsymbol{\mu}_M = \boldsymbol{\Phi}^T \mathbf{t} +
                             \boldsymbol{\Sigma}_0^{-1} \boldsymbol{\mu}_0$$
                         </p>
                         <p>
                             Therefore:
-                            $$\boxed{\boldsymbol{\mu}_N = \boldsymbol{\Sigma}_N(\boldsymbol{\Phi}^T \mathbf{t} +
+                            $$\boxed{\boldsymbol{\mu}_M = \boldsymbol{\Sigma}_M(\boldsymbol{\Phi}^T \mathbf{t} +
                             \boldsymbol{\Sigma}_0^{-1} \boldsymbol{\mu}_0)}$$
                         </p>
                     </div>
@@ -2655,28 +2655,28 @@
                         <strong>Step 8: Identify the posterior Gamma parameters</strong>
                         <p>
                             From the power of \(\beta\), we identify:
-                            $$a_N - 1 = \frac{M + D}{2} + a_0 - 1$$
+                            $$a_M - 1 = \frac{M + D}{2} + a_0 - 1$$
                         </p>
                         <p>
                             Therefore:
-                            $$\boxed{a_N = a_0 + \frac{M + D}{2}}$$
+                            $$\boxed{a_M = a_0 + \frac{M + D}{2}}$$
                         </p>
                     </div>
 
                     <div class="step">
-                        <strong>Step 9: Derive \(b_N\)</strong>
+                        <strong>Step 9: Derive \(b_M\)</strong>
                         <p>
                             After completing the square for \(\mathbf{w}\), the constant term (which doesn't depend on
                             \(\mathbf{w}\)) in the exponent is:
-                            $$b_N = b_0 + \frac{1}{2}\left[\mathbf{t}^T \mathbf{t} + \boldsymbol{\mu}_0^T
-                            \boldsymbol{\Sigma}_0^{-1} \boldsymbol{\mu}_0 - \boldsymbol{\mu}_N^T
-                            \boldsymbol{\Sigma}_N^{-1} \boldsymbol{\mu}_N\right]$$
+                            $$b_M = b_0 + \frac{1}{2}\left[\mathbf{t}^T \mathbf{t} + \boldsymbol{\mu}_0^T
+                            \boldsymbol{\Sigma}_0^{-1} \boldsymbol{\mu}_0 - \boldsymbol{\mu}_M^T
+                            \boldsymbol{\Sigma}_M^{-1} \boldsymbol{\mu}_M\right]$$
                         </p>
                         <p>
                             This can be simplified using the matrix identity. After algebraic manipulation:
-                            $$\boxed{b_N = b_0 + \frac{1}{2}\left[\mathbf{t}^T \mathbf{t} + \boldsymbol{\mu}_0^T
+                            $$\boxed{b_M = b_0 + \frac{1}{2}\left[\mathbf{t}^T \mathbf{t} + \boldsymbol{\mu}_0^T
                             \boldsymbol{\Sigma}_0^{-1} \boldsymbol{\mu}_0 - (\boldsymbol{\Phi}^T \mathbf{t} +
-                            \boldsymbol{\Sigma}_0^{-1} \boldsymbol{\mu}_0)^T \boldsymbol{\Sigma}_N (\boldsymbol{\Phi}^T
+                            \boldsymbol{\Sigma}_0^{-1} \boldsymbol{\mu}_0)^T \boldsymbol{\Sigma}_M (\boldsymbol{\Phi}^T
                             \mathbf{t} + \boldsymbol{\Sigma}_0^{-1} \boldsymbol{\mu}_0)\right]}$$
                         </p>
                     </div>
@@ -2685,15 +2685,15 @@
                         <strong>Step 10: Verify the functional form</strong>
                         <p>
                             We have shown that:
-                            $$p(\mathbf{w}, \beta \mid \mathbf{t}) \propto \beta^{K/2}
-                            \exp\!\left(-\frac{\beta}{2}(\mathbf{w} - \boldsymbol{\mu}_N)^T \boldsymbol{\Sigma}_N^{-1}
-                            (\mathbf{w} - \boldsymbol{\mu}_N)\right) \times \beta^{a_N - 1} \exp(-b_N \beta)$$
+                            $$p(\mathbf{w}, \beta \mid \mathbf{t}) \propto \beta^{D/2}
+                            \exp\!\left(-\frac{\beta}{2}(\mathbf{w} - \boldsymbol{\mu}_M)^T \boldsymbol{\Sigma}_M^{-1}
+                            (\mathbf{w} - \boldsymbol{\mu}_M)\right) \times \beta^{a_M - 1} \exp(-b_M \beta)$$
                         </p>
                         <p>
                             This is exactly:
                             $$\boxed{p(\mathbf{w}, \beta \mid \mathbf{t}) = \mathcal{N}\!\left(\mathbf{w} \mid
-                            \boldsymbol{\mu}_N, \beta^{-1} \boldsymbol{\Sigma}_N\right) \; \mathrm{Gam}(\beta \mid a_N,
-                            b_N)}$$
+                            \boldsymbol{\mu}_M, \beta^{-1} \boldsymbol{\Sigma}_M\right) \; \mathrm{Gam}(\beta \mid a_M  ,
+                            b_M)}$$
                         </p>
                         <p>
                             which confirms the Normal-Gamma conjugacy.
@@ -2707,6 +2707,26 @@
                             that the Normal-Gamma distribution is conjugate to the Gaussian likelihood with unknown mean
                             and precision.
                         </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 12 -->
+            <div class="problem">
+                <div class="context">
+                </div>
+
+                <div class="problem-statement">
+                    <h4>Question</h4>
+                </div>
+
+                <div class="solution">
+                    <h4>Solution:</h4>
+
+                    <div class="step">
+                    </div>
+
+                    <div class="note">
                     </div>
                 </div>
             </div>
