@@ -2692,8 +2692,8 @@
                         <p>
                             This is exactly:
                             $$\boxed{p(\mathbf{w}, \beta \mid \mathbf{t}) = \mathcal{N}\!\left(\mathbf{w} \mid
-                            \boldsymbol{\mu}_M, \beta^{-1} \boldsymbol{\Sigma}_M\right) \; \mathrm{Gam}(\beta \mid a_M  ,
-                            b_M)}$$
+                            \boldsymbol{\mu}_M, \beta^{-1} \boldsymbol{\Sigma}_M\right) \; \mathrm{Gam}(\beta \mid a_M ,
+                            b_M)} \tag{1.31}$$
                         </p>
                         <p>
                             which confirms the Normal-Gamma conjugacy.
@@ -2712,6 +2712,280 @@
             </div>
 
             <!-- 12 -->
+            <div class="problem">
+                <div class="context">
+                    <p>
+                        In the previous exercise, we derived the posterior distribution over both the weights
+                        \( \mathbf{w} \) and the noise precision \( \beta \) for a Bayesian linear regression model as
+                        stated in (1.31).
+                    </p>
+
+                    <p>Now, we'll find out the predictive distribution \( p(t_* \mid x_*, \mathbf{w}, \beta) \). </p>
+
+                    <p>Note that now there's an additional variable \( \beta \), so the integral now changes to:</p>
+
+                    \[
+                    p(t_* \mid x_*, \mathbf{t})
+                    =
+                    \int \!\! \int
+                    p(t_* \mid x_*, \mathbf{w}, \beta)\,
+                    p(\mathbf{w}, \beta \mid \mathbf{t})
+                    \, d\mathbf{w}\, d\beta
+                    \tag{1.32}
+                    \]
+
+                    <p>Let's figure out the predictive distribution!!!!</p>
+                </div>
+
+                <div class="problem-statement">
+                    <h4>Question</h4>
+                    <p>
+                        Show that the predictive distribution \( p(t_* \mid x_*, \mathbf{t}) \) for the model discussed
+                        earlier
+                        is a Student’s \( t \)-distribution of the form
+                    </p>
+                    \[
+                    p(t_* \mid x_*, \mathbf{t})
+                    =
+                    \text{St}(t_* \mid \mu, \lambda, \nu)
+                    \]
+                    <p>
+                        and obtain expressions for\( \mu \), \( \lambda \), and \( \nu \).
+                    </p>
+                </div>
+
+                <div class="solution">
+                    <h4>Solution:</h4>
+
+                    <div class="step">
+                        <strong>Step 1: Define the predictive distribution</strong>
+                        <p>
+                            The predictive distribution for a new input \( x_* \)
+                            is obtained by marginalizing over the posterior uncertainty
+                            in both the weights and the noise precision given by (1.32):
+                        </p>
+                        \[
+                        p(t_* \mid x_*, \mathbf{t})
+                        =
+                        \int \!\! \int
+                        p(t_* \mid x_*, \mathbf{w}, \beta)\,
+                        p(\mathbf{w}, \beta \mid \mathbf{t})
+                        \, d\mathbf{w}\, d\beta
+                        \]
+                        </p>
+                    </div>
+
+                    <div class="step">
+                        <strong>Step 2: Integrate over the weights \( \mathbf{w} \)</strong>
+                        <p>
+                            Using (1.31), the joint posterior is:
+                        </p>
+
+                        \[
+                        p(\mathbf{w}, \beta \mid \mathbf{t})
+                        =
+                        \mathcal{N}(\mathbf{w} \mid \boldsymbol{\mu}_M, \beta^{-1}\boldsymbol{\Sigma}_M)\,
+                        \text{Gam}(\beta \mid a_M, b_M)
+                        \]
+
+                        <p>
+                            Conditioning on \( \beta \), the posterior over
+                            \( \mathbf{w} \) is Gaussian:
+                        </p>
+                        \[
+                        p(\mathbf{w} \mid \beta, \mathbf{t})
+                        =
+                        \mathcal{N}(\mathbf{w} \mid \boldsymbol{\mu}_M, \beta^{-1}\boldsymbol{\Sigma}_M)
+                        \]
+                        <p>The integral now turns out to be:</p>
+                        \[
+                        p(t_* \mid x_*, \beta, \mathbf{t})
+                        =
+                        \int
+                        \mathcal{N}(t_* \mid \boldsymbol{\phi}_*^\top \mathbf{w}, \beta^{-1})\,
+                        \mathcal{N}(\mathbf{w} \mid \boldsymbol{\mu}_M, \beta^{-1}\boldsymbol{\Sigma}_M)
+                        \, d\mathbf{w}
+                        \]
+                    </div>
+
+                    <div class="step">
+                        <strong>Gaussian-Gaussian Marginalization</strong>
+                        <p>This is a standard identity:</p>
+                        <p>If:</p>
+                        \[
+                        y = \mathbf{a}^\top \mathbf{w} + \epsilon;
+                        \quad
+                        \epsilon \sim \mathcal{N}(0, \beta),
+                        \quad
+                        \mathbf{w} \sim \mathcal{N}(\boldsymbol{\mu}, \beta^{-1}\boldsymbol{\Sigma}),
+                        \]
+                        <p>then,</p>
+                        \[
+                        p(y) = \mathcal{N}(y \mid \mathbf{a}^\top \boldsymbol{\mu}, \beta^{-1}(1 + \mathbf{a}^\top
+                        \boldsymbol{\Sigma} \mathbf{a}))
+                        \tag{1.33}
+                        \]
+                        <p>
+                            Using (1.33) yields:
+                        </p>
+                        \[
+                        p(t_* \mid x_*, \beta, \mathbf{t})
+                        =
+                        \mathcal{N}\!\left(
+                        t_* \mid
+                        \boldsymbol{\phi}_*^\top \boldsymbol{\mu}_M,\;
+                        \beta^{-1}\!\left(1 + \boldsymbol{\phi}_*^\top \boldsymbol{\Sigma}_M \boldsymbol{\phi}_*\right)
+                        \right)
+                        \]
+                    </div>
+
+                    <div class="step">
+                        <strong>Step 3: Integrate over the noise precision \( \beta \)</strong>
+                        <p>
+                            This is where the Student’s \(t\) comes from:
+                        </p>
+                        <p class="math">
+                            \[
+                            p(t_* \mid x_*, \mathbf{t})
+                            =
+                            \int
+                            \mathcal{N}(t_* \mid \mu_*, \beta^{-1} c_*)\,
+                            \text{Gam}(\beta \mid a_M, b_M)
+                            \, d\beta
+                            \]
+                        </p>
+                        <p>
+                            where
+                            \( \mu_* = \boldsymbol{\phi}_*^\top \mathbf{m}_N \)
+                            and
+                            \( c_* = 1 + \boldsymbol{\phi}_*^\top \boldsymbol{\Sigma}_M \boldsymbol{\phi}_* \).
+                        </p>
+                        <p>Writing everything explicitly:</p>
+                        <strong>Gausian</strong>
+                        \[
+                        \mathcal{N}(t_* \mid \mu_*, \beta^{-1} c_*)
+                        =
+                        \sqrt{\frac{\beta}{2\pi c_*}}\,
+                        \exp\!\left(
+                        -\frac{\beta}{2 c_*} (t_* - \mu_*)^2
+                        \right)
+                        \]
+                        <strong>Gamma</strong>
+                        \[
+                        \text{Gam}(\beta \mid a_M, b_M)
+                        =
+                        \frac{b_M^{a_M}}{\Gamma(a_M)}\,
+                        \beta^{a_M - 1}\,
+                        \exp(-b_M \beta)
+                        \]
+                        <p>Substituting these into the integral:</p>
+                        \[
+                        p(t_* \mid x_*, \mathbf{t})
+                        =
+                        \int
+                        \sqrt{\frac{\beta}{2\pi c_*}}\,
+                        \exp\!\left(
+                        -\frac{\beta}{2 c_*} (t_* - \mu_*)^2
+                        \right)\,
+                        \frac{b_M^{a_M}}{\Gamma(a_M)}\,
+                        \beta^{a_M - 1}\,
+                        \exp(-b_M \beta)
+                        \, d\beta
+                        \]
+                        <p>Combining terms:</p>
+                        \[
+                        p(t_* \mid x_*, \mathbf{t})
+                        =
+                        \frac{b_M^{a_M}}{\Gamma(a_M)}\,
+                        \sqrt{\frac{1}{2\pi c_*}}\,
+                        \int
+                        \beta^{a_M - \frac{1}{2}}\,
+                        \exp\!\left(
+                        -\beta \left(b_M + \frac{(t_* - \mu_*)^2}{2 c_*}\right)
+                        \right)
+                        \, d\beta
+                        \]
+                        <p>This integral is again the kernel of a Gamma distribution:</p>
+                        \[
+                        \int
+                        \beta^{(a' - 1)}\,
+                        \exp(-b' \beta)
+                        \, d\beta
+                        =
+                        \frac{\Gamma(a')}{(b')^{a'}}
+                        \]
+                        <p>where</p>
+                        \[
+                        a' = a_M + \frac{1}{2},
+                        \qquad
+                        b' = b_M + \frac{(t_* - \mu_*)^2}{2 c_*}
+                        \]
+                        <p>Substituting back, we get:</p>
+                        \[
+                        p(t_* \mid x_*, \mathbf{t})
+                        =
+                        \frac{b_M^{a_M}}{\Gamma(a_M)}\,
+                        \sqrt{\frac{1}{2\pi c_*}}\,
+                        \frac{\Gamma\!\left(a_M + \frac{1}{2}\right)}{\left(b_M + \frac{(t_* - \mu_*)^2}{2 c_*}\right)^{a_M + \frac{1}{2}}}
+                        \]
+                        <p>Rearranging terms:</p>
+                        \[
+                        \boxed{p(t_* \mid x_*, \mathbf{t})
+                        =
+                        \frac{\Gamma\!\left(a_M + \frac{1}{2}\right)}{\Gamma(a_M)}\,
+                        \sqrt{\frac{b_M}{\pi c_*}}\,
+                        \left(  1 +
+                        \frac{(t_* - \mu_*)^2}{2 b_M c_*}
+                        \right)^{-\left(a_M + \frac{1}{2}\right)}}
+                        \tag{1.34}
+                        \]
+                        <p>which is very similar to Student’s \( t \) distribution.</p>
+                        \[
+                        \text{St}(t \mid \mu, \lambda, \nu)
+                        =
+                        \frac{\Gamma\!\left(\frac{\nu + 1}{2}\right)}{\Gamma\!\left(\frac{\nu}{2}\right)}\,
+                        \sqrt{\frac{\lambda}{\pi}}\,
+                        \left(  1 +
+                        \lambda (t - \mu)^2
+                        \right)^{-\left(\frac{\nu + 1}{2}\right)}
+                        \tag{1.35}
+                        \]
+                        <p>where \(\mu\), \(\lambda\), and \(\nu\) are the mean, precision, and degrees of freedom respectively.</p>
+                    </div>
+
+                    <div class="step">
+                        <strong>Step 4: Identify the Student’s \( t \) parameters</strong>
+                        <p>
+                            Comparing with the standard Student’s \( t \) density,
+                            we obtain:
+                        </p>
+                            \[
+                            \mu = \boldsymbol{\phi}_*^\top \boldsymbol{\mu}_M,
+                            \qquad
+                            \nu = 2a_M,
+                            \qquad
+                            \lambda =
+                            \frac{a_M}{b_M}\,
+                            \frac{1}{1 + \boldsymbol{\phi}_*^\top \boldsymbol{\Sigma}_M \boldsymbol{\phi}_*}
+                            \]
+                    </div>
+
+                    <div class="note">
+                        <strong>Note:</strong>
+                        <p>
+                            The Student’s \( t \)-distribution arises because
+                            the noise precision \( \beta \) is itself uncertain
+                            and integrated out. If \( \beta \) were fixed,
+                            the predictive distribution would remain Gaussian.
+                            Note that we get a fatter tail in Student’s t distribution and it's more of a sampled version of Gaussian.
+                        </p>
+                        <img src="../assets/1_student's.png" alt="Linear Regression Illustration" class="context-image"
+                        style="max-width: 100%; height: auto; display: block; margin: 0 auto;" loading="lazy">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 13 -->
             <div class="problem">
                 <div class="context">
                 </div>
