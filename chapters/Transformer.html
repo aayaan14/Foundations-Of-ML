@@ -291,6 +291,15 @@
                         <br>
                         <p>We then compute the weighted sum of the value vectors using the attention weights to get the
                             final output.</p>
+                        \[
+                        \mathbf{E}'_{\text{Mann}}
+                        =
+                        \sum_{i}
+                        \alpha_{\text{Mann}, i}\,\mathbf{V}_i
+                        +
+                        \mathbf{E}_{\text{Mann}}
+                        \]
+                        <p>Finally, the overall step can be summarized by: </p>
                         \[\text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V\]
                     </div>
 
@@ -383,16 +392,152 @@
                             \]
 
                             <p>Now you might ask why yet another linear projection?</p>
-                            <p>Since the concatenated outputs don't really communicate to each other, by allowing another linear projection, we enable the model to combine information from all heads in a learned way.</p>
+                            <p>Since the concatenated outputs don't really communicate to each other, by allowing
+                                another linear projection, we enable the model to combine information from all heads in
+                                a learned way.</p>
                         </div>
                         <div class="note">
-                            The resulting multi-head attention mechanism allows the model to jointly attend to information from different representation subspaces at different positions. This is crucial for capturing the complex relationships in language.
+                            The resulting multi-head attention mechanism allows the model to jointly attend to
+                            information from different representation subspaces at different positions. This is crucial
+                            for capturing the complex relationships in language.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 6. Feed Forward Networks -->
+                <div class="problem" id="feed-forward">
+                    <h3>Feed Forward Networks: Position-wise Transformations</h3>
+
+                    <div class="context">
+                        <p>After the multi-head attention mechanism has allowed tokens to gather information from each
+                            other, each token's representation is passed through a <strong>Feed Forward Network
+                                (FFN)</strong>. This might seem anticlimactic after the complexity of attention, but it
+                            plays a crucial role!</p>
+                    </div>
+
+                    <div class="problem-statement">
+                        <h4>The Architecture</h4>
+                        <p>The FFN is surprisingly simple—it's a two-layer fully connected network applied identically
+                            and independently to each position:</p>
+                        \[
+                        \text{FFN}(x) = \max(0, xW_1 + b_1)W_2 + b_2
+                        \]
+
+                        <p>Where:</p>
+                        <ul>
+                            <li><strong>\(W_1 \in \mathbb{R}^{d_{model} \times d_{ff}}\):</strong> First layer weights
+                                (512 × 2048)</li>
+                            <li><strong>\(W_2 \in \mathbb{R}^{d_{ff} \times d_{model}}\):</strong> Second layer weights
+                                (2048 × 512)</li>
+                            <li><strong>\(b_1, b_2\):</strong> Bias vectors</li>
+                            <li><strong>\(d_{ff} = 2048\):</strong> Inner dimension (4× the model dimension!)</li>
+                            <li><strong>\(\max(0, \cdot)\):</strong> ReLU activation function</li>
+                        </ul>
+                        <br>
+                        <img src="../assets/t_ffn.png" alt="Black box" class="context-image"
+                            style="max-width: 100%; height: auto; display: block; margin: 0 auto;" loading="lazy">
+                        <br>
+                        <p>Before understanding the full architecture, let's ask why do we require it in first place???
+                        </p>
+
+                        <p><strong>Attention alone isn't enough:</strong> Attention is a mechanism which communicates
+                            information across tokens. It is still fundamentally a linear operation.</p>
+                        <p>By utilizing a Feed Forward Network (FFN) to each token embeddings (<em>independently</em>),
+                            we can apply non-linear transformations (helps in capturing complex patterns) to each
+                            token's representation.</p>
+                        </p>
+                        \[
+                        \text{FFN}(x_1), \text{FFN}(x_2), \ldots, \text{FFN}(x_n)
+                        \]
+
+                        <p>Each token goes through their <em>same</em> FFN, but with no interaction between tokens.
+                        </p>
+                        <br>
+                        <img src="../assets/t_mulffn.png" alt="Black box" class="context-image"
+                            style="max-width: 100%; height: auto; display: block; margin: 0 auto;" loading="lazy">
+                        <br>
+                        <p>Let's now understand the working and what each component does here:</p>
+                    </div>
+
+                    <div class="solution">
+
+                        <div class="step">
+                            <strong>1. Linear Transformation(Up-Scaling):</strong>
+                            <p>The first step is to convert our resultant outputs from the Multi-Headed Attention (MHA)
+                                block to a higher dimension.</p>
+                            <p>The main motive behind this is to learn more features by projecting the resultant vector
+                                onto a higher dimensional space.</p>
+
+                            <p>Mathematically, this is equivalent to:</p>
+                            \[
+                            E''_{\text{Mann}} = E'_{\text{Mann}} \cdot W_1 + b_1
+                            \]
+
+                            <p>where, \(E'_{\text{Mann}} \in \mathbb{R}^{512}\), \(W_1 \in \mathbb{R}^{512 \times
+                                2048}\), and \(b_1 \in \mathbb{R}^{2048}\)</p>
+                            <p>Our new vector \(E''_{\text{Mann}} \in \mathbb{R}^{2048}\) is now in a higher dimensional
+                                space.</p>
+                        </div>
+
+                        <div class="step">
+                            <strong>2. ReLU Activation (Non-linear Transformation):</strong>
+                            <p>Now, we perform a ReLU activation:</p>
+                            \[
+                            E'''_{\text{Mann}} = \max(0, E''_{\text{Mann}})
+                            \]
+                            <p>What ReLU does here is, if a neuron's input is negative, it sets the output to zero;
+                                otherwise, it passes the input through unchanged.</p>
+                            <p>This is where the non-linearity stuff occurs.</p>
+                            <br>
+                            <img src="../assets/t_relu.png" alt="Black box" class="context-image"
+                                style="max-width: 100%; height: auto; display: block; margin: 0 auto;" loading="lazy">
+                            <br>
+                            <p>Our new vector \(E'''_{\text{Mann}} \in \mathbb{R}^{2048}\) retains the same shape as it
+                                did previously.</p>
+                        </div>
+
+                        <div class="step">
+                            <strong>3. Linear Transformation(Down-Scaling):</strong>
+                            <p>Finally, we project the vector back to the original dimension:</p>
+                            \[
+                            E''''_{\text{Mann}} = E'''_{\text{Mann}} \cdot W_2 + b_2
+                            \]
+                            <p>where, \(E'''_{\text{Mann}} \in \mathbb{R}^{2048}\), \(W_2 \in \mathbb{R}^{2048 \times
+                                512}\), and \(b_2 \in \mathbb{R}^{512}\)</p>
+                            <p>Our final vector \(E''''_{\text{Mann}} \in \mathbb{R}^{512}\) is now back in the original
+                                dimension.</p>
+
+                            <p>We can write the overall transformation as:</p>
+                            \[
+                            FFN(x) = \max(0, xW_1 + b_1)W_2 + b_2
+                            \]
+                        </div>
+
+                        <div class="step">
+                            <strong>The Big Picture</strong>
+                            <p>At this point in the Transformer, each token has:</p>
+                            <ol>
+                                <li><strong>Gathered context</strong> via multi-head attention</li>
+                                <li><strong>Processed that context</strong> via the FFN</li>
+                            </ol>
+
+                            <p>But we're not done yet! These operations are wrapped in something called <strong>residual
+                                    connections</strong> and <strong>layer normalization</strong>—our next topics.</p>
+                        </div>
+
+                        <div class="note">
+                            <p>
+                                The FFN/MLPs are the components that may actually store
+                                <em>factual knowledge</em>. They account for approximately
+                                \( \tfrac{2}{3} \) of the model’s parameters.
+                            </p>
+
                         </div>
                     </div>
                 </div>
 
                 <!-- 6. The Encoder -->
-                <div class="problem" id="encoder">
+                <!-- <div class="problem" id="encoder">
                     <h3>The Encoder: Building Context</h3>
 
                     <div class="context">
@@ -513,10 +658,10 @@
                             self-attention.
                         </div>
                     </div>
-                </div>
+                </div> -->
 
                 <!-- 7. The Decoder -->
-                <div class="problem" id="decoder">
+                <!-- <div class="problem" id="decoder">
                     <h3>The Decoder: Generating Translation</h3>
 
                     <div class="context">
@@ -691,7 +836,7 @@
                             source and target tokens—learning which German words correspond to which English words.
                         </div>
                     </div>
-                </div>
+                </div> -->
 
                 <footer>
                     <p>Written with mathematical rigor and visual intuition in mind.</p>
