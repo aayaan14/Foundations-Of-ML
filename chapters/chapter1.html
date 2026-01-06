@@ -28,7 +28,7 @@
                 saying function on 'x').
                 This equation will come up a lot:
                 \[
-                y(x) = w_0 + \sum_{i=1}^D w_i\,\phi\!\left({x}\right)\quad (1.1)
+                y(x) = w_0 + \sum_{i=1}^D w_i\,\phi\!\left({x}\right)\tag{1.1}
                 \]
             </p>
             <p>These are the key notations we'll be using in the chapter:</p>
@@ -113,11 +113,11 @@
                     \]
                     <p>Hence show that a general linear combination of logistic sigmoid functions of the form:</p>
                     \[
-                    y(x,w) = w_0 + \sum_{j=1}^M w_j\,\sigma\!\left(\frac{x-\mu_j}{s}\right) \quad (1.2)
+                    y(x,w) = w_0 + \sum_{j=1}^M w_j\,\sigma\!\left(\frac{x-\mu_j}{s}\right) \tag{1.2}
                     \]
                     <p>is equivalent to a linear combination of \(\tanh\) functions of the form:</p>
                     \[
-                    y(x,u) = u_0 + \sum_{j=1}^M u_j\,\tanh\!\left(\frac{x-\mu_j}{s}\right) \quad (1.3)
+                    y(x,u) = u_0 + \sum_{j=1}^M u_j\,\tanh\!\left(\frac{x-\mu_j}{s}\right) \tag{1.3}
                     \]
                     <p>and find expressions relating the new parameters \(\{u_j\}\) to the original parameters
                         \(\{w_j\}\).</p>
@@ -3094,6 +3094,125 @@
             </div>
 
             <!-- 13 -->
+            <div class="problem">
+                <div class="context">
+                    Usually, when we do Linear Regression, we think in terms of learning weights \( \mathbf{w} \).
+                    <ol>
+                        <li>We take training data \(\mathbf{X}\) and \(\mathbf{t}\)</li>
+                        <li>We learn a weight vector \(\mathbf{w}\)</li>
+                        <li>To predict a new input \(\mathbf{x}_*\), we compute \(\mathbf{w}^\top \phi(\mathbf{x}_*)\)
+                        </li>
+                    </ol>
+                    <p>Now, we'll introduce <strong>Equivalent Kernel</strong> which will flip the entire perspective of
+                        linear regression.</p>
+                    <p>We'll show that we don't strictly need to think about weights.</p>
+                    <p>Let's consider our predictive distribution again given in (1.22)</p>
+                    \[
+                    p(t_* \mid x_*, \mathbf{t})
+                    =
+                    \mathcal{N}\!\left(
+                    t_* \mid
+                    \boldsymbol{\phi}(x_*)^T \boldsymbol{\mu}_M,\;
+                    \sigma_*^2
+                    \right)
+                    \]
+                    <p>where</p>
+                    \[
+                    \sigma_*^2
+                    =
+                    \sigma_t^2
+                    +
+                    \boldsymbol{\phi}(x_*)^T \boldsymbol{\Sigma}_M \boldsymbol{\phi}(x_*)
+                    \]
+                    <p>and</p>
+                    \[
+                    \boldsymbol{\mu}_M = \frac{1}{\sigma_t^2} \boldsymbol{\Sigma}_M \boldsymbol{\Phi}^T \mathbf{t}
+                    \]
+                    <p>Now let's find the predictive mean of the given equation by Substituting</p>
+                    \[
+                    \hat{y}(x_*)
+                    =
+                    \frac{1}{\sigma_t^2}
+                    \boldsymbol{\phi}(x_*)^{\!T}
+                    \boldsymbol{\Sigma}_M
+                    \boldsymbol{\Phi}^{\!T}
+                    \mathbf{t}
+                    \]
+
+                    <p>The above expression can be rewritten as:</p>
+                    \[
+                    \hat{y}(x_*)
+                    =
+                    \sum_{n=1}^M
+                    \frac{1}{\sigma_t^2}
+                    \boldsymbol{\phi}(x_*)^{\!T}
+                    \boldsymbol{\Sigma}_M
+                    \boldsymbol{\phi}(x_n)
+                    \; t_n
+                    \]
+                    <p>where \( x_n \) is the \( n \)-th training input corresponding to target \( t_n \).</p>
+                    <p>Defining the function</p>
+                    \[
+                    k(x_*, x_n)
+                    =
+                    \frac{1}{\sigma_t^2}
+                    \boldsymbol{\phi}(x_*)^{\!T}
+                    \boldsymbol{\Sigma}_M
+                    \boldsymbol{\phi}(x_n)
+                    \]
+                    <p>we can write the predictive mean as</p>
+                    \[
+                    \hat{y}(x_*)
+                    =
+                    \sum_{n=1}^M
+                    k(x_*, x_n)
+                    \; t_n
+                    \tag{1.36}
+                    \]
+                    <p>This shows that the predictive mean can be expressed as a linear combination of the training
+                        targets \( t_n \), weighted by the function \( k(x_*, x_n) \).</p>
+                    <p>This function \( k(x_*, x_n) \) is known as the <strong>equivalent kernel</strong> or
+                        <strong>smoother matrix</strong>.
+                    </p>
+                    <p>It measures the influence of the training target \( t_n \) on the prediction at the new input \(
+                        x_* \).</p>
+                    <p>Thus, instead of thinking in terms of weights \( \mathbf{w} \), we can think in terms of how each
+                        training
+                        point contributes to the prediction through the equivalent kernel.</p>
+
+                    <br>
+                    <img src="../assets/1_kernel.png" alt="Linear Regression Illustration" class="context-image"
+                        style="max-width: 100%; height: auto; display: block; margin: 0 auto;" loading="lazy">
+                    <br>
+                </div>
+
+                <div class="solution">
+
+                    <div class="step">
+                    </div>
+
+                    <div class="note">
+                        <strong>Key properties:</strong>
+                        <ul>
+                            <li>
+                                The equivalent kernel \( k(x_*, x_n) \)
+                                depends on the choice of basis functions \( \boldsymbol{\phi}(x) \)
+                                and the posterior covariance \( \boldsymbol{\Sigma}_M \).
+                            </li>
+                            <li>
+                                It captures how similar the new input \( x_* \)
+                                is to each training input \( x_n \)
+                                in the feature space defined by the basis functions.
+                            </li>
+                            <li>
+                                The predictive mean is a weighted sum of the training targets,
+                                where the weights are given by the equivalent kernel.
+                            </li>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 14 -->
             <div class="problem">
                 <div class="context">
                 </div>
