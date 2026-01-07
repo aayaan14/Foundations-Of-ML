@@ -536,8 +536,141 @@
                     </div>
                 </div>
 
-                <!-- 6. The Encoder -->
-                <!-- <div class="problem" id="encoder">
+                <!-- 7. Residual Connections -->
+                <div class="problem" id="residual-connections">
+                    <h3>Residual Connections: Learning Refinements, Not Replacements</h3>
+
+                    <div class="context">
+                        <p>We've discussed the major chunk of the encoder block, i.e. Self attention and the FFN layer.
+                            But the encoder block alone won't have a single self attention and FFN layer. We stack
+                            multiple encoder blocks together, and each block contains a self attention layer and an FFN
+                            layer as shown in the diagram below.</p>
+
+                        <br>
+                        <img src="../assets/t_nonresid.png" alt="Black box" class="context-image"
+                            style="max-width: 100%; height: auto; display: block; margin: 0 auto;" loading="lazy">
+                        <br>
+                        <p>Now the problem here is we have stacked multiple encoder blocks together. This leads to
+                            <em>vanishing gradients</em> as the information flows through many layers, making it
+                            difficult for gradients to propagate back effectively.
+                        </p>
+
+                        <p>To solve this issue, we introduce <strong>residual connections</strong>.</p>
+
+                        <p>Residual connections solve this by allowing information to flow directly across blocks, which
+                            ensures that gradients can flow more effectively through the network.</p>
+
+                        <br>
+                        <img src="../assets/t_resid.png" alt="Black box" class="context-image"
+                            style="max-width: 100%; height: auto; display: block; margin: 0 auto;" loading="lazy">
+                        <br>
+                    </div>
+
+                    <div class="problem-statement">
+                        <h4>The Core Idea</h4>
+
+                        <p>Rather than computing:</p>
+                        \[
+                        \mathbf{y} = F(\mathbf{x})
+                        \]
+
+                        <p>we compute:</p>
+                        \[
+                        \mathbf{y} = \mathbf{x} + F(\mathbf{x})
+                        \]
+
+                        <p>Here:</p>
+                        <ul>
+                            <li>\(\mathbf{x}\): Input to the sub-layer</li>
+                            <li>\(F(\mathbf{x})\): Transformation (Attention or FFN)</li>
+                            <li>\(\mathbf{y}\): Output after residual addition</li>
+                        </ul>
+                    </div>
+
+                    <div class="solution">
+                        <h4>Why Residual Connections Work</h4>
+
+                        <div class="step">
+                            <strong>Reason 1: Gradient Flow</strong>
+                            <p>During backpropagation, gradients can flow directly through the skip connection without
+                                passing through the layer's transformation:</p>
+                            \[
+                            \frac{\partial \mathbf{x}_{\text{out}}}{\partial \mathbf{x}_{\text{in}}} = \frac{\partial
+                            F(\mathbf{x})}{\partial \mathbf{x}} + I
+                            \]
+
+                            <p>The identity term \(I\) ensures that even if \(\frac{\partial F(\mathbf{x})}{\partial
+                                \mathbf{x}}\) is small, gradients can still propagate. This solves the vanishing
+                                gradient problem!</p>
+
+                            <p><strong>Intuition:</strong> Think of it as a "highway" that lets information bypass
+                                potentially problematic transformations.</p>
+                        </div>
+
+                        <div class="step">
+                            <strong>Reason 2: Identity Mapping</strong>
+                            <p>If a layer doesn't need to transform the input, it can simply learn to output zeros:</p>
+                            \[
+                            \text{If } F(\mathbf{x}) \approx \mathbf{0}, \text{ then } \mathbf{x}_{\text{out}} \approx
+                            \mathbf{x}
+                            \]
+
+                            <p>This makes it easier for the network to learn—the layer doesn't have to reconstruct the
+                                input from scratch, it only needs to learn the <em>changes</em> (residuals) to make.</p>
+
+                            <p><strong>Example:</strong> If the embedding for "Mann" already captures most of its
+                                meaning, the layer can make small adjustments rather than recomputing everything.</p>
+                        </div>
+
+                        <div class="step">
+                            <strong>Reason 3: Ensemble Effect</strong>
+                            <p>Residual networks can be viewed as an ensemble of exponentially many paths. Consider a
+                                network with \(L\) layers—there are \(2^L\) possible paths through the network!</p>
+
+                            <p>Each path corresponds to choosing whether to use the transformation \(F(\cdot)\) or skip
+                                it at each layer. For a 6-layer Transformer encoder, this creates \(2^6 = 64\) different
+                                effective paths.</p>
+
+                            <p><strong>Intuition:</strong> The network learns multiple complementary representations
+                                simultaneously, making it more robust.</p>
+                        </div>
+
+                        <div class="step">
+                            <strong>Reason 4: Incremental Learning</strong>
+                            <p>With residual connections, each layer learns to make incremental improvements:</p>
+                            \[
+                            \begin{aligned}
+                            \mathbf{x}_0 & = \text{Embedding} + \text{PositionalEncoding} \\
+                            \mathbf{x}_1 & = \mathbf{x}_0 + \Delta_1 \quad \text{(Layer 1 adds refinement)} \\
+                            \mathbf{x}_2 & = \mathbf{x}_1 + \Delta_2 \quad \text{(Layer 2 adds more)} \\
+                            & \vdots \\
+                            \mathbf{x}_L & = \mathbf{x}_0 + \sum_{i=1}^{L} \Delta_i
+                            \end{aligned}
+                            \]
+
+                            <p>Each \(\Delta_i\) represents a small, focused change rather than a complete
+                                re-transformation. This makes optimization much easier.</p>
+                        </div>
+
+                        <div class="note">
+                            <p>
+                                Residual connections alone are powerful—but adding them repeatedly can cause
+                                activations to grow uncontrollably.
+                            </p>
+
+                            <p>
+                                To fix this, Transformers apply <strong>Layer Normalization</strong>
+                                immediately after each residual block.
+                            </p>
+
+                            <p>
+                                That’s exactly what we’ll study next.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- 6. The Encoder -->
+                    <!-- <div class="problem" id="encoder">
                     <h3>The Encoder: Building Context</h3>
 
                     <div class="context">
@@ -660,8 +793,8 @@
                     </div>
                 </div> -->
 
-                <!-- 7. The Decoder -->
-                <!-- <div class="problem" id="decoder">
+                    <!-- 7. The Decoder -->
+                    <!-- <div class="problem" id="decoder">
                     <h3>The Decoder: Generating Translation</h3>
 
                     <div class="context">
@@ -838,27 +971,27 @@
                     </div>
                 </div> -->
 
-                <footer>
-                    <p>Written with mathematical rigor and visual intuition in mind.</p>
-                    <p><a href="../index.html">Back to Home</a></p>
-                </footer>
+                    <footer>
+                        <p>Written with mathematical rigor and visual intuition in mind.</p>
+                        <p><a href="../index.html">Back to Home</a></p>
+                    </footer>
 
-            </div>
+                </div>
 
-            <script>
-                // Render all LaTeX equations
-                document.addEventListener("DOMContentLoaded", function () {
-                    renderMathInElement(document.body, {
-                        delimiters: [
-                            { left: "$", right: "$", display: true },
-                            { left: "\\[", right: "\\]", display: true },
-                            { left: "$", right: "$", display: false },
-                            { left: "\\(", right: "\\)", display: false }
-                        ],
-                        throwOnError: false
+                <script>
+                    // Render all LaTeX equations
+                    document.addEventListener("DOMContentLoaded", function () {
+                        renderMathInElement(document.body, {
+                            delimiters: [
+                                { left: "$", right: "$", display: true },
+                                { left: "\\[", right: "\\]", display: true },
+                                { left: "$", right: "$", display: false },
+                                { left: "\\(", right: "\\)", display: false }
+                            ],
+                            throwOnError: false
+                        });
                     });
-                });
-            </script>
+                </script>
 </body>
 
 </html>
