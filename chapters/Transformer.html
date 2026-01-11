@@ -978,6 +978,157 @@
 
                 </div>
 
+                <!-- 8. Layer Normalization -->
+                <div class="problem" id="layer-norm">
+                    <h3>Layer Normalization: Stabilizes the Learning Process</h3>
+
+                    <div class="context">
+                        <p>Up to now, we’ve built a powerful pipeline:</p>
+                        <ul>
+                            <li><strong>Embeddings + Positional Encoding</strong> give meaning and order</li>
+                            <li><strong>Multi-Head Attention</strong> mixes information across tokens</li>
+                            <li><strong>FFNs</strong> apply rich non-linear transformations</li>
+                            <li><strong>Residual connections</strong> ensure gradients flow and learning is incremental
+                            </li>
+                        </ul>
+
+                        <p>But stacking many such blocks introduces a new problem:</p>
+                        <ul>
+                            <li><strong>Unstable training:</strong> Large activations → exploding gradients</li>
+                            <li><strong>Slow convergence:</strong> The optimizer struggles with inconsistent scales</li>
+                            <li><strong>Dead neurons:</strong> Some dimensions dominate while others vanish</li>
+                        </ul>
+                        <p>To fix these issues, we introduce <strong>Layer Normalization</strong>.</p>
+
+                        <br>
+                        <img src="../assets/t_layernorm.png" alt="Black box" class="context-image"
+                            style="max-width: 100%; height: auto; display: block; margin: 0 auto;" loading="lazy">
+                        <br>
+                    </div>
+
+                    <div class="problem-statement">
+                        <h4>The Core Idea</h4>
+                        <p>Layer Normalization normalizes the features of a single token, instead of normalizing across
+                            the batch (Batch Normalization).</p>
+
+                        <p>For a token representation </p>
+                        \[
+                        \mathbf{x} = [x_1, x_2, \ldots, x_{d_{model}}]
+                        \]
+                        <p>LayerNorm Computes:</p>
+                        \[
+                        \mu = \frac{1}{d_{model}} \sum_{i=1}^{d_{model}} x_i
+                        \]
+                        \[
+                        \sigma^2 = \frac{1}{d_{model}} \sum_{i=1}^{d_{model}} (x_i - \mu)^2
+                        \]
+                        \[
+                        \text{LayerNorm}(\mathbf{x}) = \gamma \odot \frac{\mathbf{x} - \mu}{\sqrt{\sigma^2 + \epsilon}}
+                        + \beta
+                        \]
+                        <p>Where:</p>
+                        <ul>
+                            <li><strong>\(\gamma\)</strong> and <strong>\(\beta\)</strong> are learnable parameters
+                                (scale and shift)</li>
+                            <li><strong>\(\epsilon\)</strong> is a small constant to prevent division by zero</li>
+                        </ul>
+                        <p>
+                            This guarantees that, for a token:
+                        </p>
+
+                        \[
+                        \mathbb{E}[\mathbf{x}] \approx 0,
+                        \quad
+                        \mathrm{Var}(\mathbf{x}) \approx 1
+                        \]
+                    </div>
+
+                    <div class="solution">
+
+                        <h4>Why Layer Normalization works</h4>
+                        <div class="step">
+                            <strong>1. Stable Activation Scale</strong>
+                            <p>LayerNorm ensures that each token representation has:</p>
+                            \[
+                            \mathbb{E}[\mathbf{x}] \approx 0,
+                            \quad
+                            \mathrm{Var}(\mathbf{x}) \approx 1
+                            \]
+                            <p>This prevents activations from <strong>exploding or shrinking</strong> as depth
+                                increases.</p>
+                        </div>
+
+                        <div class="step">
+                            <strong>2. Faster and More Reliable Convergence</strong>
+                            <p>When gradients propagate through normalized activations:</p>
+                            <ul>
+                                <li>Learning rates can be larger</li>
+                                <li>Optimization becomes more stable</li>
+                                <li>Training converges faster</li>
+                            </ul>
+                            <p>But how??</p>
+                            <p>The contour plot of an unnormalized loss function might look like this:</p>
+                            <br>
+                            <img src="../assets/t_unnormalized.png" alt="Black box" class="context-image"
+                                style="max-width: 100%; height: auto; display: block; margin: 0 auto;" loading="lazy">
+                            <br>
+                            <p>A larger Learning rate is not ideal for unnormalized data as it can lead to unstable
+                                gradients and poor convergence (higher jumps).</p>
+                            <p>So, we reduce the learning rate. But this leads to slower training!!!</p>
+
+                            <p>However, with Normalization, the loss contours become more spherical:</p>
+                            <br>
+                            <img src="../assets/t_normalized.png" alt="Black box" class="context-image"
+                                style="max-width: 100%; height: auto; display: block; margin: 0 auto;" loading="lazy">
+                            <br>
+                            <p>This makes the contour plot circular.</p>
+                            <p>Now, we can use a larger learning rate without without worrying about instability.</p>
+                        </div>
+
+                        <div class="note">
+                            <strong><em>Why Layer Normalization is preferred over Batch Normalization</em></strong>
+
+                            <p>Batch Normalization normalizes across the batch dimension, which mixes information
+                                across batch. Layer Normalization normalizes across
+                                the embedding dimension for each token independently, preserving the unique
+                                characteristics of each token's representation.</p>
+
+                            <br>
+                            <img src="../assets/t_batchvslayer.png" alt="Black box" class="context-image"
+                                style="max-width: 100%; height: auto; display: block; margin: 0 auto;" loading="lazy">
+                            <br>
+                        </div>
+
+                        <div class="note">
+                            <strong><em>Post-Norm vs Pre-Norm</em></strong>
+
+                            <p>Post-Norm (Original Transformer)</p>
+                            \[
+                            x_{\text{out}} = \text{LayerNorm}\bigl(x + \text{Attention}(x)\bigr)
+                            \]
+                            <p>Pre-Norm (Improved Stability)</p>
+                            \[
+                            x_{\text{out}} = x + \text{Attention}\bigl(\text{LayerNorm}(x)\bigr)
+                            \]
+                            
+                            <br>
+                            <img src="../assets/t_prevspostnorm.jpg" alt="Black box" class="context-image"
+                                style="max-width: 100%; height: auto; display: block; margin: 0 auto;" loading="lazy">
+                            <br>
+
+                            <p>Why is Pre-Norm preferred over Post-Norm?</p>
+                            <ul>
+                                <li><strong>Improved Gradient Flow:</strong> Normalizing before the sub-layer ensures
+                                    that gradients remain stable as they pass through the layer, reducing the risk of
+                                    vanishing or exploding gradients.</li>
+                                <li><strong>Faster Convergence:</strong> Pre-Norm often leads to faster training times
+                                    because the model can learn more effectively from the start.</li>
+                        </div>
+                        <p>This wraps up our Encoder section and now we let's decode!!</p>
+                    </div>
+
+                </div>
+
                 <script>
                     // Render all LaTeX equations
                     document.addEventListener("DOMContentLoaded", function () {
