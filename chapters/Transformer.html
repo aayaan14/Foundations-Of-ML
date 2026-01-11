@@ -53,12 +53,40 @@
 
                         <br>
 
-                        <p>This looks scary!!! But do not worry, we'll learn this architecture thoroughly and understand
+                        <p>This looks scary!!! But do not worry, we'll learn this architecture (in 2 parts: encoder and decoder) thoroughly and understand
                             how did our text get translated step by step.</p>
                     </div>
                 </div>
 
-                <!-- 2. Embeddings -->
+                <!-- 2. The Encoder -->
+                <div class="problem" id="encoder">
+                    <h3>The Encoder: Building Context</h3>
+
+                    <div class="context">
+                        <p>The encoder's job is to build a rich, context-aware representation of the input sentence
+                            (German).</p>
+
+                        <p>Each encoder layer has these sub-components:</p>
+                        <ol>
+                            <li><strong>Multi-Head Self-Attention</strong>: Allows each token to attend to all other
+                                tokens
+                            </li>
+                            <li><strong>Feed-Forward Network</strong>: Applies non-linear transformation</li>
+                            <li><strong>Residual Connections</strong>: Adds input to output for stability</li>
+                            <li><strong>Layer Normalization</strong>: Normalizes activations for stability</li>
+                        </ol>
+
+                        <p>This is how the Encoder Architecture looks like in the paper:</p>
+                        
+                    </div>
+                    <br>
+                        <img src="../assets/t_encoder.png" alt="Black box" class="context-image"
+                            style="max-width: 100%; height: auto; display: block; margin: 0 auto;" loading="lazy">
+                        <br>
+                    <p>Let's break this down step by step.</p>
+                </div>
+
+                <!-- 3. Embeddings -->
                 <div class="problem" id="embeddings">
                     <h3>Embeddings: From Words to Vectors</h3>
 
@@ -93,7 +121,7 @@
                     </div>
                 </div>
 
-                <!-- 3. Positional Encoding -->
+                <!-- 4. Positional Encoding -->
                 <div class="problem" id="positional">
                     <h3>Positional Encoding: Teaching Order</h3>
 
@@ -194,7 +222,7 @@
                     </div>
                 </div>
 
-                <!-- 4. Attention Mechanism -->
+                <!-- 5. Attention Mechanism -->
                 <div class="problem" id="attention">
                     <h3>Attention Mechanism: The Heart of Transformers</h3>
 
@@ -305,7 +333,7 @@
 
                 </div>
 
-                <!-- 5. Multi-Head Attention -->
+                <!-- 6. Multi-Head Attention -->
                 <div class="problem" id="multi-head">
                     <h3>Multi-Head Attention: Multiple Perspectives</h3>
 
@@ -404,7 +432,7 @@
                     </div>
                 </div>
 
-                <!-- 6. Feed Forward Networks -->
+                <!-- 7. Feed Forward Networks -->
                 <div class="problem" id="feed-forward">
                     <h3>Feed Forward Networks: Position-wise Transformations</h3>
 
@@ -536,7 +564,7 @@
                     </div>
                 </div>
 
-                <!-- 7. Residual Connections -->
+                <!-- 8. Residual Connections -->
                 <div class="problem" id="residual-connections">
                     <h3>Residual Connections: Learning Refinements, Not Replacements</h3>
 
@@ -669,131 +697,165 @@
                         </div>
                     </div>
 
-                    <!-- 6. The Encoder -->
-                    <!-- <div class="problem" id="encoder">
-                    <h3>The Encoder: Building Context</h3>
+                    <footer>
+                        <p>Written with mathematical rigor and visual intuition in mind.</p>
+                        <p><a href="../index.html">Back to Home</a></p>
+                    </footer>
+
+                </div>
+
+                <!-- 9. Layer Normalization -->
+                <div class="problem" id="layer-norm">
+                    <h3>Layer Normalization: Stabilizes the Learning Process</h3>
 
                     <div class="context">
-                        <p>The encoder's job is to build a rich, context-aware representation of the input sentence
-                            (German).</p>
-
-                        <p>Each encoder layer has two main sub-components:</p>
-                        <ol>
-                            <li><strong>Multi-Head Self-Attention</strong>: Allows each token to attend to all other
-                                tokens
+                        <p>Up to now, we’ve built a powerful pipeline:</p>
+                        <ul>
+                            <li><strong>Embeddings + Positional Encoding</strong> give meaning and order</li>
+                            <li><strong>Multi-Head Attention</strong> mixes information across tokens</li>
+                            <li><strong>FFNs</strong> apply rich non-linear transformations</li>
+                            <li><strong>Residual connections</strong> ensure gradients flow and learning is incremental
                             </li>
-                            <li><strong>Feed-Forward Network</strong>: Applies non-linear transformation</li>
-                        </ol>
+                        </ul>
+
+                        <p>But stacking many such blocks introduces a new problem:</p>
+                        <ul>
+                            <li><strong>Unstable training:</strong> Large activations → exploding gradients</li>
+                            <li><strong>Slow convergence:</strong> The optimizer struggles with inconsistent scales</li>
+                            <li><strong>Dead neurons:</strong> Some dimensions dominate while others vanish</li>
+                        </ul>
+                        <p>To fix these issues, we introduce <strong>Layer Normalization</strong>.</p>
+
+                        <br>
+                        <img src="../assets/t_layernorm.png" alt="Black box" class="context-image"
+                            style="max-width: 100%; height: auto; display: block; margin: 0 auto;" loading="lazy">
+                        <br>
                     </div>
 
                     <div class="problem-statement">
-                        <h4>Encoder Layer Mathematics</h4>
-                        <p>For input \(\mathbf{x}\), a single encoder layer performs:</p>
-                        \[
-                        \begin{aligned}
-                        \mathbf{x}_1 &= \text{LayerNorm}(\mathbf{x} + \text{MultiHeadAttention}(\mathbf{x}, \mathbf{x},
-                        \mathbf{x})) \\
-                        \mathbf{x}_2 &= \text{LayerNorm}(\mathbf{x}_1 + \text{FFN}(\mathbf{x}_1))
-                        \end{aligned}
-                        \]
+                        <h4>The Core Idea</h4>
+                        <p>Layer Normalization normalizes the features of a single token, instead of normalizing across
+                            the batch (Batch Normalization).</p>
 
-                        <p>Note: \(Q = K = V = \mathbf{x}\), hence "self-attention"</p>
+                        <p>For a token representation </p>
+                        \[
+                        \mathbf{x} = [x_1, x_2, \ldots, x_{d_{model}}]
+                        \]
+                        <p>LayerNorm Computes:</p>
+                        \[
+                        \mu = \frac{1}{d_{model}} \sum_{i=1}^{d_{model}} x_i
+                        \]
+                        \[
+                        \sigma^2 = \frac{1}{d_{model}} \sum_{i=1}^{d_{model}} (x_i - \mu)^2
+                        \]
+                        \[
+                        \text{LayerNorm}(\mathbf{x}) = \gamma \odot \frac{\mathbf{x} - \mu}{\sqrt{\sigma^2 + \epsilon}}
+                        + \beta
+                        \]
+                        <p>Where:</p>
+                        <ul>
+                            <li><strong>\(\gamma\)</strong> and <strong>\(\beta\)</strong> are learnable parameters
+                                (scale and shift)</li>
+                            <li><strong>\(\epsilon\)</strong> is a small constant to prevent division by zero</li>
+                        </ul>
+                        <p>
+                            This guarantees that, for a token:
+                        </p>
+
+                        \[
+                        \mathbb{E}[\mathbf{x}] \approx 0,
+                        \quad
+                        \mathrm{Var}(\mathbf{x}) \approx 1
+                        \]
                     </div>
 
                     <div class="solution">
-                        <h4>Component Breakdown</h4>
 
+                        <h4>Why Layer Normalization works</h4>
                         <div class="step">
-                            <strong>Component 1: Layer Normalization</strong>
-                            <p>Normalizes activations to have mean 0 and variance 1:</p>
+                            <strong>1. Stable Activation Scale</strong>
+                            <p>LayerNorm ensures that each token representation has:</p>
                             \[
-                            \text{LayerNorm}(\mathbf{x}) = \gamma \odot \frac{\mathbf{x} - \mu}{\sqrt{\sigma^2 +
-                            \epsilon}} + \beta
+                            \mathbb{E}[\mathbf{x}] \approx 0,
+                            \quad
+                            \mathrm{Var}(\mathbf{x}) \approx 1
                             \]
-
-                            <p>where:</p>
-                            <ul>
-                                <li>\(\mu = \frac{1}{d_{model}} \sum_{i=1}^{d_{model}} x_i\): Mean</li>
-                                <li>\(\sigma^2 = \frac{1}{d_{model}} \sum_{i=1}^{d_{model}} (x_i - \mu)^2\): Variance
-                                </li>
-                                <li>\(\gamma, \beta\): Learned scaling and shifting parameters</li>
-                                <li>\(\epsilon\): Small constant for numerical stability (typically \(10^{-6}\))</li>
-                            </ul>
-
-                            <p><strong>Why normalize?</strong></p>
-                            <ul>
-                                <li>Stabilizes training by preventing extreme values</li>
-                                <li>Makes different layers learn at similar rates</li>
-                                <li>Helps gradients flow better during backpropagation</li>
-                            </ul>
+                            <p>This prevents activations from <strong>exploding or shrinking</strong> as depth
+                                increases.</p>
                         </div>
 
                         <div class="step">
-                            <strong>Component 2: Multi-Head Self-Attention</strong>
-                            <p>Each token attends to all other tokens in the same sentence:</p>
-                            \[
-                            \text{SelfAttention}(\mathbf{x}) = \text{MultiHead}(\mathbf{x}, \mathbf{x}, \mathbf{x})
-                            \]
-
-                            <p>For the sentence "Ein Mann steht", token "Mann" computes attention over all three words,
-                                learning which are most relevant for understanding "Mann" in this context.</p>
-                        </div>
-
-                        <div class="step">
-                            <strong>Component 3: Residual Connections</strong>
-                            <p>The "+\(\mathbf{x}\)" in the formula is crucial—it's a residual (skip) connection:</p>
-                            \[
-                            \mathbf{x}_{\text{out}} = \mathbf{x}_{\text{in}} + F(\mathbf{x}_{\text{in}})
-                            \]
-
-                            <p><strong>Benefits:</strong></p>
+                            <strong>2. Faster and More Reliable Convergence</strong>
+                            <p>When gradients propagate through normalized activations:</p>
                             <ul>
-                                <li><strong>Gradient flow:</strong> Provides a direct path for gradients during
-                                    backpropagation</li>
-                                <li><strong>Identity mapping:</strong> Model can learn to pass information unchanged if
-                                    needed</li>
-                                <li><strong>Incremental learning:</strong> Each layer learns a refinement, not a
-                                    complete
-                                    transformation</li>
+                                <li>Learning rates can be larger</li>
+                                <li>Optimization becomes more stable</li>
+                                <li>Training converges faster</li>
                             </ul>
+                            <p>But how??</p>
+                            <p>The contour plot of an unnormalized loss function might look like this:</p>
+                            <br>
+                            <img src="../assets/t_unnormalized.png" alt="Black box" class="context-image"
+                                style="max-width: 100%; height: auto; display: block; margin: 0 auto;" loading="lazy">
+                            <br>
+                            <p>A larger Learning rate is not ideal for unnormalized data as it can lead to unstable
+                                gradients and poor convergence (higher jumps).</p>
+                            <p>So, we reduce the learning rate. But this leads to slower training!!!</p>
 
-                            <p>Mathematically, gradients can flow through the identity path:</p>
-                            \[
-                            \frac{\partial \mathbf{x}_{\text{out}}}{\partial \mathbf{x}_{\text{in}}} = I +
-                            \frac{\partial F}{\partial \mathbf{x}_{\text{in}}}
-                            \]
+                            <p>However, with Normalization, the loss contours become more spherical:</p>
+                            <br>
+                            <img src="../assets/t_normalized.png" alt="Black box" class="context-image"
+                                style="max-width: 100%; height: auto; display: block; margin: 0 auto;" loading="lazy">
+                            <br>
+                            <p>This makes the contour plot circular.</p>
+                            <p>Now, we can use a larger learning rate without without worrying about instability.</p>
                         </div>
 
-                        <div class="step">
-                            <strong>Component 4: Feed-Forward Network</strong>
-                            <p>A position-wise fully connected network applied to each position independently:</p>
+                        <div class="note">
+                            <strong><em>Why Layer Normalization is preferred over Batch Normalization</em></strong>
+
+                            <p>Batch Normalization normalizes across the batch dimension, which mixes information
+                                across batch. Layer Normalization normalizes across
+                                the embedding dimension for each token independently, preserving the unique
+                                characteristics of each token's representation.</p>
+
+                            <br>
+                            <img src="../assets/t_batchvslayer.png" alt="Black box" class="context-image"
+                                style="max-width: 100%; height: auto; display: block; margin: 0 auto;" loading="lazy">
+                            <br>
+                        </div>
+
+                        <div class="note">
+                            <strong><em>Post-Norm vs Pre-Norm</em></strong>
+
+                            <p>Post-Norm (Original Transformer)</p>
                             \[
-                            \text{FFN}(\mathbf{x}) = \max(0, \mathbf{x}W_1 + \mathbf{b}_1)W_2 + \mathbf{b}_2
+                            x_{\text{out}} = \text{LayerNorm}\bigl(x + \text{Attention}(x)\bigr)
+                            \]
+                            <p>Pre-Norm (Improved Stability)</p>
+                            \[
+                            x_{\text{out}} = x + \text{Attention}\bigl(\text{LayerNorm}(x)\bigr)
                             \]
 
-                            <p>Architecture: \(d_{model} \xrightarrow{W_1} d_{ff} \xrightarrow{\text{ReLU}}
-                                \xrightarrow{W_2} d_{model}\)</p>
-                            <p>In our case: \(512 \rightarrow 2048 \rightarrow 512\)</p>
+                            <br>
+                            <img src="../assets/t_prevspostnorm.jpg" alt="Black box" class="context-image"
+                                style="max-width: 100%; height: auto; display: block; margin: 0 auto;" loading="lazy">
+                            <br>
 
-                            <p><strong>Purpose:</strong></p>
+                            <p>Why is Pre-Norm preferred over Post-Norm?</p>
                             <ul>
-                                <li>Adds non-linearity and transformation capacity</li>
-                                <li>The expansion to 2048 gives the model "thinking space"</li>
-                                <li>Applied independently to each position (unlike attention which mixes positions)</li>
-                            </ul>
+                                <li><strong>Improved Gradient Flow:</strong> Normalizing before the sub-layer ensures
+                                    that gradients remain stable as they pass through the layer, reducing the risk of
+                                    vanishing or exploding gradients.</li>
+                                <li><strong>Faster Convergence:</strong> Pre-Norm often leads to faster training times
+                                    because the model can learn more effectively from the start.</li>
                         </div>
-
-                        <div class="tip">
-                            <strong>💡 Key Insight:</strong> The encoder transforms simple embeddings into rich,
-                            context-aware representations. Each token's final encoding contains information about itself
-                            and
-                            its relationships with every other token in the sentence—captured through multiple layers of
-                            self-attention.
-                        </div>
+                        <p>This wraps up our Encoder section and now we let's decode!!</p>
                     </div>
-                </div> -->
 
-                    <!-- 7. The Decoder -->
+                </div>
+
+                <!-- 10. The Decoder -->
                     <!-- <div class="problem" id="decoder">
                     <h3>The Decoder: Generating Translation</h3>
 
@@ -970,164 +1032,6 @@
                         </div>
                     </div>
                 </div> -->
-
-                    <footer>
-                        <p>Written with mathematical rigor and visual intuition in mind.</p>
-                        <p><a href="../index.html">Back to Home</a></p>
-                    </footer>
-
-                </div>
-
-                <!-- 8. Layer Normalization -->
-                <div class="problem" id="layer-norm">
-                    <h3>Layer Normalization: Stabilizes the Learning Process</h3>
-
-                    <div class="context">
-                        <p>Up to now, we’ve built a powerful pipeline:</p>
-                        <ul>
-                            <li><strong>Embeddings + Positional Encoding</strong> give meaning and order</li>
-                            <li><strong>Multi-Head Attention</strong> mixes information across tokens</li>
-                            <li><strong>FFNs</strong> apply rich non-linear transformations</li>
-                            <li><strong>Residual connections</strong> ensure gradients flow and learning is incremental
-                            </li>
-                        </ul>
-
-                        <p>But stacking many such blocks introduces a new problem:</p>
-                        <ul>
-                            <li><strong>Unstable training:</strong> Large activations → exploding gradients</li>
-                            <li><strong>Slow convergence:</strong> The optimizer struggles with inconsistent scales</li>
-                            <li><strong>Dead neurons:</strong> Some dimensions dominate while others vanish</li>
-                        </ul>
-                        <p>To fix these issues, we introduce <strong>Layer Normalization</strong>.</p>
-
-                        <br>
-                        <img src="../assets/t_layernorm.png" alt="Black box" class="context-image"
-                            style="max-width: 100%; height: auto; display: block; margin: 0 auto;" loading="lazy">
-                        <br>
-                    </div>
-
-                    <div class="problem-statement">
-                        <h4>The Core Idea</h4>
-                        <p>Layer Normalization normalizes the features of a single token, instead of normalizing across
-                            the batch (Batch Normalization).</p>
-
-                        <p>For a token representation </p>
-                        \[
-                        \mathbf{x} = [x_1, x_2, \ldots, x_{d_{model}}]
-                        \]
-                        <p>LayerNorm Computes:</p>
-                        \[
-                        \mu = \frac{1}{d_{model}} \sum_{i=1}^{d_{model}} x_i
-                        \]
-                        \[
-                        \sigma^2 = \frac{1}{d_{model}} \sum_{i=1}^{d_{model}} (x_i - \mu)^2
-                        \]
-                        \[
-                        \text{LayerNorm}(\mathbf{x}) = \gamma \odot \frac{\mathbf{x} - \mu}{\sqrt{\sigma^2 + \epsilon}}
-                        + \beta
-                        \]
-                        <p>Where:</p>
-                        <ul>
-                            <li><strong>\(\gamma\)</strong> and <strong>\(\beta\)</strong> are learnable parameters
-                                (scale and shift)</li>
-                            <li><strong>\(\epsilon\)</strong> is a small constant to prevent division by zero</li>
-                        </ul>
-                        <p>
-                            This guarantees that, for a token:
-                        </p>
-
-                        \[
-                        \mathbb{E}[\mathbf{x}] \approx 0,
-                        \quad
-                        \mathrm{Var}(\mathbf{x}) \approx 1
-                        \]
-                    </div>
-
-                    <div class="solution">
-
-                        <h4>Why Layer Normalization works</h4>
-                        <div class="step">
-                            <strong>1. Stable Activation Scale</strong>
-                            <p>LayerNorm ensures that each token representation has:</p>
-                            \[
-                            \mathbb{E}[\mathbf{x}] \approx 0,
-                            \quad
-                            \mathrm{Var}(\mathbf{x}) \approx 1
-                            \]
-                            <p>This prevents activations from <strong>exploding or shrinking</strong> as depth
-                                increases.</p>
-                        </div>
-
-                        <div class="step">
-                            <strong>2. Faster and More Reliable Convergence</strong>
-                            <p>When gradients propagate through normalized activations:</p>
-                            <ul>
-                                <li>Learning rates can be larger</li>
-                                <li>Optimization becomes more stable</li>
-                                <li>Training converges faster</li>
-                            </ul>
-                            <p>But how??</p>
-                            <p>The contour plot of an unnormalized loss function might look like this:</p>
-                            <br>
-                            <img src="../assets/t_unnormalized.png" alt="Black box" class="context-image"
-                                style="max-width: 100%; height: auto; display: block; margin: 0 auto;" loading="lazy">
-                            <br>
-                            <p>A larger Learning rate is not ideal for unnormalized data as it can lead to unstable
-                                gradients and poor convergence (higher jumps).</p>
-                            <p>So, we reduce the learning rate. But this leads to slower training!!!</p>
-
-                            <p>However, with Normalization, the loss contours become more spherical:</p>
-                            <br>
-                            <img src="../assets/t_normalized.png" alt="Black box" class="context-image"
-                                style="max-width: 100%; height: auto; display: block; margin: 0 auto;" loading="lazy">
-                            <br>
-                            <p>This makes the contour plot circular.</p>
-                            <p>Now, we can use a larger learning rate without without worrying about instability.</p>
-                        </div>
-
-                        <div class="note">
-                            <strong><em>Why Layer Normalization is preferred over Batch Normalization</em></strong>
-
-                            <p>Batch Normalization normalizes across the batch dimension, which mixes information
-                                across batch. Layer Normalization normalizes across
-                                the embedding dimension for each token independently, preserving the unique
-                                characteristics of each token's representation.</p>
-
-                            <br>
-                            <img src="../assets/t_batchvslayer.png" alt="Black box" class="context-image"
-                                style="max-width: 100%; height: auto; display: block; margin: 0 auto;" loading="lazy">
-                            <br>
-                        </div>
-
-                        <div class="note">
-                            <strong><em>Post-Norm vs Pre-Norm</em></strong>
-
-                            <p>Post-Norm (Original Transformer)</p>
-                            \[
-                            x_{\text{out}} = \text{LayerNorm}\bigl(x + \text{Attention}(x)\bigr)
-                            \]
-                            <p>Pre-Norm (Improved Stability)</p>
-                            \[
-                            x_{\text{out}} = x + \text{Attention}\bigl(\text{LayerNorm}(x)\bigr)
-                            \]
-                            
-                            <br>
-                            <img src="../assets/t_prevspostnorm.jpg" alt="Black box" class="context-image"
-                                style="max-width: 100%; height: auto; display: block; margin: 0 auto;" loading="lazy">
-                            <br>
-
-                            <p>Why is Pre-Norm preferred over Post-Norm?</p>
-                            <ul>
-                                <li><strong>Improved Gradient Flow:</strong> Normalizing before the sub-layer ensures
-                                    that gradients remain stable as they pass through the layer, reducing the risk of
-                                    vanishing or exploding gradients.</li>
-                                <li><strong>Faster Convergence:</strong> Pre-Norm often leads to faster training times
-                                    because the model can learn more effectively from the start.</li>
-                        </div>
-                        <p>This wraps up our Encoder section and now we let's decode!!</p>
-                    </div>
-
-                </div>
 
                 <script>
                     // Render all LaTeX equations
