@@ -69,13 +69,12 @@
 
                         <p>Each encoder layer has these sub-components:</p>
                         <ol>
-                            <li><strong>Multi-Head Self-Attention</strong>: Allows each token to attend to all other
-                                tokens
+                            <li><strong>Multi-Head Self-Attention</strong>
                             </li>
-                            <li><strong>Feed-Forward Network</strong>: Applies non-linear transformation</li>
-                            <li><strong>Residual Connections</strong>: Adds input to output for stability</li>
-                            <li><strong>Layer Normalization</strong>: Normalizes activations for stability</li>
-                            <li><strong>Dropout</strong>: Randomly sets a fraction of inputs to zero during training
+                            <li><strong>Feed-Forward Network</strong></li>
+                            <li><strong>Residual Connections</strong></li>
+                            <li><strong>Layer Normalization</strong></li>
+                            <li><strong>Dropout</strong>
                             </li>
                         </ol>
 
@@ -1015,7 +1014,8 @@
                         </div>
 
                         <div class="note"><strong>Note: </strong>Always apply dropout during training only and not
-                            during inference.</div>
+                            during inference.
+                        </div>
 
                         <p>
                             This wraps up our Encoder section — and now, we’re finally ready to decode!
@@ -1028,177 +1028,23 @@
                     <h3>The Decoder: Generating Translation</h3>
 
                     <div class="context">
-                        <p>The decoder's job is to generate the English translation one word at a time, using both the
+                        <p>Now that we’ve covered most of the concepts on the encoder side, we basically know how the components of decoders work as well (except causal-masking and cross-attention mechanism).</p>
+                        <p>The decoder's main job is to generate the English translation one word at a time, using both the
                             encoder's context and the words it has already generated.</p>
 
-                        <p>Each decoder layer has <strong>three</strong> sub-components (compared to encoder's two):</p>
+                        <p>We derive most of the components from encoder here except:</p>
                         <ol>
-                            <li><strong>Masked Self-Attention</strong>: Attends to previously generated tokens</li>
-                            <li><strong>Cross-Attention</strong>: Attends to encoder output (source sentence)</li>
-                            <li><strong>Feed-Forward Network</strong>: Non-linear transformation</li>
+                            <li><strong>Masked Self-Attention</strong>
+                            <li><strong>Cross-Attention</strong>
                         </ol>
+                        <p>Here's how a decoder looks like:</p>
+                        <br>
+                        <img src="../assets/t_decoder.jpg" alt="Black box" class="context-image"
+                            style="max-width: 100%; height: auto; display: block; margin: 0 auto;" loading="lazy">
+                            <br>
+                        <p>Let's now understand causal masking.</p>
                     </div>
-
-                    <div class="problem-statement">
-                        <h4>Decoder Layer Mathematics</h4>
-                        <p>For input \(\mathbf{y}\) and encoder output \(\mathbf{h}_{\text{enc}}\):</p>
-                        \[
-                        \begin{aligned}
-                        \mathbf{y}_1 &= \text{LayerNorm}(\mathbf{y} + \text{MaskedMultiHead}(\mathbf{y}, \mathbf{y},
-                        \mathbf{y})) \\
-                        \mathbf{y}_2 &= \text{LayerNorm}(\mathbf{y}_1 + \text{MultiHead}(\mathbf{y}_1,
-                        \mathbf{h}_{\text{enc}}, \mathbf{h}_{\text{enc}})) \\
-                        \mathbf{y}_3 &= \text{LayerNorm}(\mathbf{y}_2 + \text{FFN}(\mathbf{y}_2))
-                        \end{aligned}
-                        \]
-                    </div>
-
-                    <div class="solution">
-                        <h4>Component Breakdown</h4>
-
-                        <div class="step">
-                            <strong>Component 1: Masked Self-Attention</strong>
-                            <p>Prevents the decoder from "looking into the future" during training. The mask ensures
-                                position \(i\) can only attend to positions \(\leq i\):</p>
-                            \[
-                            \text{Mask}_{ij} = \begin{cases}
-                            0 & \text{if } i \geq j \\
-                            -\infty & \text{if } i < j \end{cases} \] <p>Applied to attention scores before softmax:</p>
-                                \[
-                                \text{Scores} = \frac{QK^T}{\sqrt{d_k}} + \text{Mask}
-                                \]
-
-                                <p><strong>Mask pattern for 4 tokens:</strong></p>
-                                \[
-                                \begin{bmatrix}
-                                0 & 0 & 0 & 0 \\
-                                -\infty & 0 & 0 & 0 \\
-                                -\infty & -\infty & 0 & 0 \\
-                                -\infty & -\infty & -\infty & 0 \\
-                                \end{bmatrix}
-                                \]
-
-                        </div>
-
-                        <div class="step">
-                            <strong>Component 2: Cross-Attention (Encoder-Decoder Attention)</strong>
-                            <p>This is where German meets English! The decoder attends to the encoder's output:</p>
-                            \[
-                            \text{CrossAttention}(\mathbf{y}, \mathbf{h}_{\text{enc}}) = \text{MultiHead}(\mathbf{y},
-                            \mathbf{h}_{\text{enc}}, \mathbf{h}_{\text{enc}})
-                            \]
-
-                            <p><strong>Key observation:</strong></p>
-                            <ul>
-                                <li>\(Q\): From decoder (current English token being generated)</li>
-                                <li>\(K, V\): From encoder (all German tokens)</li>
-                            </ul>
-
-                            <p>The decoder asks: "Which German words should I focus on when generating this English
-                                word?"
-                            </p>
-                        </div>
-
-                        <div class="step">
-                            <strong>Cross-Attention Example</strong>
-                            <p>Generating English word "man" from German "Ein Mann steht":</p>
-
-                            <table class="data-table">
-                                <thead>
-                                    <tr>
-                                        <th>German Token</th>
-                                        <th>Attention Weight</th>
-                                        <th>Interpretation</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>Ein</td>
-                                        <td>0.1</td>
-                                        <td>Low (determiner, less relevant)</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Mann</td>
-                                        <td>0.8</td>
-                                        <td>High (direct translation!)</td>
-                                    </tr>
-                                    <tr>
-                                        <td>steht</td>
-                                        <td>0.1</td>
-                                        <td>Low (verb, translates separately)</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-
-                            <p>Strong attention to "Mann" makes sense—we're translating that specific word!</p>
-                        </div>
-
-                        <div class="step">
-                            <strong>Component 3: Feed-Forward Network</strong>
-                            <p>Same as in encoder:</p>
-                            \[
-                            \text{FFN}(\mathbf{x}) = \max(0, \mathbf{x}W_1 + \mathbf{b}_1)W_2 + \mathbf{b}_2
-                            \]
-                            <p>Architecture: \(512 \rightarrow 2048 \rightarrow 512\)</p>
-                        </div>
-
-                        <div class="step">
-                            <strong>Autoregressive Generation</strong>
-
-                            <p>
-                                The decoder generates the output sequence token by token using the
-                                chain rule of probability:
-                            </p>
-
-                            \[
-                            P(y_{1:T} \mid x)
-                            =
-                            \prod_{t=1}^{T} P(y_t \mid y_{1:t-1}, x)
-                            \]
-
-                            <p><strong>Generation process:</strong></p>
-
-                            \[
-                            \begin{aligned}
-                            \text{Step 1:} & \quad y_1 \sim P(y_1 \mid \langle \text{bos} \rangle, x) \\
-                            \text{Step 2:} & \quad y_2 \sim P(y_2 \mid y_1, x) \\
-                            \text{Step 3:} & \quad y_3 \sim P(y_3 \mid y_1, y_2, x) \\
-                            & \quad \vdots \\
-                            \text{Step } t: & \quad y_t \sim P(y_t \mid y_{1:t-1}, x) \\
-                            & \quad \vdots \\
-                            \text{Stop when:} & \quad y_t = \langle \text{eos} \rangle
-                            \end{aligned}
-                            \]
-                        </div>
-
-                        <blockquote>
-                            <strong>Complete Generation Example:</strong>
-                            <br><br>
-                            Input: "Ein Mann steht" (German)
-                            <br>
-                            Encoder output: Context vectors [4 × 512]
-                            <br><br>
-                            <strong>Step 1:</strong> Start with &lt;bos&gt; → Generate "A"
-                            <br>
-                            <strong>Step 2:</strong> Input &lt;bos&gt;, "A" → Generate "man"
-                            <br>
-                            <strong>Step 3:</strong> Input &lt;bos&gt;, "A", "man" → Generate "is"
-                            <br>
-                            <strong>Step 4:</strong> Input &lt;bos&gt;, "A", "man", "is" → Generate "standing"
-                            <br>
-                            <strong>Step 5:</strong> Input &lt;bos&gt;, "A", "man", "is", "standing" → Generate
-                            &lt;eos&gt;
-                            <br>
-                            <strong>Done!</strong> Translation: "A man is standing"
-                        </blockquote>
-
-                        <div class="tip">
-                            <strong>💡 Key Insight:</strong> Cross-attention is the bridge between languages. While
-                            self-attention helps each language understand itself, cross-attention enables the model to
-                            align
-                            source and target tokens—learning which German words correspond to which English words.
-                        </div>
-                    </div>
+                
                 </div>
 
                 <footer>
