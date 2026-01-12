@@ -53,7 +53,8 @@
 
                         <br>
 
-                        <p>This looks scary!!! But do not worry, we'll learn this architecture (in 2 parts: encoder and decoder) thoroughly and understand
+                        <p>This looks scary!!! But do not worry, we'll learn this architecture (in 2 parts: encoder and
+                            decoder) thoroughly and understand
                             how did our text get translated step by step.</p>
                     </div>
                 </div>
@@ -74,15 +75,17 @@
                             <li><strong>Feed-Forward Network</strong>: Applies non-linear transformation</li>
                             <li><strong>Residual Connections</strong>: Adds input to output for stability</li>
                             <li><strong>Layer Normalization</strong>: Normalizes activations for stability</li>
+                            <li><strong>Dropout</strong>: Randomly sets a fraction of inputs to zero during training
+                            </li>
                         </ol>
 
                         <p>This is how the Encoder Architecture looks like in the paper:</p>
-                        
+
                     </div>
                     <br>
-                        <img src="../assets/t_encoder.png" alt="Black box" class="context-image"
-                            style="max-width: 100%; height: auto; display: block; margin: 0 auto;" loading="lazy">
-                        <br>
+                    <img src="../assets/t_encoder.png" alt="Black box" class="context-image"
+                        style="max-width: 100%; height: auto; display: block; margin: 0 auto;" loading="lazy">
+                    <br>
                     <p>Let's break this down step by step.</p>
                 </div>
 
@@ -697,11 +700,6 @@
                         </div>
                     </div>
 
-                    <footer>
-                        <p>Written with mathematical rigor and visual intuition in mind.</p>
-                        <p><a href="../index.html">Back to Home</a></p>
-                    </footer>
-
                 </div>
 
                 <!-- 9. Layer Normalization -->
@@ -850,13 +848,183 @@
                                 <li><strong>Faster Convergence:</strong> Pre-Norm often leads to faster training times
                                     because the model can learn more effectively from the start.</li>
                         </div>
-                        <p>This wraps up our Encoder section and now we let's decode!!</p>
                     </div>
 
                 </div>
 
-                <!-- 10. The Decoder -->
-                    <!-- <div class="problem" id="decoder">
+                <!-- 10. Dropout -->
+                <div class="problem" id="dropout">
+                    <h3>Dropout: Controlled Noise for Robust Learning</h3>
+
+                    <div class="context">
+                        <p>
+                            Up to this point, our Transformer encoder is very powerful—perhaps <strong>too
+                                powerful</strong>.
+                        </p>
+                        <p>With:</p>
+                        <p>
+                        <ul>
+                            <li>
+                                High-dimensional embeddings
+                            </li>
+                            <li>Multi-head attention</li>
+                            <li>Large FFNs (2048 hidden units)</li>
+                            <li>Deep stacking</li>
+                        </ul>
+                        …the model has millions of parameters, making it prone to <strong>overfitting</strong>.
+                        </p>
+                        <p>
+                            To prevent the model from memorizing training data instead of learning generalizable
+                            patterns, Transformers introduce <strong>Dropout</strong>.
+                        </p>
+                    </div>
+
+                    <div class="problem-statement">
+                        <h4>The Core Idea</h4>
+                        <p>
+                            Dropout works by randomly zeroing out a subset of activations during training.
+                            For an input vector \( x \), dropout is defined as:
+                        </p>
+
+                        <p>
+                            \[
+                            \text{Dropout}(x) = m \odot x
+                            \]
+                        </p>
+
+                        <p>
+                            where:
+                        </p>
+                        <ul>
+                            <li>\( m_i \sim \text{Bernoulli}(1 - p) \)</li>
+                            <li>\( p \) is the dropout probability (typically \( p = 0.1 \))</li>
+                            <li>\( \odot \) denotes element-wise multiplication</li>
+                        </ul>
+                        <br>
+                        <img src="../assets/t_dropout.png" alt="Black box" class="context-image"
+                            style="max-width: 100%; height: auto; display: block; margin: 0 auto;" loading="lazy">
+                        <br>
+                    </div>
+
+                    <div class="solution">
+                        <h4>Why Dropout Works</h4>
+
+                        <div class="step">
+                            <strong>1. Prevents Co-Adaptation</strong>
+                            <p>
+                                Without dropout, neurons may rely heavily on specific other neurons.
+                                Dropout forces each neuron to contribute meaningfully on its own.
+                            </p>
+                            <p>
+                                This discourages fragile feature dependencies and promotes
+                                more robust representations.
+                            </p>
+
+                        </div>
+
+                        <div class="step">
+                            <strong>2. Implicit Model Averaging</strong>
+                            <p>
+                                Each dropout mask corresponds to a different sub-network.
+                                Training with dropout is equivalent to averaging predictions
+                                from exponentially many such networks.
+                            </p>
+                            <p>
+                                This dramatically improves generalization performance.
+                            </p>
+                        </div>
+
+
+                        <div class="note">
+                            <div class="step">
+                                <p>
+                                    <strong>Where Dropout Appears in Transformers</strong>
+                                </p>
+
+                                <em>1. After Embeddings + Positional Encoding</em>
+                                <p>
+                                    \[
+                                    x_0 = \text{Dropout}\big(\text{Embedding}(x)\sqrt{d_{\text{model}}} + PE(x)\big)
+                                    \]
+                                </p>
+                                <p>This prevents the model from over-relying on:</p>
+                                <ul>
+                                    <li>Specific embedding dimensions</li>
+                                    <li>Exact positional signals</li>
+                                </ul>
+
+                                <em>2. On Attention Weights</em>
+                                <p>
+                                    After computing attention scores:
+                                </p>
+                                <p>
+                                    \[
+                                    \alpha = \text{softmax}\!\left(\frac{QK^{\mathsf{T}}}{\sqrt{d_k}}\right)
+                                    \]
+                                </p>
+                                <p>
+                                    We apply dropout directly to the attention matrix:
+                                </p>
+                                <p>
+                                    \[
+                                    \tilde{\alpha} = \text{Dropout}(\alpha)
+                                    \]
+                                </p>
+                                <p>This means:</p>
+                                <ul>
+                                    <li>Some token-to-token connections are randomly weakened</li>
+                                    <li>The model cannot always attend to the same words</li>
+                                </ul>
+                                <p>
+                                    This is especially important for preventing <em>attention collapse</em>
+                                    (e.g., always attending to the same token).
+                                </p>
+
+                                <em>3. After Multi-Head Attention Output</em>
+                                <p>
+                                    \[
+                                    x_{\text{attn}} = \text{Dropout}(\text{MHA}(x))
+                                    \]
+                                </p>
+                                <p>
+                                    Then wrapped with residual connection and layer normalization:
+                                </p>
+                                <p>
+                                    \[
+                                    x_1 = \text{LayerNorm}(x + x_{\text{attn}})
+                                    \]
+                                </p>
+
+                                <em>4. After the Feed Forward Network</em>
+                                <p>
+                                    \[
+                                    x_{\text{ffn}} = \text{Dropout}(\text{FFN}(x_1))
+                                    \]
+                                </p>
+                                <p>
+                                    \[
+                                    x_2 = \text{LayerNorm}(x_1 + x_{\text{ffn}})
+                                    \]
+                                </p>
+                                <p>
+                                    This prevents the large feed-forward network (which contains most of the model’s
+                                    parameters) from overfitting.
+                                </p>
+                            </div>
+
+                        </div>
+
+                        <div class="note"><strong>Note: </strong>Always apply dropout during training only and not
+                            during inference.</div>
+
+                        <p>
+                            This wraps up our Encoder section — and now, we’re finally ready to decode!
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 11. The Decoder -->
+                <div class="problem" id="decoder">
                     <h3>The Decoder: Generating Translation</h3>
 
                     <div class="context">
@@ -1031,7 +1199,12 @@
                             source and target tokens—learning which German words correspond to which English words.
                         </div>
                     </div>
-                </div> -->
+                </div>
+
+                <footer>
+                    <p>Written with mathematical rigor and visual intuition in mind.</p>
+                    <p><a href="../index.html">Back to Home</a></p>
+                </footer>
 
                 <script>
                     // Render all LaTeX equations
