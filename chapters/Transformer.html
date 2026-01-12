@@ -1246,7 +1246,287 @@ Position 3 (standing):  [0.1,  0.3,  0.4,  0.2]</pre>
                     </div>
                 </div>
 
-                
+                <!-- 13. Cross-Attention -->
+                <div class="problem" id="cross-attention">
+                    <h3>Cross-Attention: Bridging Encoder and Decoder</h3>
+
+                    <div class="context">
+                        <p>We've now seen how the decoder uses <strong>masked self-attention</strong> to process its own
+                            generated tokens autoregressively. But there's a critical piece missing: <strong>how does
+                                the decoder access information from the source sentence?</strong></p>
+
+                        <p>The answer is <strong>Cross-Attention</strong>—the mechanism that connects the encoder's
+                            understanding of the German input to the decoder's English generation.</p>
+
+                        <p>While self-attention allows tokens to attend to other tokens in the <em>same</em> sequence,
+                            cross-attention allows tokens in the <em>decoder</em> to attend to tokens in the
+                            <em>encoder</em>.
+                        </p>
+
+                        <br>
+                        <img src="../assets/t_crossattention.png" alt="Cross-Attention" class="context-image"
+                            style="max-width: 100%; height: auto; display: block; margin: 0 auto;" loading="lazy">
+                        <br>
+                    </div>
+
+                    <div class="problem-statement">
+                        <h4>The Core Idea</h4>
+                        <p>In cross-attention, the decoder asks:</p>
+                        <p><em>"Which parts of the source sentence (German) should I focus on to generate the current
+                                target word (English)?"</em></p>
+
+                        <p>For example, when generating "standing", the decoder should attend strongly to "steht" in the
+                            encoder's output.</p>
+
+                        <p><strong>Key difference from self-attention:</strong></p>
+                        <ul>
+                            <li><strong>Self-Attention:</strong> Queries, Keys, and Values all come from the
+                                <em>same</em> sequence
+                            </li>
+                            <li><strong>Cross-Attention:</strong> Queries come from the <em>decoder</em>, but Keys and
+                                Values come from the <em>encoder</em></li>
+                        </ul>
+                    </div>
+
+                    <div class="solution">
+                        <div class="step">
+                            <strong>The Mathematical Formulation</strong>
+                            <p>Recall that standard attention is:</p>
+                            \[\text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V\]
+
+                            <p>In cross-attention, we have:</p>
+                            <ul>
+                                <li><strong>Q (Queries):</strong> Come from the decoder's current state</li>
+                                <li><strong>K (Keys):</strong> Come from the encoder's output</li>
+                                <li><strong>V (Values):</strong> Come from the encoder's output</li>
+                            </ul>
+
+                            <p>Mathematically:</p>
+                            \[
+                            \begin{aligned}
+                            Q &= \text{DecoderState} \cdot W_Q \\
+                            K &= \text{EncoderOutput} \cdot W_K \\
+                            V &= \text{EncoderOutput} \cdot W_V
+                            \end{aligned}
+                            \]
+
+                            <p>Then we compute:</p>
+                            \[\text{CrossAttention}(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V\]
+                        </div>
+
+                        <div class="step">
+                            <strong>A Concrete Example</strong>
+                            <p>Let's walk through generating the word "standing" when translating "Ein Mann steht in
+                                einer Küche".</p>
+
+                            <p><strong>Step 1: Decoder State (Query Source)</strong></p>
+                            <pre style="background: #f4f4f4; padding: 10px; border-radius: 3px;">Decoder has generated: [START] A man is
+Current position: generating next word (should be "standing")</pre>
+
+                            <p>The decoder's current hidden state at position "is" becomes the <strong>query</strong>:
+                            </p>
+                            \[Q_{\text{is}} = \text{DecoderState}_{\text{is}} \cdot W_Q\]
+
+                            <p><strong>Step 2: Encoder Output (Key & Value Source)</strong></p>
+                            <pre style="background: #f4f4f4; padding: 10px; border-radius: 3px;">Encoder processed: Ein Mann steht in einer Küche
+Encoder outputs: [E_Ein, E_Mann, E_steht, E_in, E_einer, E_Küche]</pre>
+
+                            <p>These encoder outputs are transformed into keys and values:</p>
+                            \[
+                            \begin{aligned}
+                            K &= \begin{bmatrix} E_{\text{Ein}} \\ E_{\text{Mann}} \\ E_{\text{steht}} \\ E_{\text{in}}
+                            \\ E_{\text{einer}} \\ E_{\text{Küche}} \end{bmatrix} \cdot W_K \\
+                            V &= \begin{bmatrix} E_{\text{Ein}} \\ E_{\text{Mann}} \\ E_{\text{steht}} \\ E_{\text{in}}
+                            \\ E_{\text{einer}} \\ E_{\text{Küche}} \end{bmatrix} \cdot W_V
+                            \end{aligned}
+                            \]
+
+                            <p><strong>Step 3: Compute Attention Scores</strong></p>
+                            <p>The query "is" computes similarity with each encoder key:</p>
+                            \[\text{Scores} = \frac{Q_{\text{is}} \cdot K^T}{\sqrt{d_k}}\]
+
+                            <p>This might produce scores like:</p>
+                            <pre style="background: #f4f4f4; padding: 10px; border-radius: 3px;">Ein:   0.05
+Mann:  0.10
+steht: 0.70  ← High attention! (This is the verb we need)
+in:    0.05
+einer: 0.05
+Küche: 0.05</pre>
+
+                            <p><strong>Step 4: Apply Softmax</strong></p>
+                            \[\alpha = \text{softmax}(\text{Scores})\]
+
+                            <p><strong>Step 5: Weighted Sum of Values</strong></p>
+                            \[\text{Output}_{\text{is}} = \sum_{i} \alpha_i \cdot V_i\]
+
+                            <p>This creates a context-aware representation that strongly incorporates information from
+                                "steht", helping the decoder generate "standing".</p>
+                        </div>
+
+                        <div class="step">
+                            <strong>Multi-Head Cross-Attention</strong>
+                            <p>Just like self-attention, cross-attention uses multiple heads to capture different types
+                                of relationships:</p>
+
+                            <ul>
+                                <li><strong>Head 1:</strong> Might focus on direct word translations (Mann → man, Küche
+                                    → kitchen)</li>
+                                <li><strong>Head 2:</strong> Might focus on grammatical structure (verb positioning)
+                                </li>
+                                <li><strong>Head 3:</strong> Might focus on semantic context (kitchen → cooking-related
+                                    words)</li>
+                                <li><strong>Head 4:</strong> Might focus on word order differences between German and
+                                    English</li>
+                            </ul>
+
+                            <p>The computation remains the same as multi-head self-attention:</p>
+                            \[
+                            \text{MultiHead}(Q, K, V) = \text{Concat}(\text{head}_1, \ldots, \text{head}_h) W_O
+                            \]
+                            \[
+                            \text{where } \text{head}_i = \text{Attention}(QW^i_Q, KW^i_K, VW^i_V)
+                            \]
+
+                            <p>The only difference: <strong>K</strong> and <strong>V</strong> come from the encoder,
+                                while <strong>Q</strong> comes from the decoder.</p>
+                        </div>
+
+                        <div class="step">
+                            <strong>No Masking in Cross-Attention!</strong>
+                            <p>An important distinction:</p>
+
+                            <ul>
+                                <li><strong>Decoder self-attention:</strong> Uses causal masking (can't look at future
+                                    decoder tokens)</li>
+                                <li><strong>Cross-attention:</strong> No masking! The decoder can attend to <em>all</em>
+                                    encoder positions</li>
+                            </ul>
+
+                            <p>Why? Because the encoder has already processed the <em>entire</em> source sentence.
+                                There's no "future" to hide—the decoder should have access to all source information
+                                when generating each target word.</p>
+
+                            <p>Every decoder position can attend to every encoder position.</p>
+                        </div>
+
+                        <div class="step">
+                            <strong>Position in the Decoder Architecture</strong>
+                            <p>Cross-attention sits between the two self-attention operations in each decoder layer:</p>
+
+                            <ol>
+                                <li><strong>Masked Self-Attention:</strong> Decoder tokens attend to previous decoder
+                                    tokens</li>
+                                <li><strong>Cross-Attention:</strong> Decoder attends to encoder outputs ← <em>We are
+                                        here!</em></li>
+                                <li><strong>Feed-Forward Network:</strong> Non-linear transformation</li>
+                            </ol>
+
+                            <p>With residual connections and layer normalization:</p>
+                            \[
+                            \begin{aligned}
+                            x_1 &= \text{LayerNorm}(x + \text{MaskedSelfAttention}(x)) \\
+                            x_2 &= \text{LayerNorm}(x_1 + \text{CrossAttention}(x_1, \text{EncoderOutput})) \\
+                            x_3 &= \text{LayerNorm}(x_2 + \text{FFN}(x_2))
+                            \end{aligned}
+                            \]
+                        </div>
+
+                        <div class="step">
+                            <strong>Dimensions and Shapes</strong>
+                            <p>Let's clarify the matrix dimensions:</p>
+
+                            <p><strong>Encoder Output:</strong> \(\mathbb{R}^{n_{\text{src}} \times d_{\text{model}}}\)
+                            </p>
+                            <ul>
+                                <li>\(n_{\text{src}}\): Number of source tokens (e.g., 6 for "Ein Mann steht in einer
+                                    Küche")</li>
+                                <li>\(d_{\text{model}} = 512\): Model dimension</li>
+                            </ul>
+
+                            <p><strong>Decoder State:</strong> \(\mathbb{R}^{n_{\text{tgt}} \times d_{\text{model}}}\)
+                            </p>
+                            <ul>
+                                <li>\(n_{\text{tgt}}\): Number of target tokens generated so far</li>
+                            </ul>
+
+                            <p><strong>Cross-Attention Output:</strong> \(\mathbb{R}^{n_{\text{tgt}} \times
+                                d_{\text{model}}}\)</p>
+                            <ul>
+                                <li>Same shape as decoder state</li>
+                                <li>But now enriched with encoder information!</li>
+                            </ul>
+
+                            <p>The attention weight matrix has shape:</p>
+                            \[\text{Attention Weights} \in \mathbb{R}^{n_{\text{tgt}} \times n_{\text{src}}}\]
+                            <p>Each row shows how much each decoder position attends to each encoder position.</p>
+                        </div>
+
+                        <div class="note">
+                            <strong>Visualizing Cross-Attention</strong>
+                            <p>If we visualize the attention weights as a heatmap when generating "A man is standing in
+                                a kitchen":</p>
+
+                            <pre
+                                style="background: #f4f4f4; padding: 10px; border-radius: 3px; font-family: monospace; font-size: 0.85em;">
+            A     man    is   standing  in    a   kitchen
+Ein         🟦    🟦    🟦    🟦     🟦    🟦    🟦
+Mann        🟦    🟥    🟦    🟦     🟦    🟦    🟦    ← "man" attends here
+steht       🟦    🟦    🟥    🟥     🟦    🟦    🟦    ← "is" and "standing" attend here
+in          🟦    🟦    🟦    🟦     🟥    🟦    🟦    ← "in" attends here
+einer       🟦    🟦    🟦    🟦     🟦    🟥    🟦    ← "a" attends here
+Küche       🟦    🟦    🟦    🟦     🟦    🟦    🟥    ← "kitchen" attends here
+
+(🟥 = high attention, 🟦 = low attention)</pre>
+
+                            <p>This shows the alignment between source and target words—exactly what we need for
+                                translation!</p>
+                        </div>
+
+                        <div class="tip">
+                            <strong>💡 Key Insight:</strong> Cross-attention is the bridge between languages. It allows
+                            the decoder to selectively extract information from the encoder's representation of the
+                            source sentence. Without it, the decoder would be blind to the input—generating text based
+                            purely on its own previous outputs, with no connection to what it's supposed to translate!
+                        </div>
+
+                        <div class="note">
+                            <strong>Three Attention Mechanisms Summary</strong>
+                            <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+                                <tr style="background: #f4f4f4; font-weight: bold;">
+                                    <td style="padding: 8px; border: 1px solid #ddd;">Mechanism</td>
+                                    <td style="padding: 8px; border: 1px solid #ddd;">Q Source</td>
+                                    <td style="padding: 8px; border: 1px solid #ddd;">K, V Source</td>
+                                    <td style="padding: 8px; border: 1px solid #ddd;">Masking</td>
+                                    <td style="padding: 8px; border: 1px solid #ddd;">Purpose</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px; border: 1px solid #ddd;"><strong>Encoder
+                                            Self-Attention</strong></td>
+                                    <td style="padding: 8px; border: 1px solid #ddd;">Encoder</td>
+                                    <td style="padding: 8px; border: 1px solid #ddd;">Encoder</td>
+                                    <td style="padding: 8px; border: 1px solid #ddd;">None</td>
+                                    <td style="padding: 8px; border: 1px solid #ddd;">Understand source sentence</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px; border: 1px solid #ddd;"><strong>Decoder
+                                            Self-Attention</strong></td>
+                                    <td style="padding: 8px; border: 1px solid #ddd;">Decoder</td>
+                                    <td style="padding: 8px; border: 1px solid #ddd;">Decoder</td>
+                                    <td style="padding: 8px; border: 1px solid #ddd;">Causal</td>
+                                    <td style="padding: 8px; border: 1px solid #ddd;">Process generated text</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px; border: 1px solid #ddd;"><strong>Cross-Attention</strong>
+                                    </td>
+                                    <td style="padding: 8px; border: 1px solid #ddd;">Decoder</td>
+                                    <td style="padding: 8px; border: 1px solid #ddd;">Encoder</td>
+                                    <td style="padding: 8px; border: 1px solid #ddd;">None</td>
+                                    <td style="padding: 8px; border: 1px solid #ddd;">Connect source to target</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
 
                 <footer>
                     <p>Written with mathematical rigor and visual intuition in mind.</p>
