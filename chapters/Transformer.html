@@ -1528,6 +1528,359 @@ Küche       🟦    🟦    🟦    🟦     🟦    🟦    🟥    ← "kitch
                     </div>
                 </div>
 
+                <!-- 14. Output Layer -->
+                <div class="problem" id="output-layer">
+                    <h3>Output Layer: From Representations to Words</h3>
+
+                    <div class="context">
+                        <p>We've journeyed through the entire Transformer architecture:</p>
+                        <ul>
+                            <li>✓ Encoder processes the source sentence</li>
+                            <li>✓ Decoder generates target representations autoregressively</li>
+                            <li>✓ Cross-attention connects source to target</li>
+                        </ul>
+
+                        <p>But there's one final step: <strong>How do we convert the decoder's continuous vector
+                                representations back into actual words?</strong></p>
+
+                        <p>The decoder's output at each position is a vector in \(\mathbb{R}^{d_{\text{model}}}\) (512
+                            dimensions). We need to transform this into a probability distribution over our entire
+                            vocabulary (e.g., 30,000 English words).</p>
+
+                        <br>
+                        <img src="../assets/t_output.png" alt="Output Layer" class="context-image"
+                            style="max-width: 100%; height: auto; display: block; margin: 0 auto;" loading="lazy">
+                        <br>
+                    </div>
+
+                    <div class="problem-statement">
+                        <h4>The Architecture</h4>
+                        <p>The output layer consists of two simple but crucial operations:</p>
+
+                        <p><strong>1. Linear Projection</strong></p>
+                        \[
+                        \text{logits} = \text{DecoderOutput} \cdot W_{\text{vocab}} + b
+                        \]
+                        <p>Where:</p>
+                        <ul>
+                            <li>\(\text{DecoderOutput} \in \mathbb{R}^{d_{\text{model}}}\): The final decoder hidden
+                                state (512-dim)</li>
+                            <li>\(W_{\text{vocab}} \in \mathbb{R}^{d_{\text{model}} \times V}\): Weight matrix (512 ×
+                                30,000)</li>
+                            <li>\(b \in \mathbb{R}^{V}\): Bias vector</li>
+                            <li>\(V\): Vocabulary size (e.g., 30,000 words)</li>
+                        </ul>
+
+                        <p><strong>2. Softmax Activation</strong></p>
+                        \[
+                        P(w_i) = \frac{e^{\text{logit}_i}}{\sum_{j=1}^{V} e^{\text{logit}_j}}
+                        \]
+                        <p>This converts raw scores (logits) into a valid probability distribution where:</p>
+                        \[
+                        \sum_{i=1}^{V} P(w_i) = 1
+                        \]
+                    </div>
+
+                    <div class="solution">
+                        <div class="step">
+                            <strong>Step-by-Step: Generating "standing"</strong>
+                            <p>Let's see how the model generates the word "standing" after producing "A man is".</p>
+
+                            <p><strong>1. Decoder Output Vector</strong></p>
+                            <p>After processing through all decoder layers, we have:</p>
+                            \[
+                            \mathbf{h}_{\text{is}} \in \mathbb{R}^{512}
+                            \]
+                            <p>This is a rich, context-aware representation encoding:</p>
+                            <ul>
+                                <li>The meaning of previously generated words ("A man is")</li>
+                                <li>Information from the source sentence (via cross-attention)</li>
+                                <li>Predictions about what should come next</li>
+                            </ul>
+
+                            <p><strong>2. Project to Vocabulary Space</strong></p>
+                            \[
+                            \text{logits} = \mathbf{h}_{\text{is}} \cdot W_{\text{vocab}} + b \in \mathbb{R}^{30000}
+                            \]
+                            <p>This gives us a score for every word in the vocabulary:</p>
+                            <pre style="background: #f4f4f4; padding: 10px; border-radius: 3px;">Word          Logit
+-----------------------
+the           2.3
+standing      8.7  ← Highest!
+running       3.1
+sitting       4.2
+walking       3.8
+...
+(29,995 more words)</pre>
+
+                            <p><strong>3. Apply Softmax</strong></p>
+                            \[
+                            P(\text{standing}) = \frac{e^{8.7}}{e^{2.3} + e^{8.7} + e^{3.1} + \cdots} \approx 0.87
+                            \]
+                            <p>This converts logits into probabilities:</p>
+                            <pre style="background: #f4f4f4; padding: 10px; border-radius: 3px;">Word          Probability
+--------------------------
+standing      87.0%  ← Most likely!
+sitting       5.2%
+walking       3.1%
+running       2.0%
+the           1.5%
+...           1.2%</pre>
+
+                            <p><strong>4. Select Next Token</strong></p>
+                            <p>The model selects "standing" as the next word (we'll discuss selection strategies
+                                shortly).</p>
+                        </div>
+
+                        <div class="step">
+                            <strong>Weight Tying: A Clever Optimization</strong>
+                            <p>Notice that we have two large embedding matrices in the Transformer:</p>
+                            <ul>
+                                <li><strong>Input Embedding:</strong> \(W_{\text{emb}} \in \mathbb{R}^{V \times
+                                    d_{\text{model}}}\) (maps tokens → vectors)</li>
+                                <li><strong>Output Projection:</strong> \(W_{\text{vocab}} \in
+                                    \mathbb{R}^{d_{\text{model}} \times V}\) (maps vectors → tokens)</li>
+                            </ul>
+
+                            <p>These matrices are essentially doing opposite operations! The Transformer paper uses
+                                <strong>weight tying</strong>:
+                            </p>
+                            \[
+                            W_{\text{vocab}} = W_{\text{emb}}^T
+                            \]
+
+                            <p><strong>Benefits:</strong></p>
+                            <ul>
+                                <li>Reduces parameters by ~30,000 × 512 ≈ 15 million parameters</li>
+                                <li>Forces the model to learn a consistent representation space</li>
+                                <li>If "cat" has embedding \(\mathbf{e}_{\text{cat}}\), the output layer uses the same
+                                    vector to recognize "cat"</li>
+                            </ul>
+
+                            <p>Additionally, both embedding weights are scaled by \(\sqrt{d_{\text{model}}}\):</p>
+                            \[
+                            \text{logits} = \text{DecoderOutput} \cdot (W_{\text{emb}}^T \cdot \sqrt{d_{\text{model}}})
+                            \]
+                        </div>
+
+                        <div class="step">
+                            <strong>Token Selection Strategies</strong>
+                            <p>Once we have the probability distribution, how do we choose the next token?</p>
+
+                            <p><strong>1. Greedy Decoding (Simplest)</strong></p>
+
+                            \[
+                            w_t = \arg\max_{w} P(w \mid w_{\lt t}, X)
+                            \]
+
+                            <p>Always pick the most probable word.</p>
+
+
+
+                            <pre style="background: #f4f4f4; padding: 10px; border-radius: 3px;">standing: 87%  ← Choose this!
+sitting:  5%
+walking:  3%</pre>
+                            <p><strong>Pros:</strong> Fast, deterministic</p>
+                            <p><strong>Cons:</strong> Can miss better overall sequences, repetitive output</p>
+
+                            <p><strong>2. Beam Search (Most Common)</strong></p>
+                            <p>Keep track of the top-k most likely sequences (beams).</p>
+                            <pre style="background: #f4f4f4; padding: 10px; border-radius: 3px;">Beam 1: "A man is standing..." (log prob: -0.5)
+Beam 2: "A man is sitting..."  (log prob: -2.1)
+Beam 3: "A man is walking..."  (log prob: -2.8)</pre>
+                            <p>At each step, expand all beams and keep the top-k complete sequences.</p>
+                            <p><strong>Pros:</strong> Better overall sequences than greedy</p>
+                            <p><strong>Cons:</strong> Slower (k× more computation)</p>
+
+                            <p><strong>3. Sampling (For Creativity)</strong></p>
+                            <p>Sample from the probability distribution rather than taking the argmax:</p>
+                            \[
+                            w_t \sim P(w \mid w_{\lt t}, X) \] <p>This introduces randomness and diversity.</p>
+
+                                <p><strong>Temperature Scaling:</strong> Control randomness via temperature \(T\):
+                                </p>
+                                \[
+                                P(w_i) = \frac{e^{\text{logit}_i / T}}{\sum_j e^{\text{logit}_j / T}}
+                                \]
+                                <ul>
+                                    <li>\(T < 1\): More confident (sharper distribution)</li>
+                                    <li>\(T = 1\): Original distribution</li>
+                                    <li>\(T > 1\): More random (flatter distribution)</li>
+                                </ul>
+
+                                <p><strong>4. Top-k / Top-p (Nucleus) Sampling</strong></p>
+                                <p>Sample only from the most likely tokens:</p>
+                                <ul>
+                                    <li><strong>Top-k:</strong> Consider only the k most probable tokens</li>
+                                    <li><strong>Top-p:</strong> Consider tokens until cumulative probability exceeds
+                                        p (e.g., 0.9)</li>
+                                </ul>
+                                <p>This prevents sampling extremely unlikely words while maintaining diversity.</p>
+                        </div>
+
+                        <div class="step">
+                            <strong>Training: The Cross-Entropy Loss</strong>
+                            <p>During training, we know the correct target sequence. The model learns by minimizing the
+                                <strong>cross-entropy loss</strong>:
+                            </p>
+
+                            \[
+                            \mathcal{L} = -\sum_{t=1}^{T} \log P(y_t^* \mid y_{\lt t}, X) \] <p>Where:</p>
+                                <ul>
+                                    <li>\(y_t^*\): The true/correct token at position t</li>
+                                    <li>\(y_{\lt t}\): All previous true tokens</li>
+                                    <li>\(X\): The source sentence (encoder output)</li>
+                                </ul>
+
+                                <p><strong>Example:</strong> Target sentence is "A man is standing"</p>
+
+                                <p>At position 4 (generating "standing"):</p>
+                                <pre style="background: #f4f4f4; padding: 10px; border-radius: 3px;">Model predicts:
+standing: 87%
+sitting:  5%
+walking:  3%
+...
+
+True token: "standing"
+
+Loss = -log(0.87) ≈ 0.14  (low loss, good prediction!)</pre>
+
+                                <p>If the model predicted sitting: 60%, standing: 30%:</p>
+                                <pre
+                                    style="background: #f4f4f4; padding: 10px; border-radius: 3px;">Loss = -log(0.30) ≈ 1.20  (high loss, bad prediction!)</pre>
+
+                                <p>The loss is summed across all positions and all examples in the batch, then we use
+                                    backpropagation to update the model weights.</p>
+                        </div>
+
+                        <div class="step">
+                            <strong>Teacher Forcing: A Training Trick</strong>
+                            <p>During training, we use a technique called <strong>teacher forcing</strong>:</p>
+
+                            <p><strong>Instead of:</strong></p>
+                            <pre style="background: #f4f4f4; padding: 10px; border-radius: 3px;">Step 1: Generate "A"
+Step 2: Use model's "A" to generate next token
+Step 3: Use model's output to generate next token
+...</pre>
+
+                            <p><strong>We do:</strong></p>
+                            <pre style="background: #f4f4f4; padding: 10px; border-radius: 3px;">Step 1: Given true prefix [START], predict "A"
+Step 2: Given true prefix [START, A], predict "man"
+Step 3: Given true prefix [START, A, man], predict "is"
+...</pre>
+
+                            <p>We always feed the <em>true</em> previous tokens as input, not the model's predictions.
+                            </p>
+
+                            <p><strong>Why?</strong></p>
+                            <ul>
+                                <li><strong>Faster training:</strong> Can process all positions in parallel (since we
+                                    know all true tokens)</li>
+                                <li><strong>Stable gradients:</strong> Early mistakes don't compound</li>
+                                <li><strong>Better learning signal:</strong> Model learns from correct context</li>
+                            </ul>
+
+                            <p>This is possible because of the causal masking we learned earlier—even though we feed the
+                                entire true sequence, each position can only see previous positions!</p>
+                        </div>
+
+                        <div class="step">
+                            <strong>Inference vs Training: Key Differences</strong>
+
+                            <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+                                <tr style="background: #f4f4f4; font-weight: bold;">
+                                    <td style="padding: 8px; border: 1px solid #ddd;">Aspect</td>
+                                    <td style="padding: 8px; border: 1px solid #ddd;">Training</td>
+                                    <td style="padding: 8px; border: 1px solid #ddd;">Inference</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px; border: 1px solid #ddd;"><strong>Input</strong></td>
+                                    <td style="padding: 8px; border: 1px solid #ddd;">Full target sequence (known)</td>
+                                    <td style="padding: 8px; border: 1px solid #ddd;">Generated tokens only</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px; border: 1px solid #ddd;"><strong>Processing</strong></td>
+                                    <td style="padding: 8px; border: 1px solid #ddd;">Parallel (all positions at once)
+                                    </td>
+                                    <td style="padding: 8px; border: 1px solid #ddd;">Sequential (one token at a time)
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px; border: 1px solid #ddd;"><strong>Teacher Forcing</strong>
+                                    </td>
+                                    <td style="padding: 8px; border: 1px solid #ddd;">Yes (use true tokens)</td>
+                                    <td style="padding: 8px; border: 1px solid #ddd;">No (use model's own output)</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px; border: 1px solid #ddd;"><strong>Objective</strong></td>
+                                    <td style="padding: 8px; border: 1px solid #ddd;">Minimize loss</td>
+                                    <td style="padding: 8px; border: 1px solid #ddd;">Generate good translation</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px; border: 1px solid #ddd;"><strong>Dropout</strong></td>
+                                    <td style="padding: 8px; border: 1px solid #ddd;">Active</td>
+                                    <td style="padding: 8px; border: 1px solid #ddd;">Disabled</td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <div class="step">
+                            <strong>The Complete Forward Pass</strong>
+                            <p>Let's trace the complete generation of one token:</p>
+
+                            <ol style="line-height: 1.8;">
+                                <li><strong>Input:</strong> "Ein Mann steht in einer Küche" + [START, A, man, is]</li>
+                                <li><strong>Encoder:</strong> Processes German sentence → encoder outputs</li>
+                                <li><strong>Decoder Input:</strong> [START, A, man, is] → embeddings + positional
+                                    encoding</li>
+                                <li><strong>Decoder Layers (×6):</strong>
+                                    <ul>
+                                        <li>Masked self-attention (within decoder)</li>
+                                        <li>Cross-attention (to encoder)</li>
+                                        <li>Feed-forward network</li>
+                                    </ul>
+                                </li>
+                                <li><strong>Output Layer:</strong> \(\mathbf{h}_{\text{is}} \rightarrow \text{logits}
+                                    \rightarrow P(\text{word})\)</li>
+                                <li><strong>Selection:</strong> Choose "standing" (87% probability)</li>
+                                <li><strong>Next Step:</strong> Append "standing" and repeat for next token</li>
+                            </ol>
+                        </div>
+
+                        <div class="note">
+                            <strong>A Note on Stopping</strong>
+                            <p>How does the model know when to stop generating?</p>
+
+                            <p>The vocabulary includes a special <strong>[END]</strong> or <strong>[EOS]</strong> (End
+                                Of Sequence) token.</p>
+
+                            <p>When the model predicts [END] with high probability, generation stops:</p>
+                            <pre style="background: #f4f4f4; padding: 10px; border-radius: 3px;">... in a kitchen [END]
+                 ^^^^^ 
+                Stop here!</pre>
+
+                            <p>In beam search, we typically continue until all beams have generated [END] or reach a
+                                maximum length limit.</p>
+                        </div>
+
+                        <div class="tip">
+                            <strong>💡 Key Insight:</strong> The output layer is remarkably simple—just a linear
+                            projection and softmax—yet it's the bridge between the model's internal representations and
+                            actual language. The real magic happens in the learned weights \(W_{\text{vocab}}\), which
+                            encode the model's entire understanding of which vector patterns correspond to which words.
+                            Every earlier layer in the Transformer is working to create representations that make this
+                            final mapping as clean and accurate as possible.
+                        </div>
+
+                        <div class="note">
+                            <strong>🎉 Congratulations!</strong>
+                            <p>We've successfully understood the complete Transformer architecture from scratch!!!</p>
+                            <p>Below is the coding section, do have a look and code on your own!! :)</p>
+                        </div>
+                    </div>
+                </div>
+
+
                 <footer>
                     <p>Written with mathematical rigor and visual intuition in mind.</p>
                     <p><a href="../index.html">Back to Home</a></p>
