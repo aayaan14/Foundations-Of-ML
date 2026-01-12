@@ -1028,24 +1028,225 @@
                     <h3>The Decoder: Generating Translation</h3>
 
                     <div class="context">
-                        <p>Now that we’ve covered most of the concepts on the encoder side, we basically know how the components of decoders work as well (except causal-masking and cross-attention mechanism).</p>
-                        <p>The decoder's main job is to generate the English translation one word at a time, using both the
-                            encoder's context and the words it has already generated.</p>
+                        <p>Now that we've covered most of the concepts on the encoder side, we basically know how the
+                            components of decoders work as well (except causal-masking and cross-attention mechanism).
+                        </p>
+                        <p>The decoder's main job is to generate the English translation one word at a time, using both
+                            the encoder's context and the words it has already generated.</p>
 
                         <p>We derive most of the components from encoder here except:</p>
                         <ol>
-                            <li><strong>Masked Self-Attention</strong>
-                            <li><strong>Cross-Attention</strong>
+                            <li><strong>Masked Self-Attention</strong></li>
+                            <li><strong>Cross-Attention</strong></li>
                         </ol>
                         <p>Here's how a decoder looks like:</p>
                         <br>
-                        <img src="../assets/t_decoder.jpg" alt="Black box" class="context-image"
+                        <img src="../assets/t_decoder.jpg" alt="Decoder Architecture" class="context-image"
                             style="max-width: 100%; height: auto; display: block; margin: 0 auto;" loading="lazy">
-                            <br>
-                        <p>Let's now understand causal masking.</p>
+                        <br>
                     </div>
-                
+
+                    <div class="problem-statement">
+                        <h4>Autoregressive Generation: Creating One Token at a Time</h4>
+                        <p>The decoder operates <strong>autoregressively</strong>—meaning it generates the output
+                            sequence one token at a time, where each new token depends on all previously generated
+                            tokens.</p>
+                        <p>Let's understand this mathematically and intuitively.</p>
+                    </div>
+
+                    <div class="solution">
+                        <div class="step">
+                            <strong>The Sequential Process</strong>
+                            <p>When translating "Ein Mann steht in einer Küche" → "A man is standing in a kitchen", the
+                                decoder doesn't generate all words at once. Instead:</p>
+
+                            <p><strong>Step 1:</strong> Generate "A"</p>
+                            <pre style="background: #f4f4f4; padding: 10px; border-radius: 3px;">Input: [START]
+Output: "A"</pre>
+
+                            <p><strong>Step 2:</strong> Generate "man" (using "A")</p>
+                            <pre style="background: #f4f4f4; padding: 10px; border-radius: 3px;">Input: [START] A
+Output: "man"</pre>
+
+                            <p><strong>Step 3:</strong> Generate "is" (using "A man")</p>
+                            <pre style="background: #f4f4f4; padding: 10px; border-radius: 3px;">Input: [START] A man
+Output: "is"</pre>
+
+                            <p><strong>Step 4:</strong> Generate "standing" (using "A man is")</p>
+                            <pre style="background: #f4f4f4; padding: 10px; border-radius: 3px;">Input: [START] A man is
+Output: "standing"</pre>
+
+                            <p>...and so on until we generate [END].</p>
+                        </div>
+
+                        <div class="step">
+                            <strong>The Mathematical Formulation</strong>
+
+                            <p>
+                                For an output sequence <strong>y</strong> = (y₁, y₂, …, y<sub>T</sub>), the decoder
+                                models the
+                                conditional probability of the entire sequence as:
+                            </p>
+
+                            \[
+                            P(\mathbf{y} \mid \mathbf{X})
+                            =
+                            \prod_{t=1}^{T}
+                            P\!\left(y_t \mid y_{< t}, \mathbf{X}\right) \] <p><strong>Where:</strong></p>
+                                <ul>
+                                    <li><strong>y<sub>t</sub></strong>: Token generated at position <em>t</em></li>
+                                    <li>
+                                        <strong>y<sub>&lt;t</sub></strong>:
+                                        All previously generated tokens
+                                        (y₁, y₂, …, y<sub>t−1</sub>)
+                                    </li>
+                                    <li>
+                                        <strong>X</strong>:
+                                        Encoder output representing the source sentence context
+                                    </li>
+                                    <li><strong>T</strong>: Length of the output sequence</li>
+                                </ul>
+
+                                <p>This autoregressive decomposition means:</p>
+
+                                <ul>
+                                    <li>
+                                        The probability of generating <em>"man"</em> is conditioned on having already
+                                        generated
+                                        <em>"A"</em>
+                                    </li>
+                                    <li>
+                                        The probability of generating <em>"is"</em> is conditioned on having generated
+                                        <em>"A man"</em>
+                                    </li>
+                                    <li>
+                                        Each token is generated using the full history of previously generated tokens
+                                    </li>
+                                </ul>
+                        </div>
+
+                        <p>Now let's understand how causal masking works in detail.</p>
+                    </div>
                 </div>
+
+                <!-- 12. Causal/Masked Attention -->
+                <div class="problem" id="masked-attention">
+                    <h3>Masked Attention: Preventing Information Leakage</h3>
+
+                    <div class="context">
+                        <p>The decoder's self-attention mechanism has a critical constraint: it must be
+                            <strong>causal</strong>—meaning each position can only attend to previous positions, never
+                            future ones.
+                        </p>
+                        <p>Without this constraint, the decoder would "cheat" during training by looking at the answer
+                            it's supposed to predict!</p>
+                    </div>
+
+                    <div class="problem-statement">
+                        <h4>The Problem Without Masking</h4>
+                        <p>Imagine we're generating "A man is standing in a kitchen" and we're currently at the word
+                            "is".</p>
+
+                        <p><strong>Without masking:</strong></p>
+                        <pre style="background: #f4f4f4; padding: 10px; border-radius: 3px;">Query: "is"
+Can attend to: "A", "man", "is", "standing", "in", "a", "kitchen"
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                                         FUTURE TOKENS!</pre>
+                        <p>The model could simply copy "standing" from the future, making training meaningless!</p>
+
+                        <p><strong>With masking:</strong></p>
+                        <pre style="background: #f4f4f4; padding: 10px; border-radius: 3px;">Query: "is"
+Can attend to: "A", "man", "is"
+                            ^^^ (only past + current)</pre>
+                        <p>Now the model must genuinely predict "standing" based only on past context.</p>
+                    </div>
+
+                    <div class="solution">
+                        <div class="step">
+                            <strong>The Mathematical Solution</strong>
+                            <p>Recall the attention formula from earlier:</p>
+                            \[\text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V\]
+
+                            <p>To make it causal, we modify the softmax step by applying a <strong>mask</strong>:</p>
+                            \[\text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^T + M}{\sqrt{d_k}}\right)V\]
+                            <p>Where <strong>M</strong> is the causal mask matrix.</p>
+                        </div>
+
+                        <div class="step">
+                            <strong>The Causal Mask Matrix</strong>
+                            <p>The mask <strong>M</strong> is an upper-triangular matrix filled with −∞ (in practice, a
+                                very large negative number like -1e9):</p>
+                            \[M = \begin{bmatrix}
+                            0 & -\infty & -\infty & -\infty \\
+                            0 & 0 & -\infty & -\infty \\
+                            0 & 0 & 0 & -\infty \\
+                            0 & 0 & 0 & 0
+                            \end{bmatrix}\]
+                            <p>For a sequence of length 4: ["A", "man", "is", "standing"]</p>
+                        </div>
+
+                        <div class="step">
+                            <strong>Why This Works</strong>
+                            <p>When we compute attention scores:</p>
+                            \[S = \frac{QK^T}{\sqrt{d_k}} + M\]
+
+                            <p><strong>Before softmax:</strong></p>
+                            <pre style="background: #f4f4f4; padding: 10px; border-radius: 3px;">Position 0 (A):         [s₀₀,  -∞,   -∞,   -∞]
+Position 1 (man):       [s₁₀,  s₁₁,  -∞,   -∞]
+Position 2 (is):        [s₂₀,  s₂₁,  s₂₂,  -∞]
+Position 3 (standing):  [s₃₀,  s₃₁,  s₃₂,  s₃₃]</pre>
+
+                            <p><strong>After softmax:</strong></p>
+                            \[\text{softmax}([-\infty]) = e^{-\infty} / (\text{sum}) \approx 0\]
+
+                            <p>So masked positions get <strong>zero attention weight</strong>:</p>
+                            <pre style="background: #f4f4f4; padding: 10px; border-radius: 3px;">Position 0 (A):         [1.0,  0,    0,    0]
+Position 1 (man):       [0.3,  0.7,  0,    0]
+Position 2 (is):        [0.2,  0.5,  0.3,  0]
+Position 3 (standing):  [0.1,  0.3,  0.4,  0.2]</pre>
+                            <p>Each position can only attend to itself and earlier positions!</p>
+                        </div>
+                    </div>
+
+                    <div class="problem-statement">
+                        <h4>Comparing Encoder vs. Decoder Attention</h4>
+                        <div class="step">
+                            <p><strong>Encoder Self-Attention (Bidirectional):</strong></p>
+                            <ul>
+                                <li>Can attend to <strong>all</strong> positions (past, current, future)</li>
+                                <li>Used for understanding/encoding the input</li>
+                                <li>No mask needed</li>
+                            </ul>
+                            \[\text{Attention matrix} = \begin{bmatrix}
+                            ✓ & ✓ & ✓ & ✓ \\
+                            ✓ & ✓ & ✓ & ✓ \\
+                            ✓ & ✓ & ✓ & ✓ \\
+                            ✓ & ✓ & ✓ & ✓
+                            \end{bmatrix}\]
+
+                            <p><strong>Decoder Self-Attention (Causal):</strong></p>
+                            <ul>
+                                <li>Can attend only to <strong>past</strong> positions (and current)</li>
+                                <li>Used for generation</li>
+                                <li>Causal mask required</li>
+                            </ul>
+                            \[\text{Attention matrix} = \begin{bmatrix}
+                            ✓ & ✗ & ✗ & ✗ \\
+                            ✓ & ✓ & ✗ & ✗ \\
+                            ✓ & ✓ & ✓ & ✗ \\
+                            ✓ & ✓ & ✓ & ✓
+                            \end{bmatrix}\]
+                        </div>
+                    </div>
+
+                    <div class="tip">
+                        <strong>💡 Key Insight:</strong> Causal masking is a simple mathematical trick (adding −∞) that
+                        enforces a profound constraint: respect the flow of time in language generation. It's what
+                        transforms a powerful bidirectional attention mechanism into a principled generative model.
+                    </div>
+                </div>
+
+                
 
                 <footer>
                     <p>Written with mathematical rigor and visual intuition in mind.</p>
