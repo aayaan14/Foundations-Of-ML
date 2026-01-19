@@ -3212,7 +3212,318 @@
                 </div>
             </div>
 
-            <!-- 14 -->
+            <!-- 3.4 Bayesian Model Comparison -->
+            <div class="problem">
+
+                <div class="context">
+                    <p>
+                        So far in this chapter, we have focused on choosing <em>parameters</em>
+                        (weights, variances, regularization strengths) for a fixed model.
+                    </p>
+
+                    <p>
+                        But in practice, we face a deeper question:
+                    </p>
+
+                    <p>
+                        <strong>Which model should we use in the first place?</strong>
+                    </p>
+
+                    <p>
+                        For our apartment price example, this could mean:
+                    </p>
+
+                    <ul>
+                        <li>Linear vs quadratic vs higher-degree polynomial</li>
+                        <li>Few Gaussian basis functions vs many</li>
+                        <li>Weak vs strong regularization</li>
+                    </ul>
+
+                    <p>
+                        The standard solution is <strong>cross-validation</strong>.
+                    </p>
+
+                    <p>
+                        Unfortunately, cross-validation has serious drawbacks:
+                    </p>
+
+                    <ul>
+                        <li>We must split data into training and validation sets</li>
+                        <li>Some data is wasted and not used for learning</li>
+                        <li>Each model must be retrained many times</li>
+                        <li>Multiple hyperparameters become expensive to tune</li>
+                    </ul>
+
+                    <p>
+                        Bayesian model comparison solves this problem <strong>without a validation set</strong>.
+                    </p>
+                </div>
+
+                <div class="solution">
+
+                    <div class="step">
+                        <h4>Step 1: Treat the Model as a Random Variable</h4>
+
+                        <p>
+                            Suppose we are given a collection of candidate models:
+                        </p>
+
+                        \[
+                        \{ M_i \}, \quad i = 1, \dots, L
+                        \]
+
+                        <p>
+                            Each model defines a probability distribution over the observed data.
+                            We assume that <em>one of these models generated the data</em>,
+                            but we are uncertain which one.
+                        </p>
+
+                        <p>
+                            This uncertainty is represented using a prior:
+                        </p>
+
+                        \[
+                        p(M_i)
+                        \]
+
+                        <p>
+                            After observing the training dataset \( D \),
+                            Bayes’ rule gives the posterior:
+                        </p>
+
+                        \[
+                        p(M_i \mid D)
+                        \propto
+                        p(M_i)\, p(D \mid M_i)
+                        \tag{1.37}
+                        \]
+
+                        <p>
+                            If we assign equal prior probabilities to all models,
+                            the comparison depends entirely on the term:
+                        </p>
+
+                        \[
+                        p(D \mid M_i)
+                        \]
+
+                        <p>
+                            This is called the <strong>model evidence</strong>
+                            (or <strong>marginal likelihood</strong>).
+                        </p>
+                    </div>
+
+                    <div class="step">
+                        <h4>Step 2: What Is Model Evidence?</h4>
+
+                        <p>
+                            Each model \( M_i \) has parameters \( \mathbf{w} \).
+                            Instead of choosing a single “best” parameter value,
+                            Bayesian inference <strong>integrates over all parameters</strong>.
+                        </p>
+
+                        \[
+                        p(D \mid M_i)
+                        =
+                        \int
+                        p(D \mid \mathbf{w}, M_i)\, p(\mathbf{w} \mid M_i)\, d\mathbf{w}
+                        \tag{1.38}
+                        \]
+
+                        <p>
+                            This immediately explains why Bayesian model comparison
+                            avoids overfitting:
+                        </p>
+
+                        <ul>
+                            <li>Overly flexible models spread probability mass too thin</li>
+                            <li>Simple models cannot explain complex data well</li>
+                            <li>Only models that balance both are rewarded</li>
+                        </ul>
+
+                    </div>
+
+                    <div class="step">
+                        <h4>Step 3: Bayes Factor</h4>
+
+                        <p>
+                            To compare two models \( M_i \) and \( M_j \),
+                            we simply compare their evidences:
+                        </p>
+
+                        \[
+                        \frac{p(D \mid M_i)}{p(D \mid M_j)}
+                        \]
+
+                        <p>
+                            This ratio is called the <strong>Bayes factor</strong>.
+                        </p>
+
+                        <p>
+                            It answers the question:
+                        </p>
+
+                        <blockquote>
+                            “How much more does the data support model \( M_i \) over model \( M_j \)?”
+                        </blockquote>
+                    </div>
+
+                    <div class="step">
+                        <h4>Step 4: Prediction by Averaging Over Models</h4>
+
+                        <p>
+                            Once we have the posterior over models,
+                            prediction does not require choosing a single model.
+                        </p>
+
+                        \[
+                        p(t_* \mid x_*, D)
+                        =
+                        \sum_{i=1}^{L}
+                        p(t_* \mid x_*, M_i, D)\, p(M_i \mid D)
+                        \tag{1.39}
+                        \]
+
+                        <p>
+                            This is a <strong>mixture distribution</strong>.
+                        </p>
+
+                        <p>
+                            Using only the most probable model is called
+                            <strong>model selection</strong> — a crude approximation.
+                        </p>
+                    </div>
+
+                    <div class="step">
+                        <h4>Step 5: Why Evidence Penalizes Complexity</h4>
+
+                        <p>
+                            Consider a model with a single parameter \( w \).
+                            The evidence is (omitting model index for clarity):
+                        </p>
+
+                        \[
+                        p(D)
+                        =
+                        \int
+                        p(D \mid w)\, p(w)\, dw
+                        \]
+
+                        <p>
+                            If the posterior is sharply peaked around \( w_{\text{MAP}} \),
+                            we approximate the integral as:
+                        </p>
+
+                        \[
+                        p(D)
+                        \approx
+                        p(D \mid w_{\text{MAP}})
+                        \frac{
+                        \Delta w_{\text{posterior}}
+                        }{
+                        \Delta w_{\text{prior}}
+                        }
+                        \tag{1.40}
+                        \]
+
+                        <br>
+                        <img src="../assets/1_baycomp.png" alt="Linear Regression Illustration" class="context-image"
+                            style="max-width: 100%; height: auto; display: block; margin: 0 auto;" loading="lazy">
+                        <br>
+
+                        <p>
+                            <strong>Why this makes sense:</strong>
+                        </p>
+
+                        <ul>
+                            <li>\( p(D \mid w_{\text{MAP}}) \): height of the peak</li>
+                            <li>\( \Delta w_{\text{posterior}} \): width of the peak</li>
+                            <li>\( 1 / \Delta w_{\text{prior}} \): prior height</li>
+                            <li>Integral ≈ height × width</li>
+                        </ul>
+
+                        <p>
+                            Taking logs:
+                        </p>
+
+                        \[
+                        \ln p(D)
+                        \approx
+                        \ln p(D \mid w_{\text{MAP}})
+                        +
+                        \ln
+                        \left(
+                        \frac{
+                        \Delta w_{\text{posterior}}
+                        }{
+                        \Delta w_{\text{prior}}
+                        }
+                        \right)
+                        \tag{1.41}
+                        \]
+
+                        <p>
+                            Since \( \Delta w_{\text{posterior}} < \Delta w_{\text{prior}} \), the second term is always
+                                negative. </p>
+                    </div>
+
+                    <div class="step">
+                        <h4>Step 6: Multiple Parameters</h4>
+
+                        <p>
+                            For a model with \( k \) parameters:
+                        </p>
+
+                        \[
+                        \ln p(D)
+                        \approx
+                        \ln p(D \mid \mathbf{w}_{\text{MAP}})
+                        +
+                        k
+                        \ln
+                        \left(
+                        \frac{
+                        \Delta w_{\text{posterior}}
+                        }{
+                        \Delta w_{\text{prior}}
+                        }
+                        \right)
+                        \tag{1.42}
+                        \]
+
+                        <p>
+                            Interpretation:
+                        </p>
+
+                        <ul>
+                            <li>First term: goodness of fit</li>
+                            <li>Second term: complexity penalty</li>
+                            <li>Penalty grows linearly with number of parameters</li>
+                        </ul>
+
+                        <p>
+                            Bayesian model comparison automatically finds the
+                            optimal trade-off between fit and complexity.
+                        </p>
+                    </div>
+
+                    <div class="note">
+                        <strong>Key Takeaways</strong>
+                        <ul>
+                            <li>Cross-validation wastes data and requires repeated retraining</li>
+                            <li>Bayesian comparison integrates out parameters instead of fixing them</li>
+                            <li>Model evidence balances fit and complexity automatically</li>
+                            <li>Bayes factors compare models using probability ratios</li>
+                            <li>Predictions can be averaged across models for robustness</li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+
+
+
+            <!-- 15 -->
             <div class="problem">
                 <div class="context">
                 </div>
