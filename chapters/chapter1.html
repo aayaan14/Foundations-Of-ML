@@ -683,13 +683,16 @@
                                 <th>Aspect</th>
                                 <th>MLE</th>
                                 <th>MAP</th>
+                                <th>Fully Bayesian</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr>
                                 <td>View of Weights \( \mathbf{w} \)</td>
                                 <td>Fixed but unknown parameters</td>
-                                <td>Random variables (weights are bounded)</td>
+                                <td>Random variables (with prior)</td>
+                                <td>Random variables with full posterior distribution (gives a probability distribution
+                                    on \(\mathbf{w}\))</td>
                             </tr>
                             <tr>
                                 <td>Objective Function</td>
@@ -705,15 +708,22 @@
                                     = \arg\max_{\mathbf{w}} \; p(\mathbf{w}\mid \mathbf{t})
                                     \)
                                     \[
-                                    = \arg\max_{\mathbf{w}} \; {p(\mathbf{t}\mid
-                                    \mathbf{w})\,p(\mathbf{w})}
+                                    = \arg\max_{\mathbf{w}} \; p(\mathbf{t}\mid \mathbf{w})\,p(\mathbf{w})
+                                    \]
+                                </td>
+                                <td>
+                                    No single best estimate — compute full posterior:
+                                    \[
+                                    p(\mathbf{w}\mid \mathbf{t})
+                                    = \frac{p(\mathbf{t}\mid \mathbf{w})p(\mathbf{w})}{p(\mathbf{t})}
                                     \]
                                 </td>
                             </tr>
                             <tr>
                                 <td>Best Use Case</td>
-                                <td>Large datasets</td>
-                                <td>Limited or noisy data</td>
+                                <td>Large datasets, low prior knowledge</td>
+                                <td>When regularization/prior knowledge helps</td>
+                                <td>When uncertainty matters (small data, predictions with confidence)</td>
                             </tr>
                         </tbody>
                     </table>
@@ -3212,9 +3222,8 @@
                 </div>
             </div>
 
-            <!-- 3.4 Bayesian Model Comparison -->
+            <!-- 14 -->
             <div class="problem">
-
                 <div class="context">
                     <p>
                         So far in this chapter, we have focused on choosing <em>parameters</em>
@@ -3521,11 +3530,73 @@
                 </div>
             </div>
 
-
-
             <!-- 15 -->
             <div class="problem">
                 <div class="context">
+                    Let's go back to our predictive distribution function
+
+                    \[
+                    p(t_* \mid x_*, \mathcal{D})
+                    \]
+
+                    where \(\mathcal{D} = \{(x_n, t_n)\}_{n=1}^M\) is the training data; \(x_*\) is a new input; and
+                    \(t_*\) is the corresponding target.
+                    <p>
+                        In a fully bayesian treatment (considering priors over weights and noise precision), the
+                        predictive distribution can be rewritten as:
+
+                        \[
+                        p(t_* \mid x_*, \mathcal{D})
+                        =
+                        \int \!\! \int \!\! \int
+                        p(t_*, \mathbf{w},\alpha, \beta \mid \mathcal{D}, \mathbf{x_*})\,
+                        \, d\mathbf{w}\, d\beta\, d\alpha
+                        \tag{1.43}
+                        \]
+
+                    </p>
+                    <p>
+                        Let's try to break the above term using the law of total probability.
+                    </p>
+                    \[
+                    p(t_*, \mathbf{w},\alpha, \beta \mid \mathcal{D}, \mathbf{x_*})
+                    =
+                    p(t_* \mid \mathbf{w}, \beta, \mathcal{D})\,
+                    p(\mathbf{w}, \beta, \alpha \mid \mathcal{D})
+                    \tag{1.44}
+                    \]
+
+                    <p>(Note: We have omitted \(\alpha\) in the first term as when weights are fixed, the prior on
+                        weights is also fixed.)</p>
+
+                    <p>Let's break the second factor again:</p>
+                    \[
+                    p(\mathbf{w}, \beta, \alpha \mid \mathcal{D})
+                    =
+                    p(\mathbf{w} \mid \beta, \alpha, \mathcal{D})\,
+                    p(\beta , \alpha \mid \mathcal{D})\
+                    \tag{1.45}
+                    \]
+
+                    <p>Now plugging the above equations in (1.43):</p>
+                    \[
+                    p(t_* \mid x_*, \mathcal{D})
+                    =
+                    \int \!\! \int \!\! \int
+                    p(t_* \mid \mathbf{w}, \beta, \mathcal{D})\,
+                    p(\mathbf{w} \mid \beta, \alpha, \mathcal{D})\,
+                    p(\beta , \alpha \mid \mathcal{D})
+                    \, d\mathbf{w}\, d\beta\, d\alpha
+                    \tag{1.46}
+                    \]
+
+                    <p>Integration over all parameters in (1.46) is hard and intractable (no closed solution exists) as:</p>
+
+                    <p>\(p(t_* \mid \mathbf{w}, \beta, \mathcal{D})\) = \(\mathcal{N}(t_* \mid \mathbf{w}^\top x_*, \beta^{-1})\)</p>
+
+                    <p>\(p(\mathbf{w} \mid \beta, \alpha, \mathcal{D})\) = \(\mathcal{N}(\mathbf{w} \mid \mathbf{0}, (\alpha I)^{-1})\)</p> 
+
+                    <p>\(p(\beta, \alpha \mid \mathcal{D})\) = \(\mathcal{G}(\beta, \alpha \mid \beta_0, \alpha_0)\) <- this is the intractable part!!!</p>
                 </div>
 
                 <div class="problem-statement">
