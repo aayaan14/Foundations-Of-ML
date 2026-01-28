@@ -3590,13 +3590,155 @@
                     \tag{1.46}
                     \]
 
-                    <p>Integration over all parameters in (1.46) is hard and intractable (no closed solution exists) as:</p>
+                    <p>Integration over all parameters in (1.46) is hard and intractable (no closed solution exists) as:
+                    </p>
+                    <ul>
+                        <li>
+                            \(p(t_* \mid \mathbf{w}, \beta, \mathcal{D})\) = \(\mathcal{N}(t_* \mid \mathbf{w}^\top
+                            \phi(x_*), \beta^{-1})\)
+                        </li>
+                        <li>
+                            \(p(\mathbf{w} \mid \beta, \alpha, \mathcal{D})
+                            = \mathcal{N}(\mathbf{w} \mid \boldsymbol{\mu}_M, \boldsymbol{\Sigma}_M)\)
 
-                    <p>\(p(t_* \mid \mathbf{w}, \beta, \mathcal{D})\) = \(\mathcal{N}(t_* \mid \mathbf{w}^\top x_*, \beta^{-1})\)</p>
+                            <ul>
+                                <li>
+                                    \(\boldsymbol{\mu}_M = \beta\, \boldsymbol{\Sigma}_M \boldsymbol{\Phi}^\top
+                                    \mathbf{t}\)
+                                </li>
+                                <li>
+                                    \(\boldsymbol{\Sigma}_M = \left(\alpha \mathbf{I} + \beta \boldsymbol{\Phi}^\top
+                                    \boldsymbol{\Phi}\right)^{-1}\)
+                                </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <p>\(p(\beta, \alpha \mid \mathcal{D})\) = \(\mathcal{G}(\beta, \alpha \mid \beta_0,
+                                \alpha_0)\) <- this is the intractable part!!!</p>
+                        </li>
+                    </ul>
 
-                    <p>\(p(\mathbf{w} \mid \beta, \alpha, \mathcal{D})\) = \(\mathcal{N}(\mathbf{w} \mid \mathbf{0}, (\alpha I)^{-1})\)</p> 
+                    <p>We'll now try to solve this intractable part.</p>
 
-                    <p>\(p(\beta, \alpha \mid \mathcal{D})\) = \(\mathcal{G}(\beta, \alpha \mid \beta_0, \alpha_0)\) <- this is the intractable part!!!</p>
+                    <p>Using Bayes' theorem:</p>
+                    \[
+                    p(\beta, \alpha \mid \mathcal{D})
+                    \propto
+                    p(\mathcal{D} \mid \beta, \alpha)\, p(\beta, \alpha)
+                    \tag{1.47}
+                    \]
+                    <p>Where:</p>
+                    <ul>
+                        <li>
+                            \(p(\mathcal{D} \mid \beta, \alpha)\) = Marginal likelihood / Evidence Function
+                        </li>
+                        <li>
+                            \(p(\beta, \alpha)\) = Prior over noise precision and weight precision.
+                        </li>
+                    </ul>
+
+                    <p>Let's now evaluate the evidence function</p>
+
+                    \[
+                    p(\mathcal{D} \mid \beta, \alpha)
+                    =
+                    \int
+                    p(\mathcal{D} \mid \mathbf{w}, \beta)\,
+                    p(\mathbf{w} \mid \alpha)
+                    \, d\mathbf{w}
+                    \tag{1.48}
+                    \]
+
+                    <p>where:</p>
+                    \[
+                    \begin{aligned}
+                    p(\mathcal{D} \mid \mathbf{w}, \beta)
+                    &= \prod_{n=1}^{M}
+                    \mathcal{N}\!\left(t_n \mid \mathbf{w}^\top \boldsymbol{\phi}(x_n), \beta^{-1}\right) \\
+                    &= \mathcal{N}\!\left(\mathbf{t} \mid \boldsymbol{\Phi}\mathbf{w}, \beta^{-1}\mathbf{I}\right) \\
+                    &= \left(\frac{\beta}{2\pi}\right)^{M/2}
+                    \exp\!\left\{
+                    -\frac{\beta}{2}
+                    \|\mathbf{t}-\boldsymbol{\Phi}\mathbf{w}\|^2
+                    \right\}
+                    \end{aligned}
+                    \tag{1.49}
+                    \]
+                    <p>and:</p>
+                    \[
+                    p(\mathbf{w} \mid \alpha)
+                    =
+                    \mathcal{N}(\mathbf{w} \mid \mathbf{0}, \alpha^{-1} \mathbf{I})
+                    \]
+                    \[
+                    =
+                    \left(\frac{\alpha}{2\pi}\right)^{D/2}
+                    \exp\!\left\{
+                    -\frac{\alpha}{2}
+                    \mathbf{w}^\top \mathbf{w}
+                    \right\}
+                    \tag{1.50}
+                    \]
+
+                    <p>Substituting (1.49) and (1.50) into (1.48):</p>
+
+                    \[
+                    p(\mathcal{D} \mid \beta, \alpha)
+                    =
+                    \int
+                    \left(\frac{\beta}{2\pi}\right)^{M/2}
+                    \exp\!\left\{
+                    -\frac{\beta}{2}
+                    \|\mathbf{t}-\boldsymbol{\Phi}\mathbf{w}\|^2
+                    \right\}\,
+                    \left(\frac{\alpha}{2\pi}\right)^{D/2}
+                    \exp\!\left\{
+                    -\frac{\alpha}{2}
+                    \mathbf{w}^\top \mathbf{w}
+                    \right\}
+                    \, d\mathbf{w}
+                    \]
+
+                    \[
+                    =
+                    \left(\frac{\beta}{2\pi}\right)^{M/2}
+                    \left(\frac{\alpha}{2\pi}\right)^{D/2}
+                    \int
+                    \exp\!\left\{
+                    -\frac{1}{2}
+                    \left(\beta
+                    \|\mathbf{t}-\boldsymbol{\Phi}\mathbf{w}\|^2
+                    +
+                    \alpha
+                    \mathbf{w}^\top \mathbf{w}
+                    \right)
+                    \right\}
+                    \, d\mathbf{w}
+                    \]
+
+                    <p>We now define the error function \( \mathcal{E}(\mathbf{w}) \):</p>
+                    \[
+                    \mathcal{E}(\mathbf{w})
+                    =
+                    \frac{\beta}{2}
+                    \|\mathbf{t}-\boldsymbol{\Phi}\mathbf{w}\|^2
+                    +
+                    \frac{\alpha}{2}
+                    \mathbf{w}^\top \mathbf{w}
+                    \]
+                    <p>Rewriting the evidence function:</p>
+                    \[
+                    p(\mathcal{D} \mid \beta, \alpha)
+                    =
+                    \left(\frac{\beta}{2\pi}\right)^{M/2}
+                    \left(\frac{\alpha}{2\pi}\right)^{D/2}
+                    \int
+                    \exp\!\left\{
+                    -\mathcal{E}(\mathbf{w})
+                    \right\}
+                    \, d\mathbf{w}
+                    \tag{1.51}
+                    \]
                 </div>
 
                 <div class="problem-statement">
