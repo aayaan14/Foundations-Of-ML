@@ -3739,6 +3739,195 @@
                     \, d\mathbf{w}
                     \tag{1.51}
                     \]
+
+                    <p>Let's now compute the integral in (1.51) by completing the square in the exponent.</p>
+                    <p>Expanding the squared term:</p>
+
+                    \[
+                    \||\mathbf{t}-\boldsymbol{\Phi}\mathbf{w}\|^2
+                    =
+                    (\mathbf{t}-\boldsymbol{\Phi}\mathbf{w})^\top
+                    (\mathbf{t}-\boldsymbol{\Phi}\mathbf{w})
+                    =
+                    \mathbf{t}^\top \mathbf{t}
+                    -
+                    2 \mathbf{t}^\top \boldsymbol{\Phi}\mathbf{w}
+                    +
+                    \mathbf{w}^\top \boldsymbol{\Phi}^\top \boldsymbol{\Phi} \mathbf{w}
+                    \]
+
+                    <p>Substituting back into the error function, we get:</p>
+                    \[
+                    \mathcal{E}(\mathbf{w})
+                    =
+                    \frac{\beta}{2}
+                    \left(
+                    \mathbf{t}^\top \mathbf{t}
+                    -
+                    2 \mathbf{t}^\top \boldsymbol{\Phi}\mathbf{w}
+                    +
+                    \mathbf{w}^\top \boldsymbol{\Phi}^\top \boldsymbol{\Phi} \mathbf{w}
+                    \right)
+                    +
+                    \frac{\alpha}{2}
+                    \mathbf{w}^\top \mathbf{w}
+                    \]
+
+                    <p>Group the terms:</p>
+
+                    \[
+                    \mathcal{E}(\mathbf{w})
+                    =
+                    \frac{1}{2}
+                    \mathbf{w}^\top
+                    \mathbf{A}
+                    \mathbf{w}
+                    -
+                    \beta
+                    \mathbf{t}^\top \boldsymbol{\Phi}\mathbf{w}
+                    +
+                    \frac{\beta}{2}
+                    \mathbf{t}^\top \mathbf{t}
+                    \]
+
+                    <p>where we define: </p>
+                    \[
+                    \mathbf{A}
+                    =
+                    \beta \boldsymbol{\Phi}^\top \boldsymbol{\Phi}
+                    +
+                    \alpha \mathbf{I}
+                    \]
+
+                    <p>We want to rewrite the error function as:</p>
+                    \[
+                    \mathcal{E}(\mathbf{w})
+                    =
+                    \mathcal{E}(\boldsymbol{\mu}_M)
+                    +
+                    \frac{1}{2}
+                    (\mathbf{w} - \boldsymbol{\mu}_M)^\top
+                    \mathbf{A}
+                    (\mathbf{w} - \boldsymbol{\mu}_M)
+                    \tag{1.52}
+                    \]
+
+                    <p>Let's find \( \boldsymbol{\mu}_M \)</p>
+
+                    \[
+                    \nabla_{\mathbf{w}} \mathcal{E}(\mathbf{w})
+                    =
+                    \mathbf{A}\mathbf{w}
+                    -
+                    \beta \boldsymbol{\Phi}^\top \mathbf{t}
+                    =
+                    \mathbf{0}
+                    \]
+
+                    \[
+                    \Rightarrow
+                    \quad
+                    \boldsymbol{\mu}_M
+                    =
+                    \beta
+                    \mathbf{A}^{-1}
+                    \boldsymbol{\Phi}^\top \mathbf{t}
+                    \]
+
+                    <p>Taking double derivatives:</p>
+                    \[
+                    \nabla_{\mathbf{w}} \nabla_{\mathbf{w}} \mathcal{E}(\mathbf{w})
+                    =
+                    \mathbf{A}
+                    \]
+                    <p>which proves that \(\mathbf{A}\) is a hessian matrix of \(\mathcal{E}(\mathbf{w})\)
+
+                        \[
+                        \mathcal{E}(\mathbf{w})
+                        =
+                        \underbrace{
+                        \frac{1}{2}\mathbf{w}^\top \mathbf{A}\mathbf{w}
+                        -
+                        \beta \mathbf{t}^\top \boldsymbol{\Phi}\mathbf{w}
+                        +
+                        \frac{1}{2}\boldsymbol{\mu}_M^\top \mathbf{A}\boldsymbol{\mu}_M
+                        }_{\text{forms square}}
+                        +
+                        \underbrace{
+                        \frac{\beta}{2}\mathbf{t}^\top \mathbf{t}
+                        -
+                        \frac{1}{2}\boldsymbol{\mu}_M^\top \mathbf{A}\boldsymbol{\mu}_M
+                        }_{\mathcal{E}(\boldsymbol{\mu}_M)}
+                        \]
+
+                    <p>Using \(\boldsymbol{\mu}_M = \beta \mathbf{A}^{-1} \boldsymbol{\Phi}^\top \mathbf{t}\), we can
+                        rewrite the error function:</p>
+
+                    \[
+                    \boxed{
+                    \mathcal{E}(\mathbf{w})
+                    =
+                    \mathcal{E}(\boldsymbol{\mu}_M)
+                    +
+                    \frac{1}{2}
+                    (\mathbf{w} - \boldsymbol{\mu}_M)^\top
+                    \mathbf{A}
+                    (\mathbf{w} - \boldsymbol{\mu}_M)
+                    }
+                    \]
+
+                    <p>Let's solve (1.51) now:</p>
+                    \[
+                    p(\mathcal{D} \mid \beta, \alpha)
+                    =
+                    \left(\frac{\beta}{2\pi}\right)^{M/2}
+                    \left(\frac{\alpha}{2\pi}\right)^{D/2}
+                    e^{-\mathcal{E}(\boldsymbol{\mu}_M)}
+                    \int
+                    \exp\!\left\{
+                    -\frac{1}{2}
+                    (\mathbf{w} - \boldsymbol{\mu}_M)^\top
+                    \mathbf{A}
+                    (\mathbf{w} - \boldsymbol{\mu}_M)
+                    \right\}
+                    \, d\mathbf{w}
+                    \]
+
+                    \[
+                    =
+                    \left(\frac{\beta}{2\pi}\right)^{M/2}
+                    \left(\frac{\alpha}{2\pi}\right)^{D/2}
+                    e^{-\mathcal{E}(\boldsymbol{\mu}_M)}
+                    (2\pi)^{D/2}
+                    |\mathbf{A}|^{-1/2}
+                    \]
+
+                    \[
+                    p(\mathcal{D} \mid \beta, \alpha)
+                    =
+                    \left(\frac{\beta}{2\pi}\right)^{M/2}
+                    \alpha^{D/2}
+                    e^{-\mathcal{E}(\boldsymbol{\mu}_M)}
+                    |\mathbf{A}|^{-1/2}
+                    \tag{1.53}
+                    \]
+
+                    <p>Often written in log form for optimization (evidence maximization):</p>
+                    \[
+                    \ln p(\mathcal{D} \mid \beta, \alpha)
+                    =
+                    \frac{M}{2} \ln \beta
+                    +
+                    \frac{D}{2} \ln \alpha
+                    -
+                    \mathcal{E}(\boldsymbol{\mu}_M)
+                    -
+                    \frac{1}{2} \ln |\mathbf{A}|
+                    -
+                    \frac{M}{2} \ln (2\pi)
+                    \tag{1.54}
+                    \]
+
                 </div>
 
                 <div class="problem-statement">
