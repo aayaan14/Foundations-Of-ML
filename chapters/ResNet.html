@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Transformers</title>
+    <title>ResNet</title>
     <link rel="stylesheet" href="../css/style.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
@@ -17,75 +17,365 @@
         <a href="../index.html" class="back-link">← Back to Home</a>
 
         <header>
-            <h1>Transformers</h1>
+            <h1>ResNet</h1>
 
             <div class="chapter-intro">
-                <p>In this chapter, we'll explore how machines translate "Ein Mann steht in einer Küche"
-                    (German) to "A man is standing in a kitchen" (English) using the revolutionary Transformer
-                    architecture—focusing purely on the mathematical elegance behind it.</p>
+                <p>In this chapter, we'll explore how Residual Networks (ResNet) solve the degradation & vanishing
+                    gradient problem in deep neural networks.</p>
             </div>
 
             <div class="chapter">
 
-                <!-- 1. The Big Picture -->
+                <!-- 1. Why ResNet -->
                 <div class="problem" id="big-picture">
-                    <h3>The Big Picture</h3>
+                    <h3>Why Residual Connections?</h3>
 
                     <div class="context">
-                        <p>Here's how a Transformer might look at a very high level for our task.
+                        <p>Let's look at the given graph.
                         </p>
 
                         <br>
 
-                        <img src="../assets/t_blackbox.png" alt="Black box" class="context-image"
+                        <img src="../assets/res_plain_20vs56.png" alt="Black box" class="context-image"
                             style="max-width: 100%; height: auto; display: block; margin: 0 auto;" loading="lazy">
 
                         <br>
 
-                        <p>You can think of this as a black box that takes German text and outputs English text.</p>
+                        <p>We expected the training/test error for the 56-layer network to be lower than the 20-layer
+                            network (since the solution space of a 20-layer network is subset of the solution space of a
+                            56-layer network), but it was the opposite!</p>
 
-                        <p>Now let's try to open up this black box!!!!</p>
+                        <p>Why?</p>
 
-                        <br>
+                        <p>This is primarily due to 2 problems:</p>
+                        <ol>
+                            <li><strong>Vanishing/Exploding Gradients</strong></li>
+                            <li><strong>The degradation problem</strong></li>
+                        </ol>
+                        <p>Let's look at each one by one</p>
 
-                        <img src="../assets/t_arch.png" alt="Transformer Architecture" class="context-image"
-                            style="max-height: 550px; width: auto; display: block; margin: 0 auto;" loading="lazy">
-
-                        <br>
-
-                        <p>This looks scary!!! But do not worry, we'll learn this architecture (in 2 parts: encoder and
-                            decoder) thoroughly and understand
-                            how did our text get translated step by step.</p>
                     </div>
                 </div>
 
-                <!-- 2. The Encoder -->
-                <div class="problem" id="encoder">
-                    <h3>The Encoder: Building Context</h3>
-
+                <!-- 2. Vanishing/Exploding Gradients Problem -->
+                <div class="problem" id="vanishing">
+                    <h3>Vanishing/Exploding Gradients Problem</h3>
                     <div class="context">
-                        <p>The encoder's job is to build a rich, context-aware representation of the input sentence
-                            (German).</p>
+                        <p>
+                            During backpropagation, gradients propagate backward through every layer via the chain rule.
+                            For a network with \(L\) layers, the gradient of the loss with respect to the first layer's
+                            weights looks like this:
+                        </p>
 
-                        <p>Each encoder layer has these sub-components:</p>
-                        <ol>
-                            <li><strong>Multi-Head Self-Attention</strong>
+                        <div class="problem-statement">
+                            <h4>Gradient via Chain Rule</h4>
+                            \[
+                            \frac{\partial \mathcal{L}}{\partial W_1}
+                            =
+                            \frac{\partial \mathcal{L}}{\partial x_L}
+                            \cdot
+                            \frac{\partial x_L}{\partial x_{L-1}}
+                            \cdot
+                            \frac{\partial x_{L-1}}{\partial x_{L-2}}
+                            \cdots
+                            \frac{\partial x_2}{\partial W_1}
+                            \]
+                        </div>
+
+                        <p>
+                            Each term \(\frac{\partial x_{i+1}}{\partial x_i}\) is the Jacobian of that layer's
+                            output with respect to its input. For a single layer with weight matrix \(W_i\) and
+                            activation \(\sigma\), this Jacobian is:
+                        </p>
+
+                        <div class="problem-statement">
+                            <h4>Jacobian of a Single Layer</h4>
+                            \[
+                            \frac{\partial x_{i+1}}{\partial x_i}
+                            =
+                            W_i^{\top}
+                            \operatorname{diag}\!\left(\sigma'(x_i)\right)
+                            \]
+                            <p style="margin-top: 10px;">
+                                where \(\sigma'(x_i)\) is the derivative of the activation function — for ReLU,
+                                this is either \(0\) or \(1\).
+                            </p>
+                        </div>
+
+                        <p>
+                            So the full gradient product across \(L\) layers becomes:
+                        </p>
+
+                        <div class="problem-statement">
+                            <h4>The Vanishing Gradient — Full Product</h4>
+                            \[
+                            \frac{\partial \mathcal{L}}{\partial W_1}
+                            =
+                            \frac{\partial \mathcal{L}}{\partial x_L}
+                            \prod_{i=1}^{L-1}
+                            \left(
+                            W_i^{\top}
+                            \operatorname{diag}\!\left(\sigma'(x_i)\right)
+                            \right)
+                            \]
+                        </div>
+
+                        <p>
+                            This is a product of \(L - 1\) matrices. Two things can go wrong:
+                        </p>
+                        <ul>
+                            <li style="margin-bottom: 10px;">
+                                <strong>Vanishing:</strong> If the singular values of \(W_i\) are less than \(1\),
+                                each multiplication shrinks the gradient. After \(L\) layers, the product
+                                \(\prod_{i=1}^{L-1} \lVert W_i \rVert\) collapses toward \(0\) exponentially fast.
+                                Early layers receive essentially no gradient signal and stop learning.
                             </li>
-                            <li><strong>Feed-Forward Network</strong></li>
-                            <li><strong>Residual Connections</strong></li>
-                            <li><strong>Layer Normalization</strong></li>
-                            <li><strong>Dropout</strong>
+                            <li>
+                                <strong>Exploding:</strong> If the singular values of \(W_i\) are greater than \(1\),
+                                the product grows exponentially. Gradients become astronomically large, weight
+                                updates destabilize training, and loss diverges.
                             </li>
-                        </ol>
+                        </ul>
 
-                        <p>This is how the Encoder Architecture looks like in the paper:</p>
+                        <div class="note">
+                            <strong>Note:</strong> ReLU already helps compared to sigmoid or tanh — its derivative
+                            is either exactly \(0\) or exactly \(1\), so it does not saturate. But with \(56\) layers,
+                            even a modest per-layer shrinkage compounds: if each Jacobian scales gradients by
+                            \(0.9\), after \(56\) layers you get \(0.9^{56} \approx 0.0015\) — less than \(0.2\%\) of
+                            the original gradient reaches the first layer.
+                        </div>
 
+                        <div class="tip">
+                            <strong>Key Insight:</strong> This is not an overfitting problem. The training error
+                            itself goes up with depth. The network has enough capacity — the optimizer simply
+                            cannot train it effectively because the gradient signal vanishes before reaching
+                            the early layers.
+                        </div>
                     </div>
-                    <br>
-                    <img src="../assets/t_encoder.png" alt="Black box" class="context-image"
-                        style="max-width: 100%; height: auto; display: block; margin: 0 auto;" loading="lazy">
-                    <br>
-                    <p>Let's break this down step by step.</p>
+                </div>
+
+                <!-- 3. Degradation Problem -->
+                <div class="problem" id="degradation">
+                    <h3>The Degradation Problem</h3>
+                    <div class="context">
+                        <p>
+                            Once we fix vanishing gradients (via better initialization, batch normalization, etc.),
+                            does a deeper network always perform at least as well as a shallower one?
+                        </p>
+                        <p>
+                            It should. Here's the theoretical argument:
+                        </p>
+
+                        <div class="problem-statement">
+                            <h4>The Identity Argument</h4>
+                            <p>
+                                Suppose we have a well-trained shallow network \(\mathcal{F}_s\) with \(n\) layers.
+                                Now consider a deeper network \(\mathcal{F}_d\) with \(n + k\) layers, where the
+                                extra \(k\) layers are constructed to be identity mappings:
+                            </p>
+
+                            \[
+                            \mathcal{F}_d(x) = \mathcal{F}_s(x)
+                            \quad
+                            \text{if the extra } k \text{ layers learn } h(x) = x
+                            \]
+
+                            <p style="margin-top: 10px;">
+                                So \(\mathcal{F}_d\) should achieve <em>at least</em> the same training error as
+                                \(\mathcal{F}_s\). The deeper network's solution space strictly contains the
+                                shallower one.
+                            </p>
+                        </div>
+
+                        <p>
+                            But in practice, this doesn't happen. The 56-layer plain network from the opening
+                            graph has <em>higher</em> training error than the 20-layer one. The optimizer
+                            fails to find the identity solution, even though it exists.
+                        </p>
+
+                        <p>
+                            Why is learning \(h(x) = x\) hard? Consider what a plain layer is trying to do.
+                            Starting from a random initialization, the layer computes:
+                        </p>
+
+                        <div class="problem-statement">
+                            <h4>What a Plain Layer Learns</h4>
+
+                            \[
+                            h(x) = \sigma(Wx + b)
+                            \]
+
+                            <p style="margin-top: 10px;">
+                                To learn the identity, the network needs \(W \to I\) and \(b \to 0\) — but it
+                                must discover this through gradient descent, starting from a random \(W\) with
+                                no inductive bias pointing toward identity. The optimizer has no reason to
+                                prefer identity over any other solution in the loss landscape.
+                            </p>
+                        </div>
+
+                        <p>
+                            The deeper the network, the worse this compounds. Each extra layer is another
+                            opportunity for the optimizer to settle into a suboptimal solution instead of
+                            the identity. This is the <strong>degradation problem</strong> — not caused by
+                            overfitting, not caused by vanishing gradients, but by the optimizer simply
+                            failing to find the right solution in a high-dimensional non-convex landscape.
+                        </p>
+
+                        <div class="note">
+                            <strong>Note:</strong> Degradation and vanishing gradients are related but distinct.
+                            Vanishing gradients make training slow or impossible by starving early layers of
+                            signal. Degradation happens even when gradients flow fine — the optimizer just
+                            converges to a worse solution as depth increases.
+                        </div>
+
+                        <p>
+                            Both problems point to the same root cause: plain networks ask each layer to
+                            learn the full target mapping \(H(x)\) from scratch. Residual connections change
+                            this completely — and that's exactly what we'll look at next.
+                        </p>
+
+                        <div class="tip">
+                            <strong>Key Insight:</strong> The degradation problem is an optimization problem,
+                            not a capacity problem. A 56-layer network is strictly more expressive than a
+                            20-layer one. The extra layers could always learn \(h(x) = x\) and match the
+                            shallower net exactly — the optimizer just fails to find it. Residual connections
+                            solve this by making identity the <em>default</em>, forcing the network to only
+                            learn deviations from it.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 5. conv3x3 -->
+                <div class="problem" id="conv3x3">
+                    <h3>conv3x3</h3>
+                    <div class="context">
+                        <p>
+                            Before we dive into the residual blocks themselves, let's understand the two
+                            small helper functions that get called everywhere in ResNet. The first is
+                            <code>conv3x3</code> — a wrapper around PyTorch's <code>nn.Conv2d</code> with
+                            a specific set of defaults baked in.
+                        </p>
+
+                        <pre><code>def conv3x3(in_planes: int, out_planes: int, stride: int = 1,
+            groups: int = 1, dilation: int = 1) -> nn.Conv2d:
+    """3x3 convolution with padding"""
+    return nn.Conv2d(
+        in_planes,
+        out_planes,
+        kernel_size=3,
+        stride=stride,
+        padding=dilation,
+        groups=groups,
+        bias=False,
+        dilation=dilation,
+    )</code></pre>
+
+                        <p>
+                            Let's go through each argument and understand exactly why it's set the way it is.
+                        </p>
+
+                        <p><strong>kernel_size=3</strong></p>
+                        <p>
+                            A 3×3 kernel is the smallest that captures spatial relationships in both
+                            dimensions simultaneously.
+                        </p>
+
+                        <p>
+                            Two stacked 3×3 convolutions have the same receptive field as one 5×5 convolution,
+                            but with strictly fewer parameters and an extra non-linearity between them:
+                        </p>
+
+                        <div class="problem-statement">
+                            <h4>Parameters: Two 3×3 vs One 5×5</h4>
+
+                            \[
+                            2 \times (3 \times 3 \times C_{\mathrm{in}} \times C_{\mathrm{out}})
+                            \quad \text{vs} \quad
+                            (5 \times 5 \times C_{\mathrm{in}} \times C_{\mathrm{out}})
+                            \]
+
+                            \[
+                            \Rightarrow \quad
+                            18\, C_{\mathrm{in}} C_{\mathrm{out}}
+                            \quad \text{vs} \quad
+                            25\, C_{\mathrm{in}} C_{\mathrm{out}}
+                            \]
+
+                            <p style="margin-top: 10px;">
+                                Two 3×3 convs use <strong>28% fewer parameters</strong> than one 5×5,
+                                while achieving the same receptive field and adding an extra ReLU in between.
+                            </p>
+                        </div>
+
+                        <p><strong>padding=dilation</strong></p>
+
+                        <div class="problem-statement">
+                            <h4>Output Size Formula</h4>
+
+                            \[
+                            H_{\mathrm{out}} =
+                            \left\lfloor
+                            \frac{
+                            H_{\mathrm{in}}
+                            + 2\,\text{padding}
+                            - \text{dilation}(\text{kernel} - 1)
+                            - 1
+                            }{\text{stride}}
+                            + 1
+                            \right\rfloor
+                            \]
+
+                            <p style="margin-top: 10px;">
+                                With \(H_{\mathrm{in}} = H\), \(\text{kernel} = 3\),
+                                \(\text{padding} = 1\), \(\text{dilation} = 1\),
+                                \(\text{stride} = 1\):
+                            </p>
+
+                            \[
+                            H_{\mathrm{out}}
+                            =
+                            \left\lfloor
+                            \frac{H + 2 - 1 \cdot 2 - 1}{1} + 1
+                            \right\rfloor
+                            = H
+                            \]
+
+                            <p style="margin-top: 10px;">
+                                The spatial size is preserved. When <code>dilation=2</code>,
+                                <code>padding=2</code> preserves size again —
+                                this is why <code>padding=dilation</code> works as a general rule.
+                            </p>
+                        </div>
+
+                        <p><strong>bias=False</strong></p>
+
+                        <div class="problem-statement">
+                            <h4>Why bias=False with BatchNorm</h4>
+
+                            \[
+                            \operatorname{BN}(x)
+                            =
+                            \gamma
+                            \frac{x - \mu_{\mathcal{B}}}
+                            {\sqrt{\sigma_{\mathcal{B}}^{2} + \epsilon}}
+                            +
+                            \beta
+                            \]
+
+                            <p style="margin-top: 10px;">
+                                The mean subtraction \(\mu_{\mathcal{B}}\) cancels out any constant offset —
+                                including whatever a conv bias \(b\) would have added. The learnable
+                                \(\beta\) in BN reintroduces a trainable shift.
+                            </p>
+                        </div>
+
+                        <div class="tip">
+                            <strong>Key Insight:</strong> <code>conv3x3</code> isn't just a convenience
+                            wrapper — the <code>padding=dilation</code> default is load-bearing. It ensures
+                            that every 3×3 conv preserves spatial size regardless of dilation,
+                            which makes the residual addition \(F(x) + x\) dimensionally valid.
+                        </div>
+                    </div>
                 </div>
 
                 <!-- 3. Embeddings -->
