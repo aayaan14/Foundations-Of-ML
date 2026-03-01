@@ -351,3 +351,30 @@ blockquote strong {
     font-style: normal;
     color: #212529;
 }
+
+pre {
+    background: #1e1e1e;
+    border-radius: 8px;
+    padding: 24px;
+    margin: 20px 0;
+    overflow-x: auto;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    position: relative;
+}
+
+pre code {
+    background: none;
+    padding: 0;
+    color: #d4d4d4;
+    font-family: 'Courier New', 'Consolas', monospace;
+    font-size: 0.9em;
+    line-height: 1.7;
+}
+
+/* keyword colors */
+pre code .kw   { color: #569cd6; } /* def, return       */
+pre code .fn   { color: #dcdcaa; } /* function names     */
+pre code .tp   { color: #4ec9b0; } /* types: int, str    */
+pre code .num  { color: #b5cea8; } /* numbers            */
+pre code .cm   { color: #6a9955; font-style: italic; } /* comments */
+pre code .st   { color: #ce9178; } /* strings            */
