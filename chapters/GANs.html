@@ -17,43 +17,63 @@
         <a href="../index.html" class="back-link">← Back to Home</a>
 
         <header>
-            <h1>ResNet</h1>
+            <h1>Generative Adversarial Networks</h1>
 
             <div class="chapter-intro">
-                <p>In this chapter, we'll explore how Residual Networks (ResNet) solve the degradation & vanishing
-                    gradient problem in deep neural networks.</p>
+                <p>In this chapter, we'll explore how GANs work and different architectures have been proposed,but
+                    before that, go through the prerequisites.</p>
             </div>
 
             <div class="chapter">
-
-                <!-- 1. Why ResNet -->
-                <div class="problem" id="big-picture">
-                    <h3>Why Residual Connections?</h3>
-
+                <!-- 1. Prerequisites -->
+                <div class="problem" id="prerequisites">
+                    <h3>Probability Density (\(p(x)\)) v/s Probability Distribution (\(\mathbb{P}(x)\))</h3>
                     <div class="context">
-                        <p>Let's look at the given graph.
+                        <p><strong>Discrete Variable: </strong></p>
+                        \[P(X = x) = p(x) \quad \text{(Probability Mass Function)}\]
+                        \[\mathbb{P}(X \in A) = \sum_{x \in A} p(x)\]
+
+                        <p><strong>Continuous Variable: </strong></p>
+                        No Probability Mass Function exists for continous variables (Cant find probability at a single
+                        point), but </p>
+                        \[\mathbb{P}(X \in A) = \int_A p(x) \, dx\]
+
+                    </div>
+
+                    <h3>i.i.d (Independent and Identically Distributed)</h3>
+                    <div class="context">
+                        <p><strong>Identical: </strong></p>
+                        if 2 R.V's is drawn from the same distribution, then it is said to be identical.</p>
+
+                        <p><strong>Independent: </strong></p>
+                        if the outcome of one R.V does not affect the outcome of another R.V, then they are said to be
+                        independent.</p>
+                        (more clarification from sir)
+                    </div>
+
+                    <h3>Convex Conjugate</h3>
+                    <div class="context">
+                        <p>Consider the graph given below.
+                            <br>
+                            <img src="../assets/gans_conjugate.png" alt="Convex Conjugate Illustration"
+                                class="context-image"
+                                style="max-width: 100%; height: 20em; display: block; margin: 0 auto;" loading="lazy">
+                            <br>
+                        <p>Here, \( f(x) \) is some function(convex or non-convex) which we're interested in finding the
+                            convex conjugate of. </p>
+                        <p>and now we pick an arbitrary slope y, </p>
+                        <p>at every point x, there's a vertical gap btw the line and the function \( f(x) \)</p>
+                        <p>Conjugate function defines, what is the <strong>maximum possible gap</strong> over all of x, given the slope y?</p>
+                        The convex conjugate of \( f \), denoted \( f^*(y) \), is defined as:
                         </p>
 
-                        <br>
+                        \[
+                        f^*(y) = \sup_{x} \left\{ yx - f(x) \right\}
+                        \]
 
-                        <img src="../assets/res_plain_20vs56.png" alt="Black box" class="context-image"
-                            style="max-width: 100%; height: auto; display: block; margin: 0 auto;" loading="lazy">
-
-                        <br>
-
-                        <p>We expected the training/test error for the 56-layer network to be lower than the 20-layer
-                            network (since the solution space of a 20-layer network is subset of the solution space of a
-                            56-layer network), but it was the opposite!</p>
-
-                        <p>Why?</p>
-
-                        <p>This is primarily due to 2 problems:</p>
-                        <ol>
-                            <li><strong>Vanishing/Exploding Gradients</strong></li>
-                            <li><strong>The degradation problem</strong></li>
-                        </ol>
-                        <p>Let's look at each one by one</p>
-
+                        <div class="note">
+                            <strong>Note:</strong> We've used the supremum (sup) instead of maximum (max) because the maximum may not be attained if \( f \) is not continuous or does not have a maximum value. The supremum is the least upper bound, which always exists even if the maximum does not.
+                        </div>
                     </div>
                 </div>
 
