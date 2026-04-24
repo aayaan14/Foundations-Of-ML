@@ -43,12 +43,22 @@
                     <h3>i.i.d (Independent and Identically Distributed)</h3>
                     <div class="context">
                         <p><strong>Identical: </strong></p>
-                        if 2 R.V's is drawn from the same distribution, then it is said to be identical.</p>
+                        If 2 R.V's is drawn from the same distribution, then it is said to be identical.</p>
+                        <p>Consider 2 random variables \(X_1, X_2\) that are identical.</p>
+                        \[P(X_1 = x) = P(X_2 = x)\]
 
                         <p><strong>Independent: </strong></p>
-                        if the outcome of one R.V does not affect the outcome of another R.V, then they are said to be
+                        If the outcome of one R.V does not affect the outcome of another R.V, then they are said to be
                         independent.</p>
-                        (more clarification from sir)
+                        <p>Consider 2 random variables \(X_1, X_2\) that are independent.</p>
+                        <p>Then:</p>
+                        \[P(X_1 = x_1 | X_2 = x_2) = P(X_1 = x_1)\]
+
+                        <div class="note">
+                            <strong>Note:</strong> Whenever the term i.i.d is used, Law of Large Numbers is activated for that R.V.
+
+                            \[ \text{LLN: } \quad \frac{1}{n} \sum_{i=1}^{n} X_i \xrightarrow{P} \mathbb{E}[X] \quad \text{as } n \to \infty \]
+                        </div>
                     </div>
 
                     <h3>Convex Conjugate</h3>
@@ -72,7 +82,12 @@
                         \]
 
                         <div class="note">
-                            <strong>Note:</strong> We've used the supremum (sup) instead of maximum (max) because the maximum may not be attained if \( f \) is not continuous or does not have a maximum value. The supremum is the least upper bound, which always exists even if the maximum does not.
+                            <strong>Note:</strong> We've used the supremum (sup) instead of maximum (max) because the maximum may not be attained if \( f \) is not continuous or does not have a maximum value. 
+
+                            <p>Ex: Consider the function \( f(x) \) mapped in the range \([0, 1)\) and \( f(x) = 0 \) for all \( x \in [0, 1) \). </p>
+
+                            \[max_{x \in [0, 1)} \{ f(x) \} =  undefined\]
+                            \[sup_{x \in [0, 1)} \{ f(x) \} = 1\]
                         </div>
                     </div>
                 </div>
