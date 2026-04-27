@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ResNet</title>
+    <title>GANs</title>
     <link rel="stylesheet" href="../css/style.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
@@ -44,9 +44,6 @@
                     <div class="context">
                         <p><strong>Identical: </strong></p>
                         If 2 R.V's is drawn from the same distribution, then it is said to be identical.</p>
-                        <p>Consider 2 random variables \(X_1, X_2\) that are identical.</p>
-                        \[P(X_1 = x) = P(X_2 = x)\]
-
                         <p><strong>Independent: </strong></p>
                         If the outcome of one R.V does not affect the outcome of another R.V, then they are said to be
                         independent.</p>
@@ -57,7 +54,7 @@
                         <div class="note">
                             <strong>Note:</strong> Whenever the term i.i.d is used, Law of Large Numbers is activated for that R.V.
 
-                            \[ \text{LLN: } \quad \frac{1}{n} \sum_{i=1}^{n} X_i \xrightarrow{P} \mathbb{E}[X] \quad \text{as } n \to \infty \]
+                            \[ \text{LLN: } \quad \frac{1}{n} \sum_{i=1}^{n} x_i \xrightarrow{P} \mathbb{E}[x] \quad \text{as } n \to \infty \]
                         </div>
                     </div>
 
@@ -92,100 +89,57 @@
                     </div>
                 </div>
 
-                <!-- 2. Vanishing/Exploding Gradients Problem -->
-                <div class="problem" id="vanishing">
-                    <h3>Vanishing/Exploding Gradients Problem</h3>
+                <!-- 2. Variational Divergence Minimization -->
+                <div class="problem" id="Variational Divergence Minimization">
+                    <h3>Variational Divergence Minimization</h3>
                     <div class="context">
-                        <p>
-                            During backpropagation, gradients propagate backward through every layer via the chain rule.
-                            For a network with \(L\) layers, the gradient of the loss with respect to the first layer's
-                            weights looks like this:
-                        </p>
-
-                        <div class="problem-statement">
-                            <h4>Gradient via Chain Rule</h4>
-                            \[
-                            \frac{\partial \mathcal{L}}{\partial W_1}
-                            =
-                            \frac{\partial \mathcal{L}}{\partial x_L}
-                            \cdot
-                            \frac{\partial x_L}{\partial x_{L-1}}
-                            \cdot
-                            \frac{\partial x_{L-1}}{\partial x_{L-2}}
-                            \cdots
-                            \frac{\partial x_2}{\partial W_1}
-                            \]
-                        </div>
-
-                        <p>
-                            Each term \(\frac{\partial x_{i+1}}{\partial x_i}\) is the Jacobian of that layer's
-                            output with respect to its input. For a single layer with weight matrix \(W_i\) and
-                            activation \(\sigma\), this Jacobian is:
-                        </p>
-
-                        <div class="problem-statement">
-                            <h4>Jacobian of a Single Layer</h4>
-                            \[
-                            \frac{\partial x_{i+1}}{\partial x_i}
-                            =
-                            W_i^{\top}
-                            \operatorname{diag}\!\left(\sigma'(x_i)\right)
-                            \]
-                            <p style="margin-top: 10px;">
-                                where \(\sigma'(x_i)\) is the derivative of the activation function — for ReLU,
-                                this is either \(0\) or \(1\).
-                            </p>
-                        </div>
-
-                        <p>
-                            So the full gradient product across \(L\) layers becomes:
-                        </p>
-
-                        <div class="problem-statement">
-                            <h4>The Vanishing Gradient — Full Product</h4>
-                            \[
-                            \frac{\partial \mathcal{L}}{\partial W_1}
-                            =
-                            \frac{\partial \mathcal{L}}{\partial x_L}
-                            \prod_{i=1}^{L-1}
-                            \left(
-                            W_i^{\top}
-                            \operatorname{diag}\!\left(\sigma'(x_i)\right)
-                            \right)
-                            \]
-                        </div>
-
-                        <p>
-                            This is a product of \(L - 1\) matrices. Two things can go wrong:
-                        </p>
-                        <ul>
-                            <li style="margin-bottom: 10px;">
-                                <strong>Vanishing:</strong> If the singular values of \(W_i\) are less than \(1\),
-                                each multiplication shrinks the gradient. After \(L\) layers, the product
-                                \(\prod_{i=1}^{L-1} \lVert W_i \rVert\) collapses toward \(0\) exponentially fast.
-                                Early layers receive essentially no gradient signal and stop learning.
-                            </li>
-                            <li>
-                                <strong>Exploding:</strong> If the singular values of \(W_i\) are greater than \(1\),
-                                the product grows exponentially. Gradients become astronomically large, weight
-                                updates destabilize training, and loss diverges.
-                            </li>
-                        </ul>
-
-                        <div class="note">
-                            <strong>Note:</strong> ReLU already helps compared to sigmoid or tanh — its derivative
-                            is either exactly \(0\) or exactly \(1\), so it does not saturate. But with \(56\) layers,
-                            even a modest per-layer shrinkage compounds: if each Jacobian scales gradients by
-                            \(0.9\), after \(56\) layers you get \(0.9^{56} \approx 0.0015\) — less than \(0.2\%\) of
-                            the original gradient reaches the first layer.
-                        </div>
-
-                        <div class="tip">
-                            <strong>Key Insight:</strong> This is not an overfitting problem. The training error
-                            itself goes up with depth. The network has enough capacity — the optimizer simply
-                            cannot train it effectively because the gradient signal vanishes before reaching
-                            the early layers.
-                        </div>
+                        
+                        <br>
+                            <img src="../assets/gans/1.png" alt="Convex Conjugate Illustration"
+                                class="context-image"
+                                style="max-width: 100%; height: 50em; display: block; margin: 0 auto;" loading="lazy">
+                        <br>
+                        <br>
+                            <img src="../assets/gans/2.png" alt="Convex Conjugate Illustration"
+                                class="context-image"
+                                style="max-width: 100%; height: 50em; display: block; margin: 0 auto;" loading="lazy">
+                        <br>
+                        <br>
+                            <img src="../assets/gans/3.png" alt="Convex Conjugate Illustration"
+                                class="context-image"
+                                style="max-width: 100%; height: 100em; display: block; margin: 0 auto;" loading="lazy">
+                        <br>
+                        <br>
+                            <img src="../assets/gans/4.png" alt="Convex Conjugate Illustration"
+                                class="context-image"
+                                style="max-width: 100%; height: 50em; display: block; margin: 0 auto;" loading="lazy">
+                        <br>
+                        <br>
+                            <img src="../assets/gans/5.png" alt="Convex Conjugate Illustration"
+                                class="context-image"
+                                style="max-width: 100%; height: 50em; display: block; margin: 0 auto;" loading="lazy">
+                        <br>
+                        <br>
+                            <img src="../assets/gans/6.png" alt="Convex Conjugate Illustration"
+                                class="context-image"
+                                style="max-width: 100%; height: 50em; display: block; margin: 0 auto;" loading="lazy">
+                        <br>
+                        <br>
+                            <img src="../assets/gans/7.png" alt="Convex Conjugate Illustration"
+                                class="context-image"
+                                style="max-width: 100%; height: 70em; display: block; margin: 0 auto;" loading="lazy">
+                        <br>
+                        <br>
+                            <img src="../assets/gans/8.png" alt="Convex Conjugate Illustration"
+                                class="context-image"
+                                style="max-width: 100%; height: 70em; display: block; margin: 0 auto;" loading="lazy">
+                        <br>
+                        <br>
+                            <img src="../assets/gans/9.png" alt="Convex Conjugate Illustration"
+                                class="context-image"
+                                style="max-width: 100%; height: 30em; display: block; margin: 0 auto;" loading="lazy">
+                        <br>
+                        
                     </div>
                 </div>
 
