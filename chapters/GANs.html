@@ -52,9 +52,11 @@
                         \[P(X_1 = x_1 | X_2 = x_2) = P(X_1 = x_1)\]
 
                         <div class="note">
-                            <strong>Note:</strong> Whenever the term i.i.d is used, Law of Large Numbers is activated for that R.V.
+                            <strong>Note:</strong> Whenever the term i.i.d is used, Law of Large Numbers is activated
+                            for that R.V.
 
-                            \[ \text{LLN: } \quad \frac{1}{n} \sum_{i=1}^{n} x_i \xrightarrow{P} \mathbb{E}[x] \quad \text{as } n \to \infty \]
+                            \[ \text{LLN: } \quad \frac{1}{n} \sum_{i=1}^{n} x_i \xrightarrow{P} \mathbb{E}[x] \quad
+                            \text{as } n \to \infty \]
                         </div>
                     </div>
 
@@ -70,7 +72,8 @@
                             convex conjugate of. </p>
                         <p>and now we pick an arbitrary slope y, </p>
                         <p>at every point x, there's a vertical gap btw the line and the function \( f(x) \)</p>
-                        <p>Conjugate function defines, what is the <strong>maximum possible gap</strong> over all of x, given the slope y?</p>
+                        <p>Conjugate function defines, what is the <strong>maximum possible gap</strong> over all of x,
+                            given the slope y?</p>
                         The convex conjugate of \( f \), denoted \( f^*(y) \), is defined as:
                         </p>
 
@@ -79,11 +82,13 @@
                         \]
 
                         <div class="note">
-                            <strong>Note:</strong> We've used the supremum (sup) instead of maximum (max) because the maximum may not be attained if \( f \) is not continuous or does not have a maximum value. 
+                            <strong>Note:</strong> We've used the supremum (sup) instead of maximum (max) because the
+                            maximum may not be attained if \( f \) is not continuous or does not have a maximum value.
 
-                            <p>Ex: Consider the function \( f(x) \) mapped in the range \([0, 1)\) and \( f(x) = 0 \) for all \( x \in [0, 1) \). </p>
+                            <p>Ex: Consider the function \( f(x) \) mapped in the range \([0, 1)\) and \( f(x) = 0 \)
+                                for all \( x \in [0, 1) \). </p>
 
-                            \[max_{x \in [0, 1)} \{ f(x) \} =  undefined\]
+                            \[max_{x \in [0, 1)} \{ f(x) \} = undefined\]
                             \[sup_{x \in [0, 1)} \{ f(x) \} = 1\]
                         </div>
                     </div>
@@ -93,78 +98,66 @@
                 <div class="problem" id="Variational Divergence Minimization">
                     <h3>Variational Divergence Minimization</h3>
                     <div class="context">
-                        
+
                         <br>
-                            <img src="../assets/gans/1.png" alt="Convex Conjugate Illustration"
-                                class="context-image"
-                                style="max-width: 100%; height: 50em; display: block; margin: 0 auto;" loading="lazy">
-                        <br>
-                        <br>
-                            <img src="../assets/gans/2.png" alt="Convex Conjugate Illustration"
-                                class="context-image"
-                                style="max-width: 100%; height: 50em; display: block; margin: 0 auto;" loading="lazy">
+                        <img src="../assets/gans/1.png" alt="Convex Conjugate Illustration" class="context-image"
+                            style="max-width: 100%; height: 50em; display: block; margin: 0 auto;" loading="lazy">
                         <br>
                         <br>
-                            <img src="../assets/gans/3.png" alt="Convex Conjugate Illustration"
-                                class="context-image"
-                                style="max-width: 100%; height: 100em; display: block; margin: 0 auto;" loading="lazy">
+                        <img src="../assets/gans/2.png" alt="Convex Conjugate Illustration" class="context-image"
+                            style="max-width: 100%; height: 50em; display: block; margin: 0 auto;" loading="lazy">
                         <br>
                         <br>
-                            <img src="../assets/gans/4.png" alt="Convex Conjugate Illustration"
-                                class="context-image"
-                                style="max-width: 100%; height: 50em; display: block; margin: 0 auto;" loading="lazy">
+                        <img src="../assets/gans/3.png" alt="Convex Conjugate Illustration" class="context-image"
+                            style="max-width: 100%; height: 100em; display: block; margin: 0 auto;" loading="lazy">
                         <br>
                         <br>
-                            <img src="../assets/gans/5.png" alt="Convex Conjugate Illustration"
-                                class="context-image"
-                                style="max-width: 100%; height: 50em; display: block; margin: 0 auto;" loading="lazy">
+                        <img src="../assets/gans/4.png" alt="Convex Conjugate Illustration" class="context-image"
+                            style="max-width: 100%; height: 50em; display: block; margin: 0 auto;" loading="lazy">
                         <br>
                         <br>
-                            <img src="../assets/gans/6.png" alt="Convex Conjugate Illustration"
-                                class="context-image"
-                                style="max-width: 100%; height: 50em; display: block; margin: 0 auto;" loading="lazy">
+                        <img src="../assets/gans/5.png" alt="Convex Conjugate Illustration" class="context-image"
+                            style="max-width: 100%; height: 50em; display: block; margin: 0 auto;" loading="lazy">
                         <br>
                         <br>
-                            <img src="../assets/gans/7.png" alt="Convex Conjugate Illustration"
-                                class="context-image"
-                                style="max-width: 100%; height: 70em; display: block; margin: 0 auto;" loading="lazy">
+                        <img src="../assets/gans/6.png" alt="Convex Conjugate Illustration" class="context-image"
+                            style="max-width: 100%; height: 50em; display: block; margin: 0 auto;" loading="lazy">
                         <br>
                         <br>
-                            <img src="../assets/gans/8.png" alt="Convex Conjugate Illustration"
-                                class="context-image"
-                                style="max-width: 100%; height: 70em; display: block; margin: 0 auto;" loading="lazy">
+                        <img src="../assets/gans/7.png" alt="Convex Conjugate Illustration" class="context-image"
+                            style="max-width: 100%; height: 70em; display: block; margin: 0 auto;" loading="lazy">
                         <br>
                         <br>
-                            <img src="../assets/gans/9.png" alt="Convex Conjugate Illustration"
-                                class="context-image"
-                                style="max-width: 100%; height: 30em; display: block; margin: 0 auto;" loading="lazy">
+                        <img src="../assets/gans/8.png" alt="Convex Conjugate Illustration" class="context-image"
+                            style="max-width: 100%; height: 70em; display: block; margin: 0 auto;" loading="lazy">
                         <br>
-                        
+                        <br>
+                        <img src="../assets/gans/9.png" alt="Convex Conjugate Illustration" class="context-image"
+                            style="max-width: 100%; height: 30em; display: block; margin: 0 auto;" loading="lazy">
+                        <br>
+
                     </div>
                 </div>
-                
+
                 <!-- 3. Generative Modelling via VDM -->
                 <div class="problem" id="Generative Modelling via VDM">
                     <h3>Generative Modelling via VDM</h3>
                     <div class="context">
-                        
+
                         <br>
-                            <img src="../assets/gans/10.png" alt="Convex Conjugate Illustration"
-                                class="context-image"
-                                style="max-width: 100%; height: 40em; display: block; margin: 0 auto;" loading="lazy">
+                        <img src="../assets/gans/10.png" alt="Convex Conjugate Illustration" class="context-image"
+                            style="max-width: 100%; height: 40em; display: block; margin: 0 auto;" loading="lazy">
                         <br>
 
                         <br>
-                            <img src="../assets/gans/11.png" alt="Convex Conjugate Illustration"
-                                class="context-image"
-                                style="max-width: 100%; height: 40em; display: block; margin: 0 auto;" loading="lazy">
+                        <img src="../assets/gans/11.png" alt="Convex Conjugate Illustration" class="context-image"
+                            style="max-width: 100%; height: 40em; display: block; margin: 0 auto;" loading="lazy">
                         <br>
                         <br>
-                            <img src="../assets/gans/12.png" alt="Convex Conjugate Illustration"
-                                class="context-image"
-                                style="max-width: 100%; height: 40em; display: block; margin: 0 auto;" loading="lazy">
+                        <img src="../assets/gans/12.png" alt="Convex Conjugate Illustration" class="context-image"
+                            style="max-width: 100%; height: 40em; display: block; margin: 0 auto;" loading="lazy">
                         <br>
-                        
+
                     </div>
                 </div>
 
@@ -172,13 +165,105 @@
                 <div class="problem" id="Generative Adversarial Networks">
                     <h3>Generative Adversarial Networks</h3>
                     <div class="context">
+                        <h4>
+                            Let's derive the convex conjugate of
+                            \( f(u) = u \log u - (u+1)\log(u+1) \)
+                        </h4>
+
+                        <p>
+                            We want to find its convex conjugate, defined as:
+                            \[
+                            f^*(t) = \sup_{u > 0} \left\{ tu - u \log u + (u+1)\log(u+1) \right\}
+                            \]
+
+                            <strong>Step 1: Find the critical point</strong><br>
+                            Take the derivative of the expression inside the supremum with respect to u and set it to 0:
+                            \[
+                            \frac{d}{du} \left( tu - u \log u + (u+1)\log(u+1) \right) = t - (\log u + 1) + (\log(u+1) +
+                            1) = 0
+                            \]
+
+                            Simplifying this, we get the relationship between t and u at the optimum:
+                            \[
+                            t = \log u - \log(u+1)
+                            \]
+
+                            <em>(Note: Since \( u > 0 \), the ratio \( \frac{u}{u+1} < 1 \), which implies \( t < 0
+                                    \).)</em><br><br>
+
+                                    <strong>Step 2: Simplify the objective function</strong><br>
+                                    Instead of solving for u right away, substitute \( t = \log u - \log(u+1) \)
+                                    directly into the original supremum expression:
+                                    \[
+                                    f^*(t) = u(\log u - \log(u+1)) - u \log u + (u+1)\log(u+1)
+                                    \]
+
+                                    Expand the terms:
+                                    \[
+                                    f^*(t) = u \log u - u \log(u+1) - u \log u + u \log(u+1) + \log(u+1)
+                                    \]
+
+                                    Notice how beautifully almost everything cancels out, leaving just:
+                                    \[
+                                    f^*(t) = \log(u+1)
+                                    \]
+
+                                    <strong>Step 3: Solve for u+1 in terms of t</strong><br>
+                                    Now we just need to express \( \log(u+1) \) in terms of t. Using our relationship
+                                    from Step 1:
+                                    \[
+                                    t = \log\left(\frac{u}{u+1}\right)
+                                    \]
+                                    \[
+                                    e^t = \frac{u}{u+1}
+                                    \]
+
+                                    We can rewrite the right side as:
+                                    \[
+                                    e^t = 1 - \frac{1}{u+1}
+                                    \]
+
+                                    Rearranging to solve for u+1:
+                                    \[
+                                    \frac{1}{u+1} = 1 - e^t \implies u+1 = \frac{1}{1 - e^t}
+                                    \]
+
+                                    <strong>Step 4: Final Substitution</strong><br>
+                                    Substitute u+1 back into our simplified expression for \( f^*(t) \):
+                                    \[
+                                    f^*(t) = \log\left(\frac{1}{1 - e^t}\right)
+                                    \]
+
+                                    Using the property of logarithms \( \log(1/x) = -\log(x) \), we get the final
+                                    answer:
+                                    \[
+                                    \boxed{
+                                    f^*(t) = -\log(1 - e^t)
+                                    }
+                                    \qquad \text{for } t < 0 \] </p>
+                    </div>
+                    <div class="context">
+
+                        <br>
+                        <img src="/assets/gans/13.png" alt="Generative Adversarial Networks" class="context-image"
+                            style="max-width: 100%; height: 60em; display: block; margin: 0 auto;" loading="lazy">
+                        <br>
                         
                         <br>
-                            <img src="" alt="Generative Adversarial Networks"
-                                class="context-image"
-                                style="max-width: 100%; height: 40em; display: block; margin: 0 auto;" loading="lazy">
+                        <img src="/assets/gans/14.png" alt="Generative Adversarial Networks" class="context-image"
+                            style="max-width: 100%; height: 40em; display: block; margin: 0 auto;" loading="lazy">
                         <br>
-                        
+
+                        <br>
+                        <img src="/assets/gans/15.png" alt="Generative Adversarial Networks" class="context-image"
+                            style="max-width: 100%; height: 50em; display: block; margin: 0 auto;" loading="lazy">
+                        <br>
+
+                        <br>
+                        <img src="/assets/gans/16.png" alt="Generative Adversarial Networks" class="context-image"
+                            style="max-width: 100%; height: 40em; display: block; margin: 0 auto;" loading="lazy">
+                        <br>
+
                     </div>
                 </div>
 
