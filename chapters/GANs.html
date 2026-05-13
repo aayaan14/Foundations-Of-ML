@@ -20,7 +20,7 @@
             <h1>Generative Adversarial Networks</h1>
 
             <div class="chapter-intro">
-                <p>In this chapter, we'll explore how GANs work and different architectures have been proposed,but
+                <p>In this chapter, we'll explore how GANs work and different architectures have been proposed, but
                     before that, go through the prerequisites.</p>
             </div>
 
@@ -64,22 +64,28 @@
                     <div class="context">
                         <p>Consider the graph given below.
                             <br>
-                            <img src="../assets/gans_conjugate.png" alt="Convex Conjugate Illustration"
+                            <img src="../assets/gans/gans_conjugate.png" alt="Convex Conjugate Illustration"
                                 class="context-image"
                                 style="max-width: 100%; height: 20em; display: block; margin: 0 auto;" loading="lazy">
                             <br>
-                        <p>Here, \( f(x) \) is some function(convex or non-convex) which we're interested in finding the
+                        <p>Here, \( f(u) \) is some function(convex or non-convex) which we're interested in finding the
                             convex conjugate of. </p>
-                        <p>and now we pick an arbitrary slope y, </p>
-                        <p>at every point x, there's a vertical gap btw the line and the function \( f(x) \)</p>
-                        <p>Conjugate function defines, what is the <strong>maximum possible gap</strong> over all of x,
-                            given the slope y?</p>
-                        The convex conjugate of \( f \), denoted \( f^*(y) \), is defined as:
-                        </p>
+                        <p>and now we pick an arbitrary slope t, and line l(u) = tu + c</p>
+                        <p>to say that the line is convex conjugate, it must satisfy: </p>
+                        \[ l(u) \leq f(u) \quad \text{for all } u \] 
+                        \[ tu + c \leq f(u) \quad \text{for all } u \]
+                        \[ c \leq f(u) - tu \quad \text{for all } u \]
+
+                        <p>now, our job is to minimize c </p>
+                        \[ c = \inf_{u} \left\{ f(u) - tu \right\} \]
+                        <p>or, </p>
+                        \[ -c = \sup_{u} \left\{ tu - f(u) \right\} \]
+
+                        <p>We can write convex conjugate as a function of t:</p>
 
                         \[
-                        f^*(y) = \sup_{x} \left\{ yx - f(x) \right\}
-                        \]
+                        f^*(t) = \sup_{u} \left\{ tu - f(u) \right\}
+                        \] 
 
                         <div class="note">
                             <strong>Note:</strong> We've used the supremum (sup) instead of maximum (max) because the
@@ -113,7 +119,7 @@
                         <br>
                         <br>
                         <img src="../assets/gans/4.png" alt="Convex Conjugate Illustration" class="context-image"
-                            style="max-width: 100%; height: 50em; display: block; margin: 0 auto;" loading="lazy">
+                            style="max-width: 100%; height: 60em; display: block; margin: 0 auto;" loading="lazy">
                         <br>
                         <br>
                         <img src="../assets/gans/5.png" alt="Convex Conjugate Illustration" class="context-image"
@@ -161,7 +167,7 @@
                     </div>
                 </div>
 
-                <!-- 3. Generative Adversarial Networks -->
+                <!-- 4. Generative Adversarial Networks -->
                 <div class="problem" id="Generative Adversarial Networks">
                     <h3>Generative Adversarial Networks</h3>
                     <div class="context">
@@ -260,7 +266,7 @@
                         <br>
 
                         <br>
-                        <img src="/assets/gans/16.png" alt="Generative Adversarial Networks" class="context-image"
+                        <img src="../assets/gans/16.png" alt="Generative Adversarial Networks" class="context-image"
                             style="max-width: 100%; height: 40em; display: block; margin: 0 auto;" loading="lazy">
                         <br>
 
