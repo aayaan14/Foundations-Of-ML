@@ -36,7 +36,7 @@
 
                         <br>
 
-                        <img src="../assets/res_plain_20vs56.png" alt="Black box" class="context-image"
+                        <img src="../assets/resnet/res_plain_20vs56.png" alt="Black box" class="context-image"
                             style="max-width: 100%; height: auto; display: block; margin: 0 auto;" loading="lazy">
 
                         <br>
@@ -180,8 +180,8 @@
                                 So the deeper model should achieve at least the same training error.
                             </p>
                             <br>
-                            <img src="../assets/res_degradationproblem.png" alt="Degradation problem illustration"
-                                class="context-image"
+                            <img src="../assets/resnet/res_degradationproblem.png"
+                                alt="Degradation problem illustration" class="context-image"
                                 style="max-width: 100%; height: auto; display: block; margin: 0 auto;" loading="lazy">
                             <br>
                         </div>
@@ -255,8 +255,9 @@
                             or more layers and adds the input \(x\) directly to the output:
                         </p>
 
-                        <img src="../assets/res_residual_block.png" alt="Residual Block Diagram" class="context-image"
-                            style="max-width: 100%; height: auto; display: block; margin: 0 auto;" loading="lazy">
+                        <img src="../assets/resnet/res_residual_block.png" alt="Residual Block Diagram"
+                            class="context-image" style="max-width: 100%; height: auto; display: block; margin: 0 auto;"
+                            loading="lazy">
 
                         <br>
 
@@ -312,7 +313,7 @@
                     <p>We will now understand the implementation of ResNet-18 Architecture and understand each and every
                         component</p>
                     <br>
-                    <img src="../assets/res_resnet18.png" alt="ResNet-18 Architecture" class="context-image"
+                    <img src="../assets/resnet/res_resnet18.png" alt="ResNet-18 Architecture" class="context-image"
                         style="max-width: 100%; height: auto; display: block; margin: 0 auto;" loading="lazy">
                     <br>
                     <p>Let's understand each component required to code.</p>
@@ -373,7 +374,7 @@
                             </p>
                         </div>
 
-                        <img src="../assets/res_3x3_vs_5x5.png" alt="3x3 vs 5x5 receptive field comparison"
+                        <img src="../assets/resnet/res_3x3_vs_5x5.png" alt="3x3 vs 5x5 receptive field comparison"
                             class="context-image" style="max-width: 100%; height: auto; display: block; margin: 0 auto;"
                             loading="lazy">
 
@@ -420,7 +421,7 @@
                             </p>
                         </div>
 
-                        <img src="../assets/res_dilation_explained.png" alt="Dilation factor increasing receptive field"
+                        <img src="../assets/resnet/res_dilation_explained.png" alt="Dilation factor increasing receptive field"
                             class="context-image" style="max-width: 100%; height: auto; display: block; margin: 0 auto;"
                             loading="lazy">
 
@@ -483,7 +484,7 @@
                             learned downsampling operation.
                         </p>
 
-                        <img src="../assets/res_stride.png" alt="stride=1 vs stride=2 spatial downsampling"
+                        <img src="../assets/resnet/res_stride.png" alt="stride=1 vs stride=2 spatial downsampling"
                             class="context-image" style="max-width: 100%; height: auto; display: block; margin: 0 auto;"
                             loading="lazy">
 
@@ -500,7 +501,7 @@
                             grouped convolutions to trade width for depth efficiently.
                         </p>
 
-                        <img src="../assets/res_groups.png" alt="groups=1 standard conv vs depthwise conv"
+                        <img src="../assets/resnet/res_groups.png" alt="groups=1 standard conv vs depthwise conv"
                             class="context-image" style="max-width: 100%; height: auto; display: block; margin: 0 auto;"
                             loading="lazy">
 
@@ -609,7 +610,7 @@
                             </p>
                         </div>
 
-                        <img src="../assets/res_conv1x1.png" alt="1x1 convolution channel projection"
+                        <img src="../assets/resnet/res_conv1x1.png" alt="1x1 convolution channel projection"
                             class="context-image" style="max-width: 100%; height: auto; display: block; margin: 0 auto;"
                             loading="lazy">
 
@@ -648,7 +649,7 @@
          Right (projection shortcut): same block but x is also passed through a 1×1 conv (with stride)
          before reaching ⊕ — shapes now match even though channels increased and H×W halved.
          Label input/output shapes at each point. Use a different color (e.g. orange) for the 1×1 projection arrow. -->
-                        <img src="../assets/res_projection_shortcut.png" alt="Identity vs projection shortcut"
+                        <img src="../assets/resnet/res_projection_shortcut.png" alt="Identity vs projection shortcut"
                             class="context-image" style="max-width: 100%; height: auto; display: block; margin: 0 auto;"
                             loading="lazy">
 

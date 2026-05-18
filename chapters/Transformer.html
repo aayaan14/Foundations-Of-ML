@@ -37,7 +37,7 @@
 
                         <br>
 
-                        <img src="../assets/t_blackbox.png" alt="Black box" class="context-image"
+                        <img src="../assets/transformer/t_blackbox.png" alt="Black box" class="context-image"
                             style="max-width: 100%; height: auto; display: block; margin: 0 auto;" loading="lazy">
 
                         <br>
@@ -48,7 +48,7 @@
 
                         <br>
 
-                        <img src="../assets/t_arch.png" alt="Transformer Architecture" class="context-image"
+                        <img src="../assets/transformer/t_arch.png" alt="Transformer Architecture" class="context-image"
                             style="max-height: 550px; width: auto; display: block; margin: 0 auto;" loading="lazy">
 
                         <br>
@@ -82,7 +82,7 @@
 
                     </div>
                     <br>
-                    <img src="../assets/t_encoder.png" alt="Black box" class="context-image"
+                    <img src="../assets/transformer/t_encoder.png" alt="Black box" class="context-image"
                         style="max-width: 100%; height: auto; display: block; margin: 0 auto;" loading="lazy">
                     <br>
                     <p>Let's break this down step by step.</p>
@@ -103,7 +103,7 @@
                         <p>You can think of embeddings as a way to represent words in a continuous vector space, where
                             the position of each word encodes its meaning.</p>
 
-                        <img src="../assets/t_emb.png" alt="Black box" class="context-image"
+                        <img src="../assets/transformer/t_emb.png" alt="Black box" class="context-image"
                             style="max-width: 100%; height: auto; display: block; margin: 0 auto;" loading="lazy">
 
                         <h4>The Mathematical Transformation</h4>
@@ -117,7 +117,7 @@
 
                         <p>We now convert our input words (tokens) into these high-dimensional vectors.</p>
 
-                        <img src="../assets/t_wordsemb.png" alt="Black box" class="context-image"
+                        <img src="../assets/transformer/t_wordsemb.png" alt="Black box" class="context-image"
                             style="max-width: 100%; height: auto; display: block; margin: 0 auto;" loading="lazy">
 
                     </div>
@@ -237,7 +237,7 @@
                         <p>Suppose the only type of update that we care about (for now), is looking at how tokens such
                             as steht and kuche is affecting the embedding of Mann</p>
 
-                        <img src="../assets/t_attention.png" alt="Black box" class="context-image"
+                        <img src="../assets/transformer/t_attention.png" alt="Black box" class="context-image"
                             style="max-width: 100%; height: auto; display: block; margin: 0 auto;" loading="lazy">
 
                         <p>Our goal is to ingest the meaning of the surrounding words (steht and kuche) to update the
@@ -257,18 +257,18 @@
                             question:</p>
                         <p><em>Which words describe where I'm and what I'm doing?</em></p>
                         <br>
-                        <img src="../assets/t_query.png" alt="Black box" class="context-image"
+                        <img src="../assets/transformer/t_query.png" alt="Black box" class="context-image"
                             style="max-width: 100%; height: auto; display: block; margin: 0 auto;" loading="lazy">
                         <br>
                         <p>These questions can be encoded as vectors in the query space. To do the same, we apply a
                             linear transformation to the embeddings using a query matrix \(W_Q\) .</p>
                         <br>
-                        <img src="../assets/t_queryembspace.png" alt="Black box" class="context-image"
+                        <img src="../assets/transformer/t_queryembspace.png" alt="Black box" class="context-image"
                             style="max-width: 100%; height: auto; display: block; margin: 0 auto;" loading="lazy">
                         <br>
                         <p>We then find the query vectors for all the tokens in the context window</p>
                         <br>
-                        <img src="../assets/t_querymatrix.png" alt="Black box" class="context-image"
+                        <img src="../assets/transformer/t_querymatrix.png" alt="Black box" class="context-image"
                             style="max-width: 100%; height: auto; display: block; margin: 0 auto;" loading="lazy">
                     </div>
 
@@ -281,7 +281,7 @@
                         <p>Conceptually, we want to think these keys as representing the potential answers to the
                             queries.</p>
                         <br>
-                        <img src="../assets/t_keys.png" alt="Black box" class="context-image"
+                        <img src="../assets/transformer/t_keys.png" alt="Black box" class="context-image"
                             style="max-width: 100%; height: auto; display: block; margin: 0 auto;" loading="lazy">
                         <br>
 
@@ -289,7 +289,7 @@
                             gives
                             us a score indicating how much attention the query should pay to the key.</p>
                         <br>
-                        <img src="../assets/t_dotprod.jpg" alt="Black box" class="context-image"
+                        <img src="../assets/transformer/t_dotprod.jpg" alt="Black box" class="context-image"
                             style="max-width: 100%; height: auto; display: block; margin: 0 auto;" loading="lazy">
                         <br>
 
@@ -310,13 +310,13 @@
                             higher dimension equivalent to the embedding space.</p>
                         <p>To do this, we'll use a <strong>Value Matrix</strong> \(W_V\).</p>
                         <br>
-                        <img src="../assets/t_value.jpg" alt="Black box" class="context-image"
+                        <img src="../assets/transformer/t_value.jpg" alt="Black box" class="context-image"
                             style="max-width: 100%; height: auto; display: block; margin: 0 auto;" loading="lazy">
                         <br>
                         <p>The result yields a <strong>value vector</strong> for each token. We'll use this to add to
                             our embeddings.</p>
                         <br>
-                        <img src="../assets/t_valuemat.png" alt="Black box" class="context-image"
+                        <img src="../assets/transformer/t_valuemat.png" alt="Black box" class="context-image"
                             style="max-width: 100%; height: auto; display: block; margin: 0 auto;" loading="lazy">
                         <br>
                         <p>We then compute the weighted sum of the value vectors using the attention weights to get the
@@ -351,13 +351,13 @@
                             <li><strong>Head 4:</strong> Long-range dependencies (first/last words)</li>
                         </ul>
                         <br>
-                        <img src="../assets/t_multihead.png" alt="Black box" class="context-image"
+                        <img src="../assets/transformer/t_multihead.png" alt="Black box" class="context-image"
                             style="max-width: 100%; height: auto; display: block; margin: 0 auto;" loading="lazy">
                         <br>
 
                         <p>A more detailed explanation of multi-head attention looks like this:</p>
                         <br>
-                        <img src="../assets/t_multidet.png" alt="Black box" class="context-image"
+                        <img src="../assets/transformer/t_multidet.png" alt="Black box" class="context-image"
                             style="max-width: 100%; height: auto; display: block; margin: 0 auto;" loading="lazy">
                         <br>
                     </div>
@@ -464,7 +464,7 @@
                             <li><strong>\(\max(0, \cdot)\):</strong> ReLU activation function</li>
                         </ul>
                         <br>
-                        <img src="../assets/t_ffn.png" alt="Black box" class="context-image"
+                        <img src="../assets/transformer/t_ffn.png" alt="Black box" class="context-image"
                             style="max-width: 100%; height: auto; display: block; margin: 0 auto;" loading="lazy">
                         <br>
                         <p>Before understanding the full architecture, let's ask why do we require it in first place???
@@ -483,7 +483,7 @@
                         <p>Each token goes through their <em>same</em> FFN, but with no interaction between tokens.
                         </p>
                         <br>
-                        <img src="../assets/t_mulffn.png" alt="Black box" class="context-image"
+                        <img src="../assets/transformer/t_mulffn.png" alt="Black box" class="context-image"
                             style="max-width: 100%; height: auto; display: block; margin: 0 auto;" loading="lazy">
                         <br>
                         <p>Let's now understand the working and what each component does here:</p>
@@ -519,7 +519,7 @@
                                 otherwise, it passes the input through unchanged.</p>
                             <p>This is where the non-linearity stuff occurs.</p>
                             <br>
-                            <img src="../assets/t_relu.png" alt="Black box" class="context-image"
+                            <img src="../assets/transformer/t_relu.png" alt="Black box" class="context-image"
                                 style="max-width: 100%; height: auto; display: block; margin: 0 auto;" loading="lazy">
                             <br>
                             <p>Our new vector \(E'''_{\text{Mann}} \in \mathbb{R}^{2048}\) retains the same shape as it
@@ -577,7 +577,7 @@
                             layer as shown in the diagram below.</p>
 
                         <br>
-                        <img src="../assets/t_nonresid.png" alt="Black box" class="context-image"
+                        <img src="../assets/transformer/t_nonresid.png" alt="Black box" class="context-image"
                             style="max-width: 100%; height: auto; display: block; margin: 0 auto;" loading="lazy">
                         <br>
                         <p>Now the problem here is we have stacked multiple encoder blocks together. This leads to
@@ -591,7 +591,7 @@
                             ensures that gradients can flow more effectively through the network.</p>
 
                         <br>
-                        <img src="../assets/t_resid.png" alt="Black box" class="context-image"
+                        <img src="../assets/transformer/t_resid.png" alt="Black box" class="context-image"
                             style="max-width: 100%; height: auto; display: block; margin: 0 auto;" loading="lazy">
                         <br>
                     </div>
@@ -724,7 +724,7 @@
                         <p>To fix these issues, we introduce <strong>Layer Normalization</strong>.</p>
 
                         <br>
-                        <img src="../assets/t_layernorm.png" alt="Black box" class="context-image"
+                        <img src="../assets/transformer/t_layernorm.png" alt="Black box" class="context-image"
                             style="max-width: 100%; height: auto; display: block; margin: 0 auto;" loading="lazy">
                         <br>
                     </div>
@@ -792,7 +792,7 @@
                             <p>But how??</p>
                             <p>The contour plot of an unnormalized loss function might look like this:</p>
                             <br>
-                            <img src="../assets/t_unnormalized.png" alt="Black box" class="context-image"
+                            <img src="../assets/transformer/t_unnormalized.png" alt="Black box" class="context-image"
                                 style="max-width: 100%; height: auto; display: block; margin: 0 auto;" loading="lazy">
                             <br>
                             <p>A larger Learning rate is not ideal for unnormalized data as it can lead to unstable
@@ -801,7 +801,7 @@
 
                             <p>However, with Normalization, the loss contours become more spherical:</p>
                             <br>
-                            <img src="../assets/t_normalized.png" alt="Black box" class="context-image"
+                            <img src="../assets/transformer/t_normalized.png" alt="Black box" class="context-image"
                                 style="max-width: 100%; height: auto; display: block; margin: 0 auto;" loading="lazy">
                             <br>
                             <p>This makes the contour plot circular.</p>
@@ -817,7 +817,7 @@
                                 characteristics of each token's representation.</p>
 
                             <br>
-                            <img src="../assets/t_batchvslayer.png" alt="Black box" class="context-image"
+                            <img src="../assets/transformer/t_batchvslayer.png" alt="Black box" class="context-image"
                                 style="max-width: 100%; height: auto; display: block; margin: 0 auto;" loading="lazy">
                             <br>
                         </div>
@@ -835,7 +835,7 @@
                             \]
 
                             <br>
-                            <img src="../assets/t_prevspostnorm.jpg" alt="Black box" class="context-image"
+                            <img src="../assets/transformer/t_prevspostnorm.jpg" alt="Black box" class="context-image"
                                 style="max-width: 100%; height: auto; display: block; margin: 0 auto;" loading="lazy">
                             <br>
 
@@ -900,7 +900,7 @@
                             <li>\( \odot \) denotes element-wise multiplication</li>
                         </ul>
                         <br>
-                        <img src="../assets/t_dropout.png" alt="Black box" class="context-image"
+                        <img src="../assets/transformer/t_dropout.png" alt="Black box" class="context-image"
                             style="max-width: 100%; height: auto; display: block; margin: 0 auto;" loading="lazy">
                         <br>
                     </div>
@@ -1041,7 +1041,7 @@
                         </ol>
                         <p>Here's how a decoder looks like:</p>
                         <br>
-                        <img src="../assets/t_decoder.jpg" alt="Decoder Architecture" class="context-image"
+                        <img src="../assets/transformer/t_decoder.jpg" alt="Decoder Architecture" class="context-image"
                             style="max-width: 100%; height: auto; display: block; margin: 0 auto;" loading="lazy">
                         <br>
                     </div>
@@ -1264,7 +1264,7 @@ Position 3 (standing):  [0.1,  0.3,  0.4,  0.2]</pre>
                         </p>
 
                         <br>
-                        <img src="../assets/t_crossattention.png" alt="Cross-Attention" class="context-image"
+                        <img src="../assets/transformer/t_crossattention.png" alt="Cross-Attention" class="context-image"
                             style="max-width: 100%; height: auto; display: block; margin: 0 auto;" loading="lazy">
                         <br>
                     </div>
@@ -1548,7 +1548,7 @@ Küche       🟦    🟦    🟦    🟦     🟦    🟦    🟥    ← "kitch
                             vocabulary (e.g., 30,000 English words).</p>
 
                         <br>
-                        <img src="../assets/t_output.png" alt="Output Layer" class="context-image"
+                        <img src="../assets/transformer/t_output.png" alt="Output Layer" class="context-image"
                             style="max-width: 100%; height: auto; display: block; margin: 0 auto;" loading="lazy">
                         <br>
                     </div>
