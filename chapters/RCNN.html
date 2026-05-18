@@ -322,6 +322,36 @@
                         <br>
                     </div>
 
+                    <h3>R-CNN Pipeline</h3>
+                    <div class="context">
+                        <br>
+                        <img src="../assets/rcnn/rcnn_pipeline.png" alt="Convex Conjugate Illustration"
+                            class="context-image" style="max-width: 100%; height: 20em; display: block; margin: 0 auto;"
+                            loading="lazy">
+                        <br>
+                    </div>
+
+                    <h3>Evaluation — Mean Average Precision (mAP)</h3>
+                    <div class="context">
+                        <p>Object detection models are evaluated using <em>mean Average Precision (mAP)</em>.</p>
+                        \[
+                        \text{Precision} = \frac{\text{True Positives}}{\text{True Positives} + \text{False Positives}}
+                        \]
+                        \[
+                        \text{Recall} = \frac{\text{True Positives}}{\text{True Positives} + \text{False
+                        Negatives}}
+                        \]
+
+                        <p>For each class, we compute the Average Precision (AP) as the area under the Precision-Recall
+                            curve. The mAP is then calculated as the mean of AP across all classes.</p>
+
+                        \[
+                        \text{AP} = \int_0^1 \text{Precision}(r) \, dr
+                        \]
+                        \[
+                        \quad\text{mAP} = \frac{1}{C} \sum_{c=1}^{C} \text{AP}_c
+                        \]
+                    </div>
                 </div>
             </div>
 
